@@ -1,5 +1,5 @@
 destination: ../site
-auto:        true
+auto:        false
 lsi:         false
 server_port: 4001
 pygments:    true
