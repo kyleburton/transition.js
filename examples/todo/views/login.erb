@@ -1,0 +1,24 @@
+<form id="login">
+  <table>
+    <tr><td>Email</td>   <td><input type="text"     name="email" ></input></td></tr>
+    <tr><td>Password</td><td><input type="password" name="password" ></input></td></tr>
+  </table>
+  <button id="login">Login</button>
+</form>
+
+<script type="text/javascript">
+  var Login = Login || (function () {
+    var self = {};
+    self.performLogin = function (e) {
+      e.preventDefault();
+      Todo.loginRequest()
+          .fromForm('form')
+          .onStatus('OK', EasyApi.redirectTo_('/'))
+          .onStatus('NotAuthorized', EasyApi.flashError_('Invalid email or password.'))
+          .run();
+      return false;
+    };
+    $('button#login').click(self.performLogin);
+    return self;
+  }());
+</script>

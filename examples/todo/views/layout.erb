@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TODO Test App</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="/js/transition-1.0.0-SNAPSHOT.js"></script>
+    <script src="/js/easy-api.js"></script>
+    <script src="/js/todo.js"></script>
+  </head>
+
+  <body>
+    <div id="all">
+      <div id="header">
+      </div>
+      <div id="content">
+        <div id="error"></div>
+        <div id="message"></div>
+        <%= yield %>
+      </div>
+      <div id="footer">
+        <a href="http://kyleburton.github.com/transition.js">Transition.js Example: TODO</a>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,3 +1,7 @@
 h1. Transition.js
 
+Detangled in-browser web application testing.
+
+
+
 

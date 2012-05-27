@@ -1,0 +1,4 @@
+* Example: todo list app in sinatra
+* Example: in-browser, frame based, tests for the todo app
+* Example: phantom.js driver for in-browser based tests
+* Example: phantom.js use of state machine - w/o frames

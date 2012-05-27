@@ -1,0 +1,18 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    base_app (1.0.5)
+    colorize (0.5.8)
+    johnson (2.0.0.pre3)
+      stackdeck (~> 0.2)
+    jslintrb (0.7.0)
+      johnson (>= 2.0.0.pre0)
+    stackdeck (0.2.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  base_app
+  colorize
+  jslintrb
