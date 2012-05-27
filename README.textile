@@ -2,6 +2,8 @@ h1. Transition.js
 
 Detangled in-browser web application testing.
 
+h1. "Documentation":http://kyleburton.github.com/transition.js
+
 
 
 
