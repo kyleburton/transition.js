@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="/css/transition.js.css">
     <link rel="stylesheet" type="text/css" media="screen" href="/css/pygments.css">
 
-    <title>{{page.title}}</title>
+    <title>Install</title>
   </head>
 
   <body>
@@ -23,12 +23,7 @@
           <h1 id="project_title"><a href="/">Transition.js</a></h1>
           <h2 id="project_tagline">Detangled in-Browser Webapp Testing</h2>
 
-          {% if page.show_downloads %}
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/kyleburton/transition.js/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/kyleburton/transition.js/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-          {% endif %}
+          
 
         </header>
     </div>
@@ -36,14 +31,19 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
 
-      {% if page.navigation == 'documentation' %}
+      
         <section id="nav-documentation" class="inner">
           <a href="/documentation">Documentation</a>
         </section>
-      {% endif %}
+      
 
       <section id="main_content" class="inner">
-      {{content}}
+      <h1>Requirements</h1>
+<p>Transition.js is implemented in JavaScript, it depends on jQuery both for itself as well as for the web applications that it tests.</p>
+<div class="highlight"><pre><code class="bash"><span class="nv">$ </span>git clone git@github.com:kyleburton/transition.js.git
+<span class="nv">$ </span><span class="nb">cd </span>transition.js
+</code></pre>
+</div>
       </section>
     </div>
 

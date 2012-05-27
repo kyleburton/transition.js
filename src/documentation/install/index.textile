@@ -1,0 +1,14 @@
+---
+layout: default
+title: Install
+navigation: documentation
+---
+
+h1. Requirements
+
+Transition.js is implemented in JavaScript, it depends on jQuery both for itself as well as for the web applications that it tests.
+
+{% highlight bash %}
+$ git clone git@github.com:kyleburton/transition.js.git
+$ cd transition.js
+{% endhighlight %}

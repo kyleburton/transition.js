@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="/css/transition.js.css">
     <link rel="stylesheet" type="text/css" media="screen" href="/css/pygments.css">
 
-    <title>{{page.title}}</title>
+    <title>Documentation</title>
   </head>
 
   <body>
@@ -23,12 +23,7 @@
           <h1 id="project_title"><a href="/">Transition.js</a></h1>
           <h2 id="project_tagline">Detangled in-Browser Webapp Testing</h2>
 
-          {% if page.show_downloads %}
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/kyleburton/transition.js/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/kyleburton/transition.js/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-          {% endif %}
+          
 
         </header>
     </div>
@@ -36,14 +31,14 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
 
-      {% if page.navigation == 'documentation' %}
-        <section id="nav-documentation" class="inner">
-          <a href="/documentation">Documentation</a>
-        </section>
-      {% endif %}
+      
 
       <section id="main_content" class="inner">
-      {{content}}
+      <ul>
+	<li><a href="install/">Installation</a></li>
+	<li><a href="getting-started/">Getting Started</a></li>
+	<li><a href="api/">Transition.js <span class="caps">API</span></a></li>
+</ul>
       </section>
     </div>
 

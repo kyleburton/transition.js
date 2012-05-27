@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Transition.js : Detangled in-Browser Webapp Testing" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="/stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/transition.js.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/pygments.css">
+
+    <title>API Documentation</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/kyleburton/transition.js">View on GitHub</a>
+
+          <h1 id="project_title"><a href="/">Transition.js</a></h1>
+          <h2 id="project_tagline">Detangled in-Browser Webapp Testing</h2>
+
+          
+
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+
+      
+        <section id="nav-documentation" class="inner">
+          <a href="/documentation">Documentation</a>
+        </section>
+      
+
+      <section id="main_content" class="inner">
+      <h2>Transition</h2>
+<p>Unles otherwise noted, each of the <span class="caps">DOM</span> helpers acts on the main frame (the frame dispalying the target web applicaiton being tested).</p>
+<h6><code>Transition.document()</code></h6>
+<p>In the frames based testing framework, this functon returns the main frame.</p>
+<h3><code>Transition.noop()</code></h3>
+<p>This function performs no action, it is useful for declaring states that do not need a trigger function.</p>
+<h3><code>Transition.log(msg)</code></h3>
+<p>This logs a message to the Test Frame&#8217;s log div.  New messages appear at the top of the div.</p>
+<h3><code>Transition.error(msg)</code></h3>
+<p>This logs an error message to the Test Frame&#8217;s log div.  New error messages appear at the top of the div.</p>
+<h3><code>Transition.dom</code></h3>
+<p>This returns the document, <span class="caps">DOM</span>, of the main frame.</p>
+<h3><code>Transition.findVisibleText(text)</code></h3>
+<p>Finds a dom element in the main frame containing text, which has the jQuery pseudo class <code>:visible</code> (i.e. not hidden).</p>
+<h3><code>Transition.find(selctor)</code></h3>
+<p>Delegates to the jQuery object in the main frame &#8211; searches for <span class="caps">DOM</span> elements using the given jQuery selector.</p>
+<h3><code>Transition.findText(selctor)</code></h3>
+<p>Delegates to the jQuery object in the main frame, finding the element that matches the selector, returning it&#8217;s text content.</p>
+<h3><code>Transition.elementExists(selctor)</code></h3>
+<p>In the main frame, tests if the selector finds one or more <span class="caps">DOM</span> elements.</p>
+<h3><code>Transition.elementExists_(selctor)</code></h3>
+<p>This is a defered form of <code>elementExists</code>, useful in the declaration of transition predicates:</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">),</span> <span class="p">{},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;doLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>
+</code></pre>
+</div>
+<p>It returns a zero argument function that will test if the given element exists when called.</p>
+<h3><code>Transition.isChecked(selctor)</code></h3>
+<p>Tests if the checkbox or radio button identified by the jQuery selector is checked.</p>
+<h3><code>Transition.isChecked_(selctor)</code></h3>
+<p>Defered form of <code>isChecked</code>.</p>
+<h3><code>Transition.isNotChecked(selctor)</code></h3>
+<p>Tests if the checkbox or radio button identified by the jQuery selector is checked.</p>
+<h3><code>Transition.isNotChecked_(selctor)</code></h3>
+<p>Defered form of <code>isNotChecked</code>.</p>
+<h3><code>Transition.navigateTo(selector)</code></h3>
+<p>Sets <code>window.location</code> in the main frame.</p>
+<h3><code>Transition.navigateTo_(selector)</code></h3>
+<p>Defered form of <code>navigateTo</code>.</p>
+<h3><code>Transition.click(selector)</code></h3>
+<p>&#8216;Clicks&#8217; on the anchor tag identified by the selector.  This is accomplished by finding the anchor tag, getting its <code>href</code> attribute and then invoking <code>navigateTo</code>.</p>
+<h3><code>Transition.clickNode(selector)</code></h3>
+<p>Fires the click handler of the identified dom element.</p>
+<h3><code>Transition.clickNode_(selector)</code></h3>
+<p>Defered version of <code>clickNode</code>.</p>
+<h3><code>Transition.propertyExists(object, property)</code></h3>
+<p>Tests if the object has the given property.  This is useful in situations where your test is setting itself up, or you are awaiting a condition that is not visible in the UI.</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">doLogout</span><span class="p">,</span> <span class="p">{</span><span class="nx">start</span><span class="o">:</span> <span class="kc">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">propertyExists_</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">state</span><span class="p">,</span> <span class="s1">&#39;isLoggedOut&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>  
+</code></pre>
+</div>
+<h3><code>Transition.propertyExists_(object, property)</code></h3>
+<p>Defered form of <code>propertyExists</code>.</p>
+<h3><code>Transition.throw(msg)</code></h3>
+<p>This logs an error and then throws the message.  <strong>Note</strong> throwing will fail the test.</p>
+<h2>Transition.Stm</h2>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Transition.js maintained by <a href="https://github.com/kyleburton">kyleburton</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+  </body>
+</html>

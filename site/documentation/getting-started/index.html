@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Transition.js : Detangled in-Browser Webapp Testing" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="/stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/transition.js.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/pygments.css">
+
+    <title>Getting Started</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/kyleburton/transition.js">View on GitHub</a>
+
+          <h1 id="project_title"><a href="/">Transition.js</a></h1>
+          <h2 id="project_tagline">Detangled in-Browser Webapp Testing</h2>
+
+          
+
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+
+      
+        <section id="nav-documentation" class="inner">
+          <a href="/documentation">Documentation</a>
+        </section>
+      
+
+      <section id="main_content" class="inner">
+      <ul>
+	<li><a href="#overview">Overview</a></li>
+	<li><a href="#using-the-state-machine">Using The State Machine</a></li>
+	<li><a href="#laying-out-your-tests">Laying Out Your Tests</a></li>
+	<li><a href="#helpers">Helpers</a></li>
+	<li><a href="#frames-framework">Frames Based Testing Framework</a></li>
+	<li><a href="#using-with-phantom">Using Transition.js with Phantom.js for Headless Automated Testing</a></li>
+	<li><a href="#automating-frames-frameowrk-tests">Automating the Frames based testing Framework</a></li>
+</ul>
+<p><a name="overview"></a></p>
+<h3>Overview</h3>
+<p>Transition.js tests are implemented as state machines.  This allows you to decouple the logic of waiting for the web site to complete an operation from the logic of what to do next.</p>
+<p><a name="using-the-state-machine"></a></p>
+<h3>Using the state machine</h3>
+<p>There are four things that you must do in order to use the state machine:</p>
+<p>1. Set your test&#8217;s name<br />
+2. Define your test&#8217;s states<br />
+3. Initialize the State Machine<br />
+4. Start the State Machine</p>
+<p>When it runs, the state machine will poll the current state&#8217;s exit transitions until either the test times out, or one of the predicates returns true.  The machine will progress until either the success or failure states have been reached.</p>
+<h6>1. Set The Test Name</h6>
+<p>To set your test&#8217;s name, assign to the <code>name</code> parameter in the State Machine object:</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s2">&quot;Login Test&quot;</span><span class="p">;</span>
+</code></pre>
+</div>
+<h6>2. Defining A State</h6>
+<p>States can be defined by calling <code>newState</code>:</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">doLogout</span><span class="p">,</span> <span class="p">{</span><span class="nx">start</span><span class="o">:</span> <span class="kc">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="p">}</span>
+  <span class="p">);</span>
+</code></pre>
+</div>
+<p><code>newState</code> requires a state name (<code>logout</code>), a function that will be invoked when the state is entered, a context, and a list of transitions.</p>
+<p>Transitions contain the name of the target state: <code>to</code>, and a boolean predicate: <code>pred</code>.  When the predicate returns true, the state machine will move to the target state.</p>
+<p><strong>Note</strong> that the first state in your test must be declared with the parameter <code>start</code> in the context: <code>{start: true}</code>.</p>
+<p>The State Machine will define two states for you automatically: <code>success</code>, and <code>failure</code>.  If your test throws an exeption, or times out (controlled by <code>Transition.Stm.maxTestTimeout</code>, which defaults to 10s), it will enter the <code>failure</code> state.</p>
+<h6>3. Initialize The State Machine</h6>
+<p>After declaring all of your states, you must call <code>init()</code>:</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
+</code></pre>
+</div>
+<p>This allows the state machine to validate the graph, and create the success and failure states.</p>
+<h6>4. Start the State Machine</h6>
+<p>To begin executing the test, call <code>start</code>:</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">start</span><span class="p">();</span>
+</code></pre>
+</div>
+<p><a name="helpers"></a></p>
+<h3>Helpers</h3>
+<p>A full list of the functions in Transition.js is available in the <a href="/documentation/api"><span class="caps">API</span> Documentation</a>.</p>
+<h6><code>Transition.log</code></h6>
+<p><a name="laying-out-your-tests"></a></p>
+<h3>Laying out your tests</h3>
+<p><a name="frames-framework"></a></p>
+<h3>Frames based testing framework.</h3>
+<p>The Frames based testing framework allwows you to interactively test your application, watch its progress, and single stepping your test.  The Frames style tests can be run from any browser.  I have found these tests to be valuable when testing mulitple devices.  Being able to bring up the test on a mobile phone, a challenging environemnt in which to test, and step the test has been fantastic.</p>
+<h6>index.html</h6>
+<div class="highlight"><pre><code class="html"><span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">&quot;en&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;frameset</span> <span class="na">rows=</span><span class="s">&quot;67%,33%&quot;</span><span class="nt">&gt;</span>
+   <span class="nt">&lt;frame</span> <span class="na">name=</span><span class="s">&quot;main&quot;</span> <span class="nt">/&gt;</span>
+   <span class="nt">&lt;frame</span> <span class="na">name=</span><span class="s">&quot;test&quot;</span> <span class="na">src=</span><span class="s">&quot;test.html&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/frameset&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre>
+</div>
+<h6>test.html</h6>
+<div class="highlight"><pre><code class="html"><span class="nt">&lt;html&gt;</span>
+  <span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;IE=8&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Test Frame<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/js/transition-1.0.0-SNAPSHOT.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/js/easy-api.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/js/todo.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;/head&gt;</span>
+  <span class="nt">&lt;body&gt;</span>
+
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;test-navigation&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;start-test&quot;</span><span class="nt">&gt;</span>Start<span class="nt">&lt;/button&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;stop-test&quot;</span><span class="nt">&gt;</span>Stop<span class="nt">&lt;/button&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;step-test&quot;</span><span class="nt">&gt;</span>Step<span class="nt">&lt;/button&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;continue-test&quot;</span><span class="nt">&gt;</span>Continue<span class="nt">&lt;/button&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;reset-console&quot;</span><span class="nt">&gt;</span>Clear Console<span class="nt">&lt;/button&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;test-content&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;pre</span> <span class="na">id=</span><span class="s">&quot;test-log&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/pre&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;test-content&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;test.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre>
+</div>
+<h6>test.js</h6>
+<div class="highlight"><pre><code class="javascript"><span class="kd">var</span> <span class="nx">LoginTest</span> <span class="o">=</span> <span class="nx">LoginTest</span> <span class="o">||</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="p">{</span><span class="nx">state</span><span class="o">:</span> <span class="p">{}};</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s2">&quot;Login Test&quot;</span><span class="p">;</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">doLogout</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="nx">Todo</span><span class="p">.</span><span class="nx">logoutRequest</span><span class="p">()</span>
+      <span class="p">.</span><span class="nx">onStatus</span><span class="p">(</span><span class="s1">&#39;OK&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">})</span>
+      <span class="p">.</span><span class="nx">run</span><span class="p">();</span>
+  <span class="p">};</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">isLoggedOut</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">doLogin</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;kyle.burton@gmail.com&#39;</span><span class="p">);</span>
+    <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;input[name=password]&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;secret&#39;</span><span class="p">);</span>
+    <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;button#login&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">();</span>
+
+  <span class="p">};</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">doLogout</span><span class="p">,</span> <span class="p">{</span><span class="nx">start</span><span class="o">:</span> <span class="kc">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="p">}</span>
+  <span class="p">);</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">),</span> <span class="p">{},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;doLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;doLogin&#39;</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">doLogin</span><span class="p">,</span> <span class="p">{},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;div#todo-list&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
+
+  <span class="k">return</span> <span class="nx">self</span><span class="p">;</span>
+<span class="p">}());</span>
+</code></pre>
+</div>
+<p><a name="using-with-phantom"></a></p>
+<h3>Using Transtion.js with <a href="http://phantomjs.org/">Phantom.js</a></h3>
+<p><a name="automating-frames-frameowrk-tests"></a></p>
+<h3>Automation of Frames Based Tests</h3>
+<h3>Using a Proxy to Separate your testing framework from your web application.</h3>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Transition.js maintained by <a href="https://github.com/kyleburton">kyleburton</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+  </body>
+</html>

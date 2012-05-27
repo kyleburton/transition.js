@@ -1,6 +1,61 @@
 ---
 layout: default
 title: Transition.js - Detangled in browser Web Testing
+show_downloads: true
 ---
 
-Put an overview here.
+h3. Overview
+
+Transition.js is an in-browser testing framework.  Transition.js is designed to make testing asynchronous web applications easier.  The tests can be run interactively, easing the burden of testing across multiple browsers (especailly mobile devices).
+
+h3. Example
+
+"Transition.js":http://github.com/kyleburton/transition.js comes with an example web app ("Todo":https://github.com/kyleburton/transition.js/tree/master/examples/todo) and tests for that app.  This is a test for the login page:
+
+{% highlight javascript %}
+var LoginTest = LoginTest || (function () {
+  var self = {state: {}};
+
+  Transition.Stm.name = "Login Test";
+
+  self.doLogout = function () {
+    self.isLoggedOut = false;
+    Todo.logoutRequest()
+      .onStatus('OK', function (response) {
+        self.state.isLoggedOut = true;
+      })
+      .run();
+  };
+
+  self.isLoggedOut = function () {
+    return self.state.isLoggedOut;
+  };
+
+  self.doLogin = function () {
+    Transition.find('input[name=email]').val('kyle.burton@gmail.com');
+    Transition.find('input[name=password]').val('secret');
+    Transition.find('button#login').click();
+
+  };
+
+  Transition.Stm.newState('logout', self.doLogout, {start: true},
+    {to: 'viewLogin', pred: self.isLoggedOut }
+  );
+
+  Transition.Stm.newState('viewLogin', Transition.navigateTo_('/login'), {},
+    {to: 'doLogin', pred: Transition.elementExists_('input[name=email]') }
+  );
+
+  Transition.Stm.newState('doLogin', self.doLogin, {},
+    {to: 'success', pred: Transition.elementExists_('div#todo-list') }
+  );
+
+  Transition.Stm.init();
+
+  return self;
+}());
+{% endhighlight %}
+
+h3. Ready to get started?
+
+Start with the "installation instrucitons":documentation/install then browse the "Documentation":documentation/.

@@ -6,7 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
     <meta name="description" content="Transition.js : Detangled in-Browser Webapp Testing" />
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/transition.js.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/pygments.css">
 
     <title>Transition.js - Detangled in browser Web Testing</title>
   </head>
@@ -18,20 +20,74 @@
         <header class="inner">
           <a id="forkme_banner" href="https://github.com/kyleburton/transition.js">View on GitHub</a>
 
-          <h1 id="project_title">Transition.js</h1>
+          <h1 id="project_title"><a href="/">Transition.js</a></h1>
           <h2 id="project_tagline">Detangled in-Browser Webapp Testing</h2>
 
+          
             <section id="downloads">
               <a class="zip_download_link" href="https://github.com/kyleburton/transition.js/zipball/master">Download this project as a .zip file</a>
               <a class="tar_download_link" href="https://github.com/kyleburton/transition.js/tarball/master">Download this project as a tar.gz file</a>
             </section>
+          
+
         </header>
     </div>
 
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
+
+      
+
       <section id="main_content" class="inner">
-      <p>Put an overview here.</p>
+      <h3>Overview</h3>
+<p>Transition.js is an in-browser testing framework.  Transition.js is designed to make testing asynchronous web applications easier.  The tests can be run interactively, easing the burden of testing across multiple browsers (especailly mobile devices).</p>
+<h3>Example</h3>
+<p><a href="http://github.com/kyleburton/transition.js">Transition.js</a> comes with an example web app (<a href="https://github.com/kyleburton/transition.js/tree/master/examples/todo">Todo</a>) and tests for that app.  This is a test for the login page:</p>
+<div class="highlight"><pre><code class="javascript"><span class="kd">var</span> <span class="nx">LoginTest</span> <span class="o">=</span> <span class="nx">LoginTest</span> <span class="o">||</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="p">{</span><span class="nx">state</span><span class="o">:</span> <span class="p">{}};</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s2">&quot;Login Test&quot;</span><span class="p">;</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">doLogout</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="nx">Todo</span><span class="p">.</span><span class="nx">logoutRequest</span><span class="p">()</span>
+      <span class="p">.</span><span class="nx">onStatus</span><span class="p">(</span><span class="s1">&#39;OK&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">self</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">})</span>
+      <span class="p">.</span><span class="nx">run</span><span class="p">();</span>
+  <span class="p">};</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">isLoggedOut</span><span class="p">;</span>
+  <span class="p">};</span>
+
+  <span class="nx">self</span><span class="p">.</span><span class="nx">doLogin</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;kyle.burton@gmail.com&#39;</span><span class="p">);</span>
+    <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;input[name=password]&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;secret&#39;</span><span class="p">);</span>
+    <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;button#login&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">();</span>
+
+  <span class="p">};</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">doLogout</span><span class="p">,</span> <span class="p">{</span><span class="nx">start</span><span class="o">:</span> <span class="kc">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="p">}</span>
+  <span class="p">);</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">),</span> <span class="p">{},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;doLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;doLogin&#39;</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">doLogin</span><span class="p">,</span> <span class="p">{},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;div#todo-list&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>
+
+  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
+
+  <span class="k">return</span> <span class="nx">self</span><span class="p">;</span>
+<span class="p">}());</span>
+</code></pre>
+</div>
+<h3>Ready to get started?</h3>
+<p>Start with the <a href="documentation/install">installation instrucitons</a> then browse the <a href="documentation/">Documentation</a>.</p>
       </section>
     </div>
 

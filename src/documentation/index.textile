@@ -1,0 +1,9 @@
+---
+layout: default
+title: Documentation
+navigation: main
+---
+
+* "Installation":install/
+* "Getting Started":getting-started/
+* "Transition.js API":api/

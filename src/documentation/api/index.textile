@@ -1,0 +1,114 @@
+---
+layout: default
+title: API Documentation
+navigation: documentation
+---
+
+h2. Transition
+
+Unles otherwise noted, each of the DOM helpers acts on the main frame (the frame dispalying the target web applicaiton being tested).
+
+h6. @Transition.document()@
+
+In the frames based testing framework, this functon returns the main frame.
+
+h3. @Transition.noop()@
+
+This function performs no action, it is useful for declaring states that do not need a trigger function.
+
+h3. @Transition.log(msg)@
+
+This logs a message to the Test Frame's log div.  New messages appear at the top of the div.
+
+h3. @Transition.error(msg)@
+
+This logs an error message to the Test Frame's log div.  New error messages appear at the top of the div.
+
+h3. @Transition.dom@
+
+This returns the document, DOM, of the main frame.
+
+h3. @Transition.findVisibleText(text)@
+
+Finds a dom element in the main frame containing text, which has the jQuery pseudo class @:visible@ (i.e. not hidden).
+
+h3. @Transition.find(selctor)@
+
+Delegates to the jQuery object in the main frame - searches for DOM elements using the given jQuery selector.
+
+h3. @Transition.findText(selctor)@
+
+Delegates to the jQuery object in the main frame, finding the element that matches the selector, returning it's text content.
+
+h3. @Transition.elementExists(selctor)@
+
+In the main frame, tests if the selector finds one or more DOM elements.
+
+h3. @Transition.elementExists_(selctor)@
+
+This is a defered form of @elementExists@, useful in the declaration of transition predicates:
+
+{% highlight javascript %}
+  Transition.Stm.newState('viewLogin', Transition.navigateTo_('/login'), {},
+    {to: 'doLogin', pred: Transition.elementExists_('input[name=email]') }
+  );
+{% endhighlight %}
+
+It returns a zero argument function that will test if the given element exists when called.
+
+h3. @Transition.isChecked(selctor)@
+
+Tests if the checkbox or radio button identified by the jQuery selector is checked.
+
+h3. @Transition.isChecked_(selctor)@
+
+Defered form of @isChecked@.
+
+h3. @Transition.isNotChecked(selctor)@
+
+Tests if the checkbox or radio button identified by the jQuery selector is checked.
+
+h3. @Transition.isNotChecked_(selctor)@
+
+Defered form of @isNotChecked@.
+
+h3. @Transition.navigateTo(selector)@
+
+Sets @window.location@ in the main frame.
+
+h3. @Transition.navigateTo_(selector)@
+
+Defered form of @navigateTo@.
+
+h3. @Transition.click(selector)@
+
+'Clicks' on the anchor tag identified by the selector.  This is accomplished by finding the anchor tag, getting its @href@ attribute and then invoking @navigateTo@.
+
+h3. @Transition.clickNode(selector)@
+
+Fires the click handler of the identified dom element.
+
+h3. @Transition.clickNode_(selector)@
+
+Defered version of @clickNode@.
+
+h3. @Transition.propertyExists(object, property)@
+
+Tests if the object has the given property.  This is useful in situations where your test is setting itself up, or you are awaiting a condition that is not visible in the UI.
+
+{% highlight javascript %}
+  Transition.Stm.newState('logout', self.doLogout, {start: true},
+    {to: 'viewLogin', pred: Transition.propertyExists_(self.state, 'isLoggedOut') }
+  );  
+{% endhighlight %}
+
+h3. @Transition.propertyExists_(object, property)@
+
+Defered form of @propertyExists@.
+
+h3. @Transition.throw(msg)@
+
+This logs an error and then throws the message.  *Note* throwing will fail the test.
+
+
+h2. Transition.Stm
