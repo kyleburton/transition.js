@@ -112,3 +112,73 @@ This logs an error and then throws the message.  *Note* throwing will fail the t
 
 
 h2. Transition.Stm
+
+h3. @Transition.Stm.start()@
+
+Starts the state machine.
+
+h3. @Transition.Stm.log(msg)@
+
+Defers to @Transition.log@, prending the name of the current state to the message.
+
+h3. @Transition.Stm.terminateTest(status, message)@
+
+Halts the state machine, marking the test as failed.  *Note* this does not effect the current state, it just halts the testing.
+
+h3. @Transition.Stm.pollStates()@
+
+This internal function should not be called by your tests.  It checkes for test timeout and executes the exit prediates of the current state.
+
+h3. @Transition.Stm.summarizeExitPredicates()@
+
+This internal function is used by @pollStates@ when logging.
+
+h3. @Transition.Stm.scheduleNextPoll()@
+
+This internal function is used by @pollStates@ to scheudle the next time to test the transition predicates.
+
+h3. @Transition.Stm.getTimeMs()@
+
+Returns the current time in miliseconds.
+
+h3. @Transition.Stm.elapsedTimeMs()@
+
+Returns the elapsed time since the state machine was started.
+
+h3. @Transition.Stm.newState(name, handler, context, transitions...)@
+
+Adds a state to the state machine.
+
+* name: the name of the state, must be unique within the test.
+* handler: a zero argument function that will be called when the state is entered.
+* context: a set of properties for the defined state.  The signficant properties are: @start@ which if set to true defines the state as a start state; @stop@ which if set to true defines the state as a terminal state; and @passwd@ which if set to true indicates that the given stop state represents a successful test execution.
+@ transitions... the remaining arguments are treated as the transition declarations.
+
+Transition declarations have 2 properties:
+
+* to: the name of the target state
+* pred: a zero argument boolean function to indicate the transition should be followed.
+
+h3. @Transition.Stm.stopPolling()@
+
+Stops the polling loop.  This does not cause the test to fail, nor succeed.
+
+h3. @Transition.Stm.compliment(fn)@
+
+Returns a new function that is the logical inversion of the given function.  Assumes a zero agument boolean function.
+
+h3. @Transition.Stm.stopTest()@
+
+Halts the test, allowing it to be continued or stepped.
+
+h3. @Transition.Stm.stepTest()@
+
+Steps the test forward 1 and only 1 state.  *Note* the test may still time out if no exit predicates indicate an edge to follow.
+
+h3. @Transition.Stm.continueTest()@
+
+Resumes the test, all subsequent transitions will happen automatically.
+
+h3. @Transition.Stm.init()@
+
+Initializes the state machine and testing framework.

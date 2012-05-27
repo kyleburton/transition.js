@@ -100,6 +100,47 @@
 <h3><code>Transition.throw(msg)</code></h3>
 <p>This logs an error and then throws the message.  <strong>Note</strong> throwing will fail the test.</p>
 <h2>Transition.Stm</h2>
+<h3><code>Transition.Stm.start()</code></h3>
+<p>Starts the state machine.</p>
+<h3><code>Transition.Stm.log(msg)</code></h3>
+<p>Defers to <code>Transition.log</code>, prending the name of the current state to the message.</p>
+<h3><code>Transition.Stm.terminateTest(status, message)</code></h3>
+<p>Halts the state machine, marking the test as failed.  <strong>Note</strong> this does not effect the current state, it just halts the testing.</p>
+<h3><code>Transition.Stm.pollStates()</code></h3>
+<p>This internal function should not be called by your tests.  It checkes for test timeout and executes the exit prediates of the current state.</p>
+<h3><code>Transition.Stm.summarizeExitPredicates()</code></h3>
+<p>This internal function is used by <code>pollStates</code> when logging.</p>
+<h3><code>Transition.Stm.scheduleNextPoll()</code></h3>
+<p>This internal function is used by <code>pollStates</code> to scheudle the next time to test the transition predicates.</p>
+<h3><code>Transition.Stm.getTimeMs()</code></h3>
+<p>Returns the current time in miliseconds.</p>
+<h3><code>Transition.Stm.elapsedTimeMs()</code></h3>
+<p>Returns the elapsed time since the state machine was started.</p>
+<h3><code>Transition.Stm.newState(name, handler, context, transitions...)</code></h3>
+<p>Adds a state to the state machine.</p>
+<ul>
+	<li>name: the name of the state, must be unique within the test.</li>
+	<li>handler: a zero argument function that will be called when the state is entered.</li>
+	<li>context: a set of properties for the defined state.  The signficant properties are: <code>start</code> which if set to true defines the state as a start state; <code>stop</code> which if set to true defines the state as a terminal state; and <code>passwd</code> which if set to true indicates that the given stop state represents a successful test execution.<br />
+@ transitions&#8230; the remaining arguments are treated as the transition declarations.</li>
+</ul>
+<p>Transition declarations have 2 properties:</p>
+<ul>
+	<li>to: the name of the target state</li>
+	<li>pred: a zero argument boolean function to indicate the transition should be followed.</li>
+</ul>
+<h3><code>Transition.Stm.stopPolling()</code></h3>
+<p>Stops the polling loop.  This does not cause the test to fail, nor succeed.</p>
+<h3><code>Transition.Stm.compliment(fn)</code></h3>
+<p>Returns a new function that is the logical inversion of the given function.  Assumes a zero agument boolean function.</p>
+<h3><code>Transition.Stm.stopTest()</code></h3>
+<p>Halts the test, allowing it to be continued or stepped.</p>
+<h3><code>Transition.Stm.stepTest()</code></h3>
+<p>Steps the test forward 1 and only 1 state.  <strong>Note</strong> the test may still time out if no exit predicates indicate an edge to follow.</p>
+<h3><code>Transition.Stm.continueTest()</code></h3>
+<p>Resumes the test, all subsequent transitions will happen automatically.</p>
+<h3><code>Transition.Stm.init()</code></h3>
+<p>Initializes the state machine and testing framework.</p>
       </section>
     </div>
 
