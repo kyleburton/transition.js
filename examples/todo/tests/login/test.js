@@ -16,10 +16,6 @@ var LoginTest = LoginTest || (function () {
       .run();
   };
 
-  self.isLoggedOut = function () {
-    return self.state.isLoggedOut;
-  };
-
   self.doLogin = function () {
     Transition.find('input[name=email]').val('kyle.burton@gmail.com');
     Transition.find('input[name=password]').val('secret');
@@ -28,7 +24,7 @@ var LoginTest = LoginTest || (function () {
   };
 
   Transition.Stm.newState('logout', self.doLogout, {start: true},
-    {to: 'viewLogin', pred: self.isLoggedOut }
+    {to: 'viewLogin', pred: Transition.propertyExists_(self.state, 'isLoggedOut') }
   );
 
   Transition.Stm.newState('viewLogin', Transition.navigateTo_('/login'), {},
