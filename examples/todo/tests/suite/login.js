@@ -8,7 +8,7 @@ var LoginTest = LoginTest || (function () {
   Transition.Stm.name = "Login Test";
 
   self.doLogout = function () {
-    self.isLoggedOut = false;
+    self.state.isLoggedOut = false;
     Todo.logoutRequest()
       .onStatus('OK', function (response) {
         self.state.isLoggedOut = true;
@@ -24,7 +24,7 @@ var LoginTest = LoginTest || (function () {
   };
 
   Transition.Stm.newState('logout', self.doLogout, {start: true},
-    {to: 'viewLogin', pred: Transition.propertyExists_(self.state, 'isLoggedOut') }
+    {to: 'viewLogin', pred: function () { return self.state.isLoggedOut; } }
   );
 
   Transition.Stm.newState('viewLogin', Transition.navigateTo_('/login'), {},

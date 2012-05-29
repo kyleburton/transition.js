@@ -239,17 +239,23 @@ var Transition = Transition || (function () {
 }());
 
 Transition.Stm = (function () {
-  var self = {states: {},
-    testHalted:       true,
-    testInit:         function () {},
-    name:             'no test name given',
-    maxTestTimeout:   10000,
-    maxStateTimeout:  5000,
-    pollTime:         250,
-    passed:           false,
-    startState:       undefined,
-    currentState:     undefined,
-    stepOnce:         false};
+  var self = {};
+
+  self.reset = function () {
+    self.states          = {};
+    self.testHalted      = true;
+    self.testInit        = function () {};
+    self.name            = 'no test name given';
+    self.maxTestTimeout  = 10000;
+    self.maxStateTimeout = 5000;
+    self.pollTime        = 250;
+    self.passed          = false;
+    self.startState      = undefined;
+    self.currentState    = undefined;
+    self.stepOnce        = false;
+  };
+
+  self.reset();
 
   self.start = function (stepOnce) {
     var msg, testInit;
@@ -489,17 +495,6 @@ Transition.Stm = (function () {
   self.init = function (testInit) {
     self.stmInitialized = true;
     self.testInit = self.testInit || testInit;
-    $("#start-test").click(function (e) {
-      e.preventDefault();
-      if (self.testHalted) {
-        self.start();
-        return false;
-      }
-      return false;
-    });
-    $("#stop-test").click(self.stopTest);
-    $("#step-test").click(self.stepTest);
-    $("#continue-test").click(self.continueTest);
   };
 
   return self;

@@ -1,4 +1,7 @@
 * Example: todo list app in sinatra
-* Example: in-browser, frame based, tests for the todo app
+* Example: in-browser, frame based test runner
+    * clear console button not working
+    * implement a RunAll button with test suite reporting
+    * have transition-runner create the test GUI / Debugger UI dynamically
 * Example: phantom.js driver for in-browser based tests
 * Example: phantom.js use of state machine - w/o frames
