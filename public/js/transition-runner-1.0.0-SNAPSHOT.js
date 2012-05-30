@@ -51,7 +51,24 @@ Transition.Runner = Transition.Runner || (function () {
     return false;
   };
 
+  self.buildDebugger = function () {
+    var body = $('body'), navDiv, logDiv;
+    navDiv = $('<div>');
+    navDiv.append("<select id='registered-tests'></select>");
+    navDiv.append('<button id="start-test">Start</button>');
+    navDiv.append('<button id="stop-test">Stop</button>');
+    navDiv.append('<button id="step-test">Step</button>');
+    navDiv.append('<button id="continue-test">Continue</button>');
+    navDiv.append('<button id="reset-console">Clear Console</button>');
+    logDiv = $('<div>');
+    logDiv.attr('id',"test-content");
+    logDiv.append('<pre id="test-log"></pre>');
+    body.append(navDiv);
+    body.append(logDiv);
+  };
+
   self.init = function () {
+    self.buildDebugger();
     var registeredTests = $('#registered-tests');
     $.each(self.tests, function(idx, cfg) {
       var option = $('<option>');
