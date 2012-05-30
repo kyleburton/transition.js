@@ -386,6 +386,7 @@ Transition.Stm = (function () {
     console.log('nextState: ', nextState);
     self.currentState = nextState;
     self.currentState.handler();
+    $('body').trigger('Transition#stateChanged');
   
     //self.log('scheduling next timeout');
     self.scheduleNextPoll();

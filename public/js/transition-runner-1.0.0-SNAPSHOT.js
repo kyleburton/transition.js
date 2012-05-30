@@ -64,11 +64,16 @@ Transition.Runner = Transition.Runner || (function () {
     navDiv.append('<button id="step-test">Step</button>');
     navDiv.append('<button id="continue-test">Continue</button>');
     navDiv.append('<button id="reset-log-console">Clear Log</button>');
+    navDiv.append('<button id="reload-current-test">Reload</button>');
+    navDiv.append('<span>Current State: <span id="current-state"></span></span>');
     logDiv = $('<div>');
     logDiv.attr('id',"test-content");
     logDiv.append('<pre id="test-log"></pre>');
     body.append(navDiv);
     body.append(logDiv);
+    $(body).bind('Transition#stateChanged', function (e) {
+      $('#current-state').html(Transition.Stm.currentState.name);
+    });
   };
 
   self.init = function () {
@@ -97,6 +102,7 @@ Transition.Runner = Transition.Runner || (function () {
     $("#step-test").click(Transition.Stm.stepTest);
     $("#continue-test").click(Transition.Stm.continueTest);
     $("#reset-log-console").click(self.clearLogConsole);
+    $("#reload-current-test").click(self.testSelected);
   };
 
   return self;
