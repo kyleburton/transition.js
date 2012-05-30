@@ -51,6 +51,10 @@ Transition.Runner = Transition.Runner || (function () {
     return false;
   };
 
+  self.clearLogConsole = function () {
+    $('#test-log').html('');
+  };
+
   self.buildDebugger = function () {
     var body = $('body'), navDiv, logDiv;
     navDiv = $('<div>');
@@ -59,7 +63,7 @@ Transition.Runner = Transition.Runner || (function () {
     navDiv.append('<button id="stop-test">Stop</button>');
     navDiv.append('<button id="step-test">Step</button>');
     navDiv.append('<button id="continue-test">Continue</button>');
-    navDiv.append('<button id="reset-console">Clear Console</button>');
+    navDiv.append('<button id="reset-log-console">Clear Log</button>');
     logDiv = $('<div>');
     logDiv.attr('id',"test-content");
     logDiv.append('<pre id="test-log"></pre>');
@@ -92,6 +96,7 @@ Transition.Runner = Transition.Runner || (function () {
     $("#stop-test").click(Transition.Stm.stopTest);
     $("#step-test").click(Transition.Stm.stepTest);
     $("#continue-test").click(Transition.Stm.continueTest);
+    $("#reset-log-console").click(self.clearLogConsole);
   };
 
   return self;
