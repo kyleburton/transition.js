@@ -19,7 +19,7 @@ var LoginTest = LoginTest || (function () {
   Transition.Stm.name = "Login Test";
 
   self.doLogout = function () {
-    self.isLoggedOut = false;
+    self.state.isLoggedOut = false;
     Todo.logoutRequest()
       .onStatus('OK', function (response) {
         self.state.isLoggedOut = true;
