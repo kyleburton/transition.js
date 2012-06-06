@@ -93,7 +93,8 @@
 <h3>Laying out your tests</h3>
 <p><a name="frames-framework"></a></p>
 <h3>Frames based testing framework.</h3>
-<p>The Frames based testing framework allwows you to interactively test your application, watch its progress, and single stepping your test.  The Frames style tests can be run from any browser.  I have found these tests to be valuable when testing mulitple devices.  Being able to bring up the test on a mobile phone, a challenging environemnt in which to test, and step the test has been fantastic.</p>
+<p>The Frames based testing framework allwows you to interactively test your application, watch its progress, and single step your test.  The Frames style tests can be run from any browser.  I have found these tests to be valuable when testing mulitple devices.  Being able to bring up the test on a mobile phone, a challenging environemnt in which to test, and step the test while watching the UI and the test log aids in troubleshooting.</p>
+<p>To use the frames based testing framework, create an <code>index.html</code> file with the following content:</p>
 <h6>index.html</h6>
 <div class="highlight"><pre><code class="html"><span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">&quot;en&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="nt">&gt;</span>
   <span class="nt">&lt;frameset</span> <span class="na">rows=</span><span class="s">&quot;67%,33%&quot;</span><span class="nt">&gt;</span>
@@ -103,6 +104,8 @@
 <span class="nt">&lt;/html&gt;</span>
 </code></pre>
 </div>
+<p>For the <span class="caps">TODO</span> example application, the tests are located at <code>/test/</code>.</p>
+<p>In the <code>test.html</code> file, include  jquery, the Transition.js testing framework, the APIs from the application you are testing (in this case, easy-api.js and todo.js), as well as the Transition test runner, transition-runner.js.  Finally, include your test suite and call <code>Transition.Runner.init()</code> which will process the test suite and build the test runner UI.</p>
 <h6>test.html</h6>
 <div class="highlight"><pre><code class="html"><span class="nt">&lt;html&gt;</span>
   <span class="nt">&lt;head&gt;</span>
@@ -114,31 +117,27 @@
     <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/js/todo.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
   <span class="nt">&lt;/head&gt;</span>
   <span class="nt">&lt;body&gt;</span>
-
-  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;test-navigation&quot;</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;start-test&quot;</span><span class="nt">&gt;</span>Start<span class="nt">&lt;/button&gt;</span>
-    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;stop-test&quot;</span><span class="nt">&gt;</span>Stop<span class="nt">&lt;/button&gt;</span>
-    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;step-test&quot;</span><span class="nt">&gt;</span>Step<span class="nt">&lt;/button&gt;</span>
-    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;continue-test&quot;</span><span class="nt">&gt;</span>Continue<span class="nt">&lt;/button&gt;</span>
-    <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">&quot;reset-console&quot;</span><span class="nt">&gt;</span>Clear Console<span class="nt">&lt;/button&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-
-  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;test-content&quot;</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;pre</span> <span class="na">id=</span><span class="s">&quot;test-log&quot;</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;/pre&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-
-  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;test-content&quot;</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;div&gt;</span>
-    <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-
-    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;test.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/js/transition-runner-1.0.0-SNAPSHOT.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;suite.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+      <span class="nx">Transition</span><span class="p">.</span><span class="nx">Runner</span><span class="p">.</span><span class="nx">init</span><span class="p">();</span>
+    <span class="nt">&lt;/script&gt;</span>
   <span class="nt">&lt;/body&gt;</span>
 <span class="nt">&lt;/html&gt;</span>
 </code></pre>
 </div>
-<h6>test.js</h6>
+<h6>suite.js</h6>
+<p>Use <code>suite.js</code> to register your individual tests with a name, a uri and tags to help you organize your tests.</p>
+<div class="highlight"><pre><code class="javascript"><span class="cm">/*jslint browser: true, maxerr: 50, indent: 2, nomen: false */</span>
+<span class="cm">/*global window, console, Transition */</span>
+<span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
+<span class="nx">Transition</span><span class="p">.</span><span class="nx">Runner</span><span class="p">.</span><span class="nx">addTests</span><span class="p">(</span>
+  <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Login&quot;</span><span class="p">,</span> <span class="nx">uri</span><span class="o">:</span> <span class="s2">&quot;suite/login.js&quot;</span><span class="p">,</span> <span class="nx">tags</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;login&quot;</span><span class="p">]</span> <span class="p">}</span>
+<span class="p">);</span>
+</code></pre>
+</div>
+<h6>site/login.js</h6>
+<p>Finally, here is the <code>login.js</code> test from the example application:</p>
 <div class="highlight"><pre><code class="javascript"><span class="kd">var</span> <span class="nx">LoginTest</span> <span class="o">=</span> <span class="nx">LoginTest</span> <span class="o">||</span> <span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="p">{</span><span class="nx">state</span><span class="o">:</span> <span class="p">{}};</span>
 
@@ -153,10 +152,6 @@
       <span class="p">.</span><span class="nx">run</span><span class="p">();</span>
   <span class="p">};</span>
 
-  <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">isLoggedOut</span><span class="p">;</span>
-  <span class="p">};</span>
-
   <span class="nx">self</span><span class="p">.</span><span class="nx">doLogin</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
     <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;kyle.burton@gmail.com&#39;</span><span class="p">);</span>
     <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;input[name=password]&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;secret&#39;</span><span class="p">);</span>
@@ -165,7 +160,7 @@
   <span class="p">};</span>
 
   <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">doLogout</span><span class="p">,</span> <span class="p">{</span><span class="nx">start</span><span class="o">:</span> <span class="kc">true</span><span class="p">},</span>
-    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">self</span><span class="p">.</span><span class="nx">isLoggedOut</span> <span class="p">}</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">self</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">isLoggedOut</span><span class="p">;</span> <span class="p">}</span> <span class="p">}</span>
   <span class="p">);</span>
 
   <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">),</span> <span class="p">{},</span>
@@ -186,7 +181,9 @@
 <h3>Using Transtion.js with <a href="http://phantomjs.org/">Phantom.js</a></h3>
 <p><a name="automating-frames-frameowrk-tests"></a></p>
 <h3>Automation of Frames Based Tests</h3>
+<p>This can be accomplished through invocation of the <code>Transtion.Runner</code>&#8217;s <code>runAll</code> method.</p>
 <h3>Using a Proxy to Separate your testing framework from your web application.</h3>
+<p>You may not want to expose your test suite with your public website (it may contain test user data that is either invalid or you do not want exposed).  We often use <a href="http://wiki.nginx.org/Main">Nginx</a> and define a local server configuration that serves up our tests from local disk, and forwards all other requests to a staging or development server.</p>
       </section>
     </div>
 

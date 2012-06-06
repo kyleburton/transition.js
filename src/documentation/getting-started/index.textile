@@ -92,7 +92,9 @@ h3. Laying out your tests
 
 h3. Frames based testing framework.
 
-The Frames based testing framework allwows you to interactively test your application, watch its progress, and single stepping your test.  The Frames style tests can be run from any browser.  I have found these tests to be valuable when testing mulitple devices.  Being able to bring up the test on a mobile phone, a challenging environemnt in which to test, and step the test has been fantastic.
+The Frames based testing framework allwows you to interactively test your application, watch its progress, and single step your test.  The Frames style tests can be run from any browser.  I have found these tests to be valuable when testing mulitple devices.  Being able to bring up the test on a mobile phone, a challenging environemnt in which to test, and step the test while watching the UI and the test log aids in troubleshooting.
+
+To use the frames based testing framework, create an @index.html@ file with the following content:
 
 h6. index.html
 
@@ -104,6 +106,10 @@ h6. index.html
   </frameset>
 </html>
 {% endhighlight %}
+
+For the TODO example application, the tests are located at @/test/@.
+
+In the @test.html@ file, include  jquery, the Transition.js testing framework, the APIs from the application you are testing (in this case, easy-api.js and todo.js), as well as the Transition test runner, transition-runner.js.  Finally, include your test suite and call @Transition.Runner.init()@ which will process the test suite and build the test runner UI.
 
 h6. test.html
 
@@ -118,31 +124,31 @@ h6. test.html
     <script src="/js/todo.js" type="text/javascript"></script>
   </head>
   <body>
-
-  <div id="test-navigation">
-    <button id="start-test">Start</button>
-    <button id="stop-test">Stop</button>
-    <button id="step-test">Step</button>
-    <button id="continue-test">Continue</button>
-    <button id="reset-console">Clear Console</button>
-  </div>
-
-  <div id="test-content">
-    <pre id="test-log">
-    </pre>
-  </div>
-
-  <div id="test-content">
-    <div>
-    </div>
-  </div>
-
-    <script src="test.js" type="text/javascript"></script>
+    <script src="/js/transition-runner-1.0.0-SNAPSHOT.js" type="text/javascript"></script>
+    <script src="suite.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      Transition.Runner.init();
+    </script>
   </body>
 </html>
 {% endhighlight %}
 
-h6. test.js
+h6. suite.js
+
+Use @suite.js@ to register your individual tests with a name, a uri and tags to help you organize your tests.
+
+{% highlight javascript %}
+/*jslint browser: true, maxerr: 50, indent: 2, nomen: false */
+/*global window, console, Transition */
+"use strict";
+Transition.Runner.addTests(
+  {name: "Login", uri: "suite/login.js", tags: ["login"] }
+);
+{% endhighlight %}
+
+h6. site/login.js
+
+Finally, here is the @login.js@ test from the example application:
 
 {% highlight javascript %}
 var LoginTest = LoginTest || (function () {
@@ -159,10 +165,6 @@ var LoginTest = LoginTest || (function () {
       .run();
   };
 
-  self.isLoggedOut = function () {
-    return self.state.isLoggedOut;
-  };
-
   self.doLogin = function () {
     Transition.find('input[name=email]').val('kyle.burton@gmail.com');
     Transition.find('input[name=password]').val('secret');
@@ -171,7 +173,7 @@ var LoginTest = LoginTest || (function () {
   };
 
   Transition.Stm.newState('logout', self.doLogout, {start: true},
-    {to: 'viewLogin', pred: self.isLoggedOut }
+    {to: 'viewLogin', pred: function () { return self.state.isLoggedOut; } }
   );
 
   Transition.Stm.newState('viewLogin', Transition.navigateTo_('/login'), {},
@@ -196,5 +198,9 @@ h3. Using Transtion.js with "Phantom.js":http://phantomjs.org/
 
 h3. Automation of Frames Based Tests
 
+This can be accomplished through invocation of the @Transtion.Runner@'s @runAll@ method.
+
 h3. Using a Proxy to Separate your testing framework from your web application.
+
+You may not want to expose your test suite with your public website (it may contain test user data that is either invalid or you do not want exposed).  We often use "Nginx":http://wiki.nginx.org/Main and define a local server configuration that serves up our tests from local disk, and forwards all other requests to a staging or development server.
 
