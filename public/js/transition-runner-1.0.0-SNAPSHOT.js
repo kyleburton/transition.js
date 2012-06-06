@@ -51,6 +51,41 @@ Transition.Runner = Transition.Runner || (function () {
     return false;
   };
 
+  self.loadScript = function (url) {
+    $.ajax({
+      url:      url,
+      dataType: "script",
+      async:    false
+    });
+  };
+
+  self.runNextTest = function (e) {
+    // TODO: check and track if test just run was successful
+    // TODO: set the current test in the drop-down
+    // TODO: time each test, and the full suite
+    self.testIndex += 1;
+    if ( self.testIndex >= self.tests.length ) {
+      $(document).bind('Transition.test.completed');
+      Transition.log('Full suite completed.');
+      return true;
+    }
+
+    console.log('run next test: ' + self.testIndex);
+    try { Transition.Stm.reset(); }
+    catch (e) { }
+    self.loadScript(self.tests[self.testIndex].uri);
+    Transition.Stm.start();
+  };
+
+  self.runAll = function (e) {
+    self.testIndex = 0;
+    $(document).bind('Transition.test.completed', self.runNextTest);
+    try { Transition.Stm.reset(); }
+    catch (e) { }
+    self.loadScript(self.tests[self.testIndex].uri);
+    Transition.Stm.start();
+  };
+
   self.clearLogConsole = function () {
     $('#test-log').html('');
   };
@@ -65,6 +100,7 @@ Transition.Runner = Transition.Runner || (function () {
     navDiv.append('<button id="continue-test">Continue</button>');
     navDiv.append('<button id="reset-log-console">Clear Log</button>');
     navDiv.append('<button id="reload-current-test">Reload</button>');
+    navDiv.append('<button id="run-all">Run All</button>');
     navDiv.append('<span>Current State: <span id="current-state"></span></span>');
     logDiv = $('<div>');
     logDiv.attr('id',"test-content");
@@ -103,6 +139,7 @@ Transition.Runner = Transition.Runner || (function () {
     $("#continue-test").click(Transition.Stm.continueTest);
     $("#reset-log-console").click(self.clearLogConsole);
     $("#reload-current-test").click(self.testSelected);
+    $("#run-all").click(self.runAll);
   };
 
   return self;
