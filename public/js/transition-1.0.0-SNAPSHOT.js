@@ -67,7 +67,7 @@ var Transition = Transition || (function () {
 
   self.dom = function () {
     if (!self.document()) {
-      self.throw("no document is loaded in the main frame");
+      self.raise("no document is loaded in the main frame");
     }
     return self.document().document;
   };
@@ -230,7 +230,7 @@ var Transition = Transition || (function () {
     };
   };
 
-  self.throw = function (msg) {
+  self.raise = function (msg) {
     self.log("Error: " + msg);
     throw msg;
   };
@@ -389,7 +389,7 @@ Transition.Stm = (function () {
     console.log('nextState: ', nextState);
     self.currentState = nextState;
     self.currentState.handler();
-    $(document).trigger('Transition#stateChanged');
+    $(document).trigger('Transition.stateChanged');
   
     //self.log('scheduling next timeout');
     self.scheduleNextPoll();
