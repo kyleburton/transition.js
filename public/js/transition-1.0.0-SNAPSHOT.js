@@ -327,7 +327,10 @@ Transition.Stm = (function () {
     else {
       self.log('TEST FAILED [' + self.name + '] ' + message);
     }
-    console.log('terminateTest: test termianted');
+    console.log('terminateTest: test terminated');
+
+    $(document).trigger('Transition.test.completed');
+
     return status;
   };
   
@@ -386,7 +389,7 @@ Transition.Stm = (function () {
     console.log('nextState: ', nextState);
     self.currentState = nextState;
     self.currentState.handler();
-    $('body').trigger('Transition#stateChanged');
+    $(document).trigger('Transition#stateChanged');
   
     //self.log('scheduling next timeout');
     self.scheduleNextPoll();
