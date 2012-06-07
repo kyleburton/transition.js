@@ -75,9 +75,10 @@ Transition.Runner = Transition.Runner || (function () {
     self.testIndex += 1;
     if (self.testIndex >= self.tests.length) {
       $(document).bind('Transition.test.completed');
-      totalTestsRun = self.testSuiteResults.numPassed + self.testSuiteResults.numFailed;
-      successPercent = (self.testSuiteResults.numPassed / totalTestsRun).toFixed(2) * 100;
+      self.testSuiteResults.totalTestsRun = totalTestsRun = self.testSuiteResults.numPassed + self.testSuiteResults.numFailed;
+      self.testSuiteResults.successPercent = successPercent = (self.testSuiteResults.numPassed / totalTestsRun).toFixed(2) * 100;
       Transition.log('Full suite completed: ' + self.testSuiteResults.numPassed + ' of ' + totalTestsRun + ' passed ' + successPercent + '%.');
+      self.testSuiteComplete = true;
       return true;
     }
 
@@ -96,6 +97,7 @@ Transition.Runner = Transition.Runner || (function () {
 
   self.runAll = function (e) {
     self.testIndex = 0;
+    self.testSuiteComplete = false;
     self.testSuiteResults = {testResults: {}, numPassed: 0, numFailed: 0};
     $(document).bind('Transition.test.completed', self.runNextTest);
     try {

@@ -45,6 +45,10 @@ var Transition = Transition || (function () {
   self.noop = function () {
   };
 
+  self.prependLogMesasge = function (msg) {
+    parent.test.$('#test-log').prepend(msg);
+  };
+
   self.log = function () {
     var str = '', ii;
     str += (new Date()).toString() + ': ';
@@ -52,7 +56,7 @@ var Transition = Transition || (function () {
       str += arguments[ii];
     }
     str += "\n";
-    parent.test.$('#test-log').prepend(str);
+    self.prependLogMesasge(str);
   };
 
   self.error = function () {
@@ -62,7 +66,7 @@ var Transition = Transition || (function () {
       str += arguments[ii];
     }
     str += "\n";
-    parent.test.$('#test-log').prepend(str);
+    self.prependLogMesasge(str);
   };
 
   self.dom = function () {
@@ -123,7 +127,6 @@ var Transition = Transition || (function () {
     if (!url) {
       return false;
     }
-    self.log('navigating to: ' + url);
     parent.main.window.location.href = url;
     return url;
   };
@@ -134,68 +137,13 @@ var Transition = Transition || (function () {
     };
   };
 
-  /*
-  self.waitForTimeout = 5000;
-
-  self.waitFor = function (testFx, onReady, timeOutMillis) {
-    var maxtimeOutMillis = timeOutMillis !== undefined ? timeOutMillis : self.waitForTimeout, //< Default Max Timeout is 3s
-        start = new Date().getTime(),
-        condition = false,
-        interval = setInterval(function () {
-          if (((new Date().getTime() - start) < maxtimeOutMillis) && !condition) {
-            // If not time-out yet and condition not yet fulfilled
-            try {
-              condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
-            }
-            catch (e) {
-              console.error(e);
-              self.error(e);
-              clearInterval(interval);
-            }
-          }
-          else {
-            if (!condition) {
-              // If condition still not fulfilled (timeout but condition is 'false')
-              self.error('waitFor() timeout: ');
-              clearInterval(interval); //< Stop this interval
-              return false;
-            }   
-            else {
-              // Condition fulfilled (timeout and/or condition is 'true')
-              console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
-              //< Do what it's supposed to do once the condition is fulfilled
-              clearInterval(interval); //< Stop this interval
-              if (onReady) {
-                if (typeof(onReady) === "string") {
-                  eval(onReady);
-                }   
-                else {
-                  console.log('invoking onReady');
-                  onReady();
-                }   
-              }   
-            }   
-          }   
-        }, 100); //< repeat check every 100ms
-  };
-
-  self.waitForText = function (selector, text, cb) {
-    self.waitFor(function () {
-      var elt        = self.find(selector),
-      actualText =  elt.text().toLowerCase();
-    text = text.toLowerCase();
-    console.log('waitForText[%s] : %s', selector, actualText);
-    return actualText.indexOf(text) !== -1;
-    }, cb);
-  };
-*/
   self.click = function (selector) {
     var elt = self.find(selector);
     if (elt.length > 0) {
-      console.log('found: ' + selector + ' => ' + elt);
       return self.navigateTo(elt.attr('href'));
     }
     console.error('Sorry, could not find : ' + selector);
+    return false;
   };
 
   self.clickNode = function (selector) {
@@ -203,7 +151,6 @@ var Transition = Transition || (function () {
     if (elt.length !== 1) {
       self.log('Error: unable to click: ' + selector);
     }
-    self.log("clicking node: " + selector);
     elt.click();
   };
 
@@ -211,7 +158,6 @@ var Transition = Transition || (function () {
     return function () {
       var theArgs = arguments;
       return function () {
-        console.log('curryAll, arguments=' + theArgs);
         console.dir(theArgs);
         fn.apply(fn, theArgs);
       };
@@ -276,7 +222,6 @@ Transition.Stm = (function () {
     testInit = self.testInit || self.noop;
     self.testHalted = false;
     testInit();
-    console.log('do the setInterval thing');
 
     if (!self.states.success) {
       self.newState('success', self.noop, {stop: true, passed: true});
@@ -327,9 +272,12 @@ Transition.Stm = (function () {
     else {
       self.log('TEST FAILED [' + self.name + '] ' + message);
     }
-    console.log('terminateTest: test terminated');
 
-    $(document).trigger('Transition.test.completed');
+    try {
+      $(document).trigger('Transition.test.completed');
+    }
+    catch (e) {
+    }
 
     return status;
   };
@@ -338,12 +286,10 @@ Transition.Stm = (function () {
     var destination = null, ii, pred, res, nextState;
 
     if (self.testHalted) {
-      self.log('test halted');
       return self.terminateTest(false, 'Test halted.');
     }
 
     if (self.currentState.properties.stop) {
-      self.log('current state is stop state');
       return self.terminateTest(self.currentState.properties.passed);
     }
   
@@ -352,7 +298,6 @@ Transition.Stm = (function () {
       return self.terminateTest(false, 'timed out after ' + (self.maxTestTimeout / 1000) + ' seconds');
     }
   
-    console.log('pollStates');
     console.dir(self.currentState);
     for (ii = 0; ii < self.currentState.exitPredicates.length; ii += 1) {
       pred = self.currentState.exitPredicates[ii];
@@ -386,12 +331,10 @@ Transition.Stm = (function () {
     }
   
     nextState = self.states[pred.to];
-    console.log('nextState: ', nextState);
     self.currentState = nextState;
     self.currentState.handler();
     $(document).trigger('Transition.stateChanged');
   
-    //self.log('scheduling next timeout');
     self.scheduleNextPoll();
 
     return true;
@@ -408,7 +351,6 @@ Transition.Stm = (function () {
 
   self.scheduleNextPoll = function () {
     if (self.stepOnce) {
-      console.log('stepOnce is set, not scheduling next pollStates');
       return;
     }
     self.timeout = setTimeout(self.pollStates, self.pollTime);
@@ -503,3 +445,5 @@ Transition.Stm = (function () {
 
   return self;
 }());
+
+Transition;
