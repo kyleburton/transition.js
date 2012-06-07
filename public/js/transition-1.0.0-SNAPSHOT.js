@@ -203,6 +203,21 @@ Transition.Stm = (function () {
 
   self.reset();
 
+  self.breakpoint = function (fn) {
+    self.log('breakpoint (click Step or Continue to continue)');
+    self.stepOnce = true;
+    if (fn) {
+      return fn();
+    }
+    return true;
+  };
+
+  self.breakpoint_ = function (fn) {
+    return function () {
+      return self.breakpoint(fn);
+    };
+  };
+
   self.start = function (stepOnce) {
     var msg, testInit;
 

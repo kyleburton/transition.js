@@ -20,7 +20,6 @@ var LoginTest = LoginTest || (function () {
     Transition.find('input[name=email]').val('kyle.burton@gmail.com');
     Transition.find('input[name=password]').val('secret');
     Transition.find('button#login').click();
-
   };
 
   Transition.Stm.newState('logout', self.doLogout, {start: true},
