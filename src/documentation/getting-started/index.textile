@@ -194,6 +194,38 @@ var LoginTest = LoginTest || (function () {
 
 h3. Using Transtion.js with "Phantom.js":http://phantomjs.org/
 
+The file "phantom-runner.js":https://github.com/kyleburton/transition.js/blob/master/examples/phantom-runner.js can be used to execute your test suite using "Phantom.js":http://phantomjs.org for automated, headless testing.  The @Rakefile@ that is part of Transtion.js has an installer for Phantom.js:
+
+{% highlight bash %}
+$ rake phantom:install
+{% endhighlight %}
+
+Once installed you can invoke the Phantom runner, pointing it at your test suite:
+
+{% highlight bash %}
+$ ./software/phantomjs-1.5.0/bin/phantomjs examples/phantom-runner.js http://localhost:4567/tests/
+>>>Thu Jun 07 2012 17:23:20 GMT-0400 (EDT): [logout]: Starting [Login Test]
+
+[object Object]
+[logout] trying pred[viewLogin] :true
+>>>Thu Jun 07 2012 17:23:20 GMT-0400 (EDT): [logout]: transitioning to: viewLogin
+
+[object Object]
+[viewLogin] trying pred[doLogin] :true
+>>>Thu Jun 07 2012 17:23:21 GMT-0400 (EDT): [viewLogin]: transitioning to: doLogin
+
+ajax failure for GET, /todo
+[object Object]
+[doLogin] trying pred[success] :true
+>>>Thu Jun 07 2012 17:23:21 GMT-0400 (EDT): [doLogin]: transitioning to: success
+
+>>>Thu Jun 07 2012 17:23:21 GMT-0400 (EDT): [success]: TEST PASSED [Login Test] 
+
+>>>Thu Jun 07 2012 17:23:21 GMT-0400 (EDT): Full suite completed: 1 of 1 passed 100%.
+
+1 passed, 0 failed, out of 1 100%
+{% endhighlight %}
+
 <a name="automating-frames-frameowrk-tests"></a>
 
 h3. Automation of Frames Based Tests

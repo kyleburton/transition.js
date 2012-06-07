@@ -179,6 +179,34 @@
 </div>
 <p><a name="using-with-phantom"></a></p>
 <h3>Using Transtion.js with <a href="http://phantomjs.org/">Phantom.js</a></h3>
+<p>The file <a href="https://github.com/kyleburton/transition.js/blob/master/examples/phantom-runner.js">phantom-runner.js</a> can be used to execute your test suite using <a href="http://phantomjs.org">Phantom.js</a> for automated, headless testing.  The <code>Rakefile</code> that is part of Transtion.js has an installer for Phantom.js:</p>
+<div class="highlight"><pre><code class="bash"><span class="nv">$ </span>rake phantom:install
+</code></pre>
+</div>
+<p>Once installed you can invoke the Phantom runner, pointing it at your test suite:</p>
+<div class="highlight"><pre><code class="bash"><span class="nv">$ </span>./software/phantomjs-1.5.0/bin/phantomjs examples/phantom-runner.js http://localhost:4567/tests/
+&gt;&gt;&gt;Thu Jun 07 2012 17:23:20 GMT-0400 <span class="o">(</span>EDT<span class="o">)</span>: <span class="o">[</span><span class="nb">logout</span><span class="o">]</span>: Starting <span class="o">[</span>Login Test<span class="o">]</span>
+
+<span class="o">[</span>object Object<span class="o">]</span>
+<span class="o">[</span><span class="nb">logout</span><span class="o">]</span> trying pred<span class="o">[</span>viewLogin<span class="o">]</span> :true
+&gt;&gt;&gt;Thu Jun 07 2012 17:23:20 GMT-0400 <span class="o">(</span>EDT<span class="o">)</span>: <span class="o">[</span><span class="nb">logout</span><span class="o">]</span>: transitioning to: viewLogin
+
+<span class="o">[</span>object Object<span class="o">]</span>
+<span class="o">[</span>viewLogin<span class="o">]</span> trying pred<span class="o">[</span>doLogin<span class="o">]</span> :true
+&gt;&gt;&gt;Thu Jun 07 2012 17:23:21 GMT-0400 <span class="o">(</span>EDT<span class="o">)</span>: <span class="o">[</span>viewLogin<span class="o">]</span>: transitioning to: doLogin
+
+ajax failure <span class="k">for </span>GET, /todo
+<span class="o">[</span>object Object<span class="o">]</span>
+<span class="o">[</span>doLogin<span class="o">]</span> trying pred<span class="o">[</span>success<span class="o">]</span> :true
+&gt;&gt;&gt;Thu Jun 07 2012 17:23:21 GMT-0400 <span class="o">(</span>EDT<span class="o">)</span>: <span class="o">[</span>doLogin<span class="o">]</span>: transitioning to: success
+
+&gt;&gt;&gt;Thu Jun 07 2012 17:23:21 GMT-0400 <span class="o">(</span>EDT<span class="o">)</span>: <span class="o">[</span>success<span class="o">]</span>: TEST PASSED <span class="o">[</span>Login Test<span class="o">]</span> 
+
+&gt;&gt;&gt;Thu Jun 07 2012 17:23:21 GMT-0400 <span class="o">(</span>EDT<span class="o">)</span>: Full suite completed: 1 of 1 passed 100%.
+
+1 passed, 0 failed, out of 1 100%
+</code></pre>
+</div>
 <p><a name="automating-frames-frameowrk-tests"></a></p>
 <h3>Automation of Frames Based Tests</h3>
 <p>This can be accomplished through invocation of the <code>Transtion.Runner</code>&#8217;s <code>runAll</code> method.</p>
