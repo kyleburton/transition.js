@@ -51,6 +51,19 @@ Transition.Runner = Transition.Runner || (function () {
     return false;
   };
 
+  self.reloadCurrentTest = function (e) {
+    var savedState;
+    if (e) {
+      e.preventDefault();
+    }
+
+    savedState = Transition.Stm.captureStmState();
+    console.log('savedState: ' + JSON.stringify(savedState));
+    self.testSelected();
+    Transition.Stm.restoreStmState(savedState);
+    return false;
+  };
+
   self.loadScript = function (url) {
     $.ajax({
       url:      url,
@@ -165,7 +178,7 @@ Transition.Runner = Transition.Runner || (function () {
     $("#step-test").click(Transition.Stm.stepTest);
     $("#continue-test").click(Transition.Stm.continueTest);
     $("#reset-log-console").click(self.clearLogConsole);
-    $("#reload-current-test").click(self.testSelected);
+    $("#reload-current-test").click(self.reloadCurrentTest);
     $("#run-all").click(self.runAll);
   };
 

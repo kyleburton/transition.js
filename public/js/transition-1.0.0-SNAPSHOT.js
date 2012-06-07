@@ -223,14 +223,6 @@ Transition.Stm = (function () {
     self.testHalted = false;
     testInit();
 
-    if (!self.states.success) {
-      self.newState('success', self.noop, {stop: true, passed: true});
-    }
-
-    if (!self.states.failure) {
-      self.newState('failure', self.noop, {stop: true, passed: false});
-    }
-  
     self.startTimeMs = self.getTimeMs();
     self.currentState = self.startState;
   
@@ -418,13 +410,28 @@ Transition.Stm = (function () {
   };
 
   self.stepTest = function (e) {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
     if (self.testRunning) {
       self.pollStates();
       return false;
     }
     self.start(true);
     return false;
+  };
+
+  self.captureStmState = function () {
+    return { currentState: self.currentState,
+             testRunning:  self.testRunning };
+  };
+
+  self.restoreStmState = function (st) {
+    self.currentState = st.currentState;
+    self.testRunning  = st.testRunning;
+    if (self.testRunning) {
+      self.testHalted = false;
+    }
   };
 
   self.continueTest = function (e) {
@@ -441,6 +448,14 @@ Transition.Stm = (function () {
   self.init = function (testInit) {
     self.stmInitialized = true;
     self.testInit = self.testInit || testInit;
+
+    if (!self.states.success) {
+      self.newState('success', self.noop, {stop: true, passed: true});
+    }
+
+    if (!self.states.failure) {
+      self.newState('failure', self.noop, {stop: true, passed: false});
+    }
   };
 
   return self;
