@@ -44,7 +44,7 @@ setInterval(function () {
         numPassed = page.evaluate(function () { return parent.test.Transition.Runner.testSuiteResults.numPassed; }),
         numFailed = page.evaluate(function () { return parent.test.Transition.Runner.testSuiteResults.numFailed; }),
         pctPassed = page.evaluate(function () { return parent.test.Transition.Runner.testSuiteResults.successPercent; });
-    console.log(numPassed + ' passed, ' + numFailed +' out of ' + totalRun + ' ' + pctPassed + '%');
+    console.log(numPassed + ' passed, ' + numFailed + ' failed, out of ' + totalRun + ' ' + pctPassed + '%');
     phantom.exit();
   }
 }, 500);
