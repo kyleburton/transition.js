@@ -182,3 +182,19 @@ Resumes the test, all subsequent transitions will happen automatically.
 h3. @Transition.Stm.init()@
 
 Initializes the state machine and testing framework.
+
+h3. @Transition.Stm.breakpoint(fn)@
+
+Stops the state machine from progressing past the current state.   This is equivalent to using 'Step' in the interactive Runner.  You can call this from any of your state handlers or transition predicates.
+
+If a function is passed (fn), it will be called.  This makes @breakpoint@ suitable as a wrapper around other functions.
+
+h3. @Transition.Stm.breakpoint_(fn)@
+
+This is a defered version of @breakpoint@, that can also be used as a wrapper around other functions:
+
+{% highlight javascript %}
+  Transition.Stm.newState('viewLogin', Transition.breakpoint_(Transition.navigateTo_('/login')), {},
+    {to: 'doLogin', pred: Transition.elementExists_('input[name=email]') }
+  );
+{% endhighlight %}

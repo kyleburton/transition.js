@@ -137,6 +137,16 @@
 <p>Resumes the test, all subsequent transitions will happen automatically.</p>
 <h3><code>Transition.Stm.init()</code></h3>
 <p>Initializes the state machine and testing framework.</p>
+<h3><code>Transition.Stm.breakpoint(fn)</code></h3>
+<p>Stops the state machine from progressing past the current state.   This is equivalent to using &#8216;Step&#8217; in the interactive Runner.  You can call this from any of your state handlers or transition predicates.</p>
+<p>If a function is passed (fn), it will be called.  This makes <code>breakpoint</code> suitable as a wrapper around other functions.</p>
+<h3><code>Transition.Stm.breakpoint_(fn)</code></h3>
+<p>This is a defered version of <code>breakpoint</code>, that can also be used as a wrapper around other functions:</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">breakpoint_</span><span class="p">(</span><span class="nx">Transition</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)),</span> <span class="p">{},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;doLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>
+</code></pre>
+</div>
       </section>
     </div>
 
