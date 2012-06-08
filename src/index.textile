@@ -58,4 +58,4 @@ var LoginTest = LoginTest || (function () {
 
 h3. Ready to get started?
 
-Start with the "installation instrucitons":documentation/install then browse the "Documentation":documentation/.
+Start with the "installation instructions":documentation/install then browse the "Documentation":documentation/.
