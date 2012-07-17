@@ -482,4 +482,6 @@ Transition.Stm = (function () {
   return self;
 }());
 
-Transition;
+// NB: this expression allows this file to return the main Transition object
+// when evaluated
+Transition = Transition;
