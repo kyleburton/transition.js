@@ -272,12 +272,14 @@ Transition.Stm = (function () {
     self.testRunning = false;
     self.stopPolling();
     self.passed = status;
+    self.endTimeMs = self.getTimeMs();
+
     message = message || '';
     if (status) {
-      self.log('TEST PASSED [' + self.name + '] ' + message);
+      self.log('TEST PASSED [' + self.name + '] in ' + self.totalTestTimeMs() + ' ms ' + message);
     }
     else {
-      self.log('TEST FAILED [' + self.name + '] ' + message);
+      self.log('TEST FAILED [' + self.name + '] in ' + self.totalTestTimeMs() + ' ms ' + message);
     }
 
     try {
@@ -370,7 +372,11 @@ Transition.Stm = (function () {
   self.elapsedTimeMs = function () {
     return self.getTimeMs() - self.startTimeMs;
   };
-  
+
+  self.totalTestTimeMs = function () {
+    return self.endTimeMs - self.startTimeMs;
+  };
+
   self.newState = function (name, handler, properties) {
     var state = {
       name:            name,
