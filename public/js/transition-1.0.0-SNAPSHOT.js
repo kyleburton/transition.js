@@ -3,7 +3,7 @@
 "use strict";
 
 var Transition = Transition || (function () {
-  var self = {webAppFrameName: 'main'};
+  var self = {webAppFrameName: 'main' };
 
   self.maxAjaxWait = 10000;
 
@@ -186,6 +186,8 @@ var Transition = Transition || (function () {
 
 Transition.Stm = (function () {
   var self = {};
+  self.callbacks = {};
+  self.suiteName = 'no suite name given';
 
   self.reset = function () {
     self.states          = {};
@@ -248,6 +250,7 @@ Transition.Stm = (function () {
     }
   
     self.log('Starting [' + self.name + ']');
+    self.startState.startTimeMs = self.getTimeMs();
     self.startState.handler();
   
     self.timeout = setTimeout(self.pollStates, self.pollTime);
@@ -282,6 +285,19 @@ Transition.Stm = (function () {
       self.log('TEST FAILED [' + self.name + '] in ' + self.totalTestTimeMs() + ' ms ' + message);
     }
 
+    if (self.callbacks.onTestCompletion) {
+      console.log('STARTED AT: ' + self.startTimeMs);
+      console.log('ENDED AT:   ' + self.endTimeMs);
+      self.callbacks.onTestCompletion({
+        status:          status,
+        suiteName:       self.suiteName,
+        name:            self.name,
+        startTimeMs:     self.startTimeMs,
+        endTimeMs:       self.endTimeMs,
+        elapsedTimeMs:   self.endTimeMs - self.startTimeMs
+      });
+    }
+
     try {
       $(document).trigger('Transition.test.completed');
     }
@@ -292,7 +308,7 @@ Transition.Stm = (function () {
   };
   
   self.pollStates = function () {
-    var destination = null, ii, pred, res, nextState;
+    var destination = null, ii, pred, res, nextState, prevState;
 
     if (self.testHalted) {
       return self.terminateTest(false, 'Test halted.');
@@ -320,7 +336,6 @@ Transition.Stm = (function () {
         console.log(e.stack);
       }
 
-      console.log('[' + self.currentState.name + '] trying pred[' + pred.to + '] :' + res);
       if (res) {
         self.log('transitioning to: ' + pred.to);
         destination = pred.to;
@@ -340,9 +355,21 @@ Transition.Stm = (function () {
     }
   
     nextState = self.states[pred.to];
+    prevState = self.currentState;
     self.currentState = nextState;
+    self.currentState.startTimeMs = self.getTimeMs();
     self.currentState.handler();
     $(document).trigger('Transition.stateChanged');
+
+    if (self.callbacks.onTransition) {
+      self.callbacks.onTransition({
+        suiteName:       self.suiteName,
+        name:            self.name,
+        startTimeMs:     prevState.startTimeMs,
+        elapsedTimeMs:   self.getTimeMs() - prevState.startTimeMs,
+        event:           'state:' + prevState.name
+      });
+    }
   
     self.scheduleNextPoll();
 
@@ -482,4 +509,6 @@ Transition.Stm = (function () {
   return self;
 }());
 
-Transition;
+// NB: this expression allows this file to return the main Transition object
+// when evaluated
+Transition = Transition;

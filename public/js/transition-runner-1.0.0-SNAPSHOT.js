@@ -3,7 +3,7 @@
 "use strict";
 
 Transition.Runner = Transition.Runner || (function () {
-  var self = {tests: [], testsByName: {}};
+  var self = {tests: [], testsByName: {}, callbacks: {}};
 
   self.addTests = function () {
     var ii;
@@ -58,7 +58,6 @@ Transition.Runner = Transition.Runner || (function () {
     }
 
     savedState = Transition.Stm.captureStmState();
-    console.log('savedState: ' + JSON.stringify(savedState));
     self.testSelected();
     Transition.Stm.restoreStmState(savedState);
     return false;
@@ -87,15 +86,24 @@ Transition.Runner = Transition.Runner || (function () {
     // TODO: time each test, and the full suite
     self.testIndex += 1;
     if (self.testIndex >= self.tests.length) {
+      // Clear the binding for this event
       $(document).bind('Transition.test.completed');
+
+      self.testSuiteComplete = true;
+      self.testSuiteResults.endTimeMs = Transition.Stm.getTimeMs();
+      self.testSuiteResults.elapsedTimeMs = self.testSuiteResults.endTimeMs - self.testSuiteResults.startTimeMs;
+
       self.testSuiteResults.totalTestsRun = totalTestsRun = self.testSuiteResults.numPassed + self.testSuiteResults.numFailed;
       self.testSuiteResults.successPercent = successPercent = (self.testSuiteResults.numPassed / totalTestsRun).toFixed(2) * 100;
-      Transition.log('Full suite completed: ' + self.testSuiteResults.numPassed + ' of ' + totalTestsRun + ' passed ' + successPercent + '%.');
-      self.testSuiteComplete = true;
+      Transition.log('Full suite completed: ' + self.testSuiteResults.numPassed + ' of ' + totalTestsRun + ' passed ' + successPercent + '% in ' + self.testSuiteResults.elapsedTimeMs + ' ms.');
+
+      if (self.callbacks.onSuiteCompletion) {
+        self.callbacks.onSuiteCompletion(self.testSuiteResults);
+      }
+
       return true;
     }
 
-    console.log('run next test: ' + self.testIndex);
     try {
       Transition.Stm.reset();
     }
@@ -111,7 +119,7 @@ Transition.Runner = Transition.Runner || (function () {
   self.runAll = function (e) {
     self.testIndex = 0;
     self.testSuiteComplete = false;
-    self.testSuiteResults = {testResults: {}, numPassed: 0, numFailed: 0};
+    self.testSuiteResults = {testResults: {}, numPassed: 0, numFailed: 0, startTimeMs: Transition.Stm.getTimeMs() };
     $(document).bind('Transition.test.completed', self.runNextTest);
     try {
       Transition.Stm.reset();
@@ -159,7 +167,6 @@ Transition.Runner = Transition.Runner || (function () {
       var option = $('<option>');
       option.attr('value', cfg.name);
       option.text(cfg.name);
-      console.log('appending option ' + JSON.stringify(cfg));
       registeredTests.append(option);
     });
 
