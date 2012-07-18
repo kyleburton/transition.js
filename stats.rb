@@ -14,9 +14,14 @@ def write_stat params
   end
 end
 
+get '/ping' do
+  content_type 'application/javascript'
+  %Q|#{params["callback"]}("OK")|
+end
+
 get '*' do
   puts "catch-all: #{params.inspect}"
   write_stat params
   content_type 'application/javascript'
-  '["OK"]'
+  %Q|#{params["callback"]}("OK")|
 end
