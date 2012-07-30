@@ -46,7 +46,8 @@ Transition.Runner = Transition.Runner || (function () {
     }
 
     Transition.Stm.reset();
-    $.getScript(self.currentTest().uri);
+    self.loadScript(self.currentTest().uri);
+    //$.getScript(self.currentTest().uri);
     Transition.log('Loaded ' + self.currentTest().name + ' from ' + self.currentTest().uri);
     return false;
   };
@@ -63,11 +64,22 @@ Transition.Runner = Transition.Runner || (function () {
     return false;
   };
 
+  self.scriptLoadErrorFn = function (url) {
+    return function (jqXhr, textStatus, errorThrown) {
+      console.error('Error while fetching url: ' + url);
+      console.error('ajax textStatus: ' + textStatus);
+      console.error('Error object available in Transition.lastError');
+      console.dir(errorThrown);
+      Transition.lastError = errorThrown;
+    };
+  };
+
   self.loadScript = function (url) {
     $.ajax({
       url:      url,
       dataType: "script",
-      async:    false
+      async:    false,
+      error:    self.scriptLoadErrorFn(url)
     });
   };
 
