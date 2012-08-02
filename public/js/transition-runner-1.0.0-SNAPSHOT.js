@@ -66,10 +66,10 @@ Transition.Runner = Transition.Runner || (function () {
 
   self.scriptLoadErrorFn = function (url) {
     return function (jqXhr, textStatus, errorThrown) {
-      console.error('Error while fetching url: ' + url);
-      console.error('ajax textStatus: ' + textStatus);
-      console.error('Error object available in Transition.lastError');
-      console.dir(errorThrown);
+      console.log('Error while fetching url: ' + url);
+      console.log('ajax textStatus: ' + textStatus);
+      console.log('Error object available in Transition.lastError');
+      console.error(errorThrown);
       Transition.lastError = errorThrown;
     };
   };
