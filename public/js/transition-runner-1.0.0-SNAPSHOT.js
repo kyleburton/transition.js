@@ -201,5 +201,13 @@ Transition.Runner = Transition.Runner || (function () {
     $("#run-all").click(self.runAll);
   };
 
+  self.onReady = function () {
+    if (-1 !== parent.location.search.toString().indexOf("autoStart=true") ) {
+      $('#run-all').click();
+    };
+  };
+
+  $(document).ready(self.onReady);
+
   return self;
 }());
