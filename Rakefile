@@ -56,6 +56,14 @@ namespace :jslint do
   end
 end
 
+namespace :test do
+  desc "run stats collector" 
+  task :stats  do 
+    system('ruby stats.rb')
+  end
+
+
+end
 namespace :phantom do
   desc "install"
   task :install do
