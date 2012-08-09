@@ -2,6 +2,7 @@ require 'rubygems'
 require 'sinatra'
 
 $stat_file = 'test-stats.tab'
+$log_file  = 'test.log'
 
 def write_stat params
   unless File.exists? $stat_file
@@ -14,7 +15,20 @@ def write_stat params
   end
 end
 
+def write_log params
+  File.open($log_file,'a') do |f|
+    f.puts params['msg']
+  end
+end
+
 get '/ping' do
+  content_type 'application/javascript'
+  %Q|#{params["callback"]}("OK")|
+end
+
+get '/l' do
+  puts "log: #{params.inspect}"
+  write_log params
   content_type 'application/javascript'
   %Q|#{params["callback"]}("OK")|
 end
