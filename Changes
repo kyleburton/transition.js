@@ -1,0 +1,6 @@
+Thu Aug  9 11:57:37 EDT 2012
+  stats.rb: also supports remote logging
+  test suite runner: test log output is now in a fixed size scrollable div.
+     This aids in testing on mobile devices to keep the viewport a manageable size
+     and to keep the frame separator in one place instead of having it pushing the
+     other frame further and further down the page.
