@@ -17,7 +17,7 @@ end
 
 def write_log params
   File.open($log_file,'a') do |f|
-    f.puts params['msg']
+    f.puts [ request.ip, request.user_agent, params['msg'] ].join("\t")
   end
 end
 
