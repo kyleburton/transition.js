@@ -150,9 +150,13 @@ Transition.Runner = Transition.Runner || (function () {
   };
 
   self.buildDebugger = function () {
-    var body = $('body'), navDiv, logDiv;
-    navDiv = $('<div>');
+    var body = $('body'), navDiv, logDiv,
+        height = $(window).height(),
+        width  = $(window).width(), 
+        divWidth = width * 0.98;
+    navDiv = $('<div style="height: 50%; width: ' + divWidth + 'px; overflow: auto; border: 1px solid #CCC; margin: auto;">');
     navDiv.append("<select id='registered-tests'></select>");
+    navDiv.append("<br />");
     navDiv.append('<button id="start-test">Start</button>');
     navDiv.append('<button id="stop-test">Stop</button>');
     navDiv.append('<button id="step-test">Step</button>');
@@ -160,10 +164,11 @@ Transition.Runner = Transition.Runner || (function () {
     navDiv.append('<button id="reset-log-console">Clear Log</button>');
     navDiv.append('<button id="reload-current-test">Reload</button>');
     navDiv.append('<button id="run-all">Run All</button>');
+    navDiv.append("<br />");
     navDiv.append('<span>Current State: <span id="current-state"></span></span>');
     logDiv = $('<div>');
     logDiv.attr('id', "test-content");
-    logDiv.append('<pre id="test-log"></pre>');
+    logDiv.append('<div style="border : solid 1px #CCC; height: 50%; width: ' + divWidth + 'px; overflow : auto; margin: auto;"><pre id="test-log"></pre></div>');
     body.append(navDiv);
     body.append(logDiv);
     $(document).bind('Transition.stateChanged', function (e) {
