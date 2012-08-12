@@ -276,7 +276,12 @@ Transition.Stm = (function () {
 
     self.log('Starting [' + self.name + ']');
     self.startState.startTimeMs = self.getTimeMs();
-    self.startState.handler();
+    try {
+      self.startState.handler();
+    }
+    catch(e) {
+      self.log('Error while executing handler for startState: ' + self.startState.name );
+    }
 
     self.timeout = setTimeout(self.pollStates, self.pollTime);
   };
@@ -383,7 +388,12 @@ Transition.Stm = (function () {
     prevState = self.currentState;
     self.currentState = nextState;
     self.currentState.startTimeMs = self.getTimeMs();
-    self.currentState.handler();
+    try {
+      self.currentState.handler();
+    }
+    catch (e) {
+      self.log('Error while executing handler for: ' + self.currentState.name );
+    }
     $(document).trigger('Transition.stateChanged');
 
     if (self.callbacks.onTransition) {
