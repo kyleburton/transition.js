@@ -128,11 +128,15 @@ Transition.Runner = Transition.Runner || (function () {
     Transition.Stm.start();
   };
 
+  self.doRunPendingTests = function () {
+    return $('#run-pending').is(':checked');
+  };
+
   self.idxOfNextTest = function (startAt) {
     var ii, idx = -1;
     startAt = startAt || -1;
     for (ii = startAt + 1; ii < self.tests.length; ii += 1) {
-      if (!self.tests[ii].pending) {
+      if (!self.tests[ii].pending || self.doRunPendingTests()) {
         idx = ii;
         break;
       }
@@ -180,6 +184,7 @@ Transition.Runner = Transition.Runner || (function () {
     navDiv.append('<button id="reset-log-console">Clear Log</button>');
     navDiv.append('<button id="reload-current-test">Reload</button>');
     navDiv.append('<button id="run-all">Run Suite</button>');
+    navDiv.append('<input type="checkbox" value="true" id="run-pending">Run Pending</button>');
     navDiv.append("<br />");
     navDiv.append('<span>Current State[<span id="suite-count"></span>]: <span id="current-state"></span></span>');
     logDiv = $('<div>');
