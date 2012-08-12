@@ -3,7 +3,16 @@
 "use strict";
 
 var Transition = Transition || (function () {
-  var self = {webAppFrameName: 'main' };
+  var self = {
+    webAppFrameName: 'main',
+    colors: {
+      GOOD:  'green',
+      OK:    'blue',
+      BAD:   'red',
+      INFO:  'black',
+      ERROR: 'red'
+    }
+  };
 
   self.maxAjaxWait = 10000;
   
@@ -49,28 +58,39 @@ var Transition = Transition || (function () {
   self.noop = function () {
   };
 
-  self.prependLogMesasge = function (msg) {
+  self.prependLogMesasge = function (msg, color) {
+    color = color || self.colors.INFO;
+    msg = "<font color='" + color + "'>" + msg + "</font><br />";
     parent.test.$('#test-log').prepend(msg);
   };
 
-  self.log = function () {
+  self.concatArguments = function (args) {
     var str = '', ii;
     str += (new Date()).toString() + ': ';
-    for (ii = 0; ii < arguments.length; ii += 1) {
-      str += arguments[ii];
+    for (ii = 0; ii < args.length; ii += 1) {
+      str += args[ii];
     }
-    str += "\n";
-    self.prependLogMesasge(str);
+    return str;
+  };
+
+  self.log = function () {
+    self.prependLogMesasge(self.concatArguments(arguments) + "\n");
+  };
+
+  self.logGood = function () {
+    self.prependLogMesasge(self.concatArguments(arguments) + "\n", self.colors.GOOD);
+  };
+
+  self.logOk = function () {
+    self.prependLogMesasge(self.concatArguments(arguments) + "\n", self.colors.OK);
+  };
+
+  self.logBad = function () {
+    self.prependLogMesasge(self.concatArguments(arguments) + "\n", self.colors.BAD);
   };
 
   self.error = function () {
-    var str = '', ii;
-    str += 'ERROR: ' + (new Date()).toString() + ': ';
-    for (ii = 0; ii < arguments.length; ii += 1) {
-      str += arguments[ii];
-    }
-    str += "\n";
-    self.prependLogMesasge(str);
+    self.prependLogMesasge('ERROR: ' + self.concatArguments(arguments) + "\n", self.colors.ERROR);
   };
 
   self.dom = function () {
@@ -80,13 +100,13 @@ var Transition = Transition || (function () {
     return self.document().document;
   };
 
-  self.fillInWithKeyEvents = function (selector,text) {
-    var ii,
+  self.fillInWithKeyEvents = function (selector, text) {
+    var ii, e, e2,
         el = self.find(selector);
 
     for (ii = 0; ii < text.length; ii += 1) {
-      var e = $.Event("keyup");
-      var e2 = $.Event("keydown");
+      e = $.Event("keyup");
+      e2 = $.Event("keydown");
       e.which = text.charCodeAt(ii);
       el.val(el.val() + text.charAt(ii));
       el.trigger(e);
@@ -279,8 +299,8 @@ Transition.Stm = (function () {
     try {
       self.startState.handler();
     }
-    catch(e) {
-      self.log('Error while executing handler for startState: ' + self.startState.name );
+    catch (e) {
+      self.log('Error while executing handler for startState: ' + self.startState.name);
     }
 
     self.timeout = setTimeout(self.pollStates, self.pollTime);
@@ -300,6 +320,14 @@ Transition.Stm = (function () {
     Transition.log('[' + currentStateName + ']: ' + str);
   };
 
+  self.error = function () {
+    Transition.error('[' + currentStateName + ']: ' + Transition.concatArguments(arguments));
+  };
+
+  self.logGood = function () {
+    Transition.logGood('[' + currentStateName + ']: ' + Transition.concatArguments(arguments));
+  };
+
   self.terminateTest = function (status, message) {
     self.testHalted = true;
     self.testRunning = false;
@@ -309,10 +337,10 @@ Transition.Stm = (function () {
 
     message = message || '';
     if (status) {
-      self.log('TEST PASSED [' + self.name + '] in ' + self.totalTestTimeMs() + ' ms ' + message);
+      self.logGood('TEST PASSED [' + self.name + '] in ' + self.totalTestTimeMs() + ' ms ' + message);
     }
     else {
-      self.log('TEST FAILED [' + self.name + '] in ' + self.totalTestTimeMs() + ' ms ' + message);
+      self.error('TEST FAILED [' + self.name + '] in ' + self.totalTestTimeMs() + ' ms ' + message);
     }
 
     if (self.callbacks.onTestCompletion) {
@@ -391,8 +419,8 @@ Transition.Stm = (function () {
     try {
       self.currentState.handler();
     }
-    catch (e) {
-      self.log('Error while executing handler for: ' + self.currentState.name );
+    catch (e2) {
+      self.log('Error while executing handler for: ' + self.currentState.name);
     }
     $(document).trigger('Transition.stateChanged');
 
