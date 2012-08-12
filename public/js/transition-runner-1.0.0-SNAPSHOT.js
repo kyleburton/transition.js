@@ -96,8 +96,8 @@ Transition.Runner = Transition.Runner || (function () {
 
     // TODO: set the current test in the drop-down
     // TODO: time each test, and the full suite
-    self.testIndex += 1;
-    if (self.testIndex >= self.tests.length) {
+    self.testIndex = self.idxOfNextTest(self.testIndex);
+    if (self.testIndex >= self.tests.length || -1 == self.testIndex) {
       // Clear the binding for this event
       $(document).bind('Transition.test.completed');
 
@@ -128,8 +128,24 @@ Transition.Runner = Transition.Runner || (function () {
     Transition.Stm.start();
   };
 
+  self.idxOfNextTest = function (startAt) {
+    var ii, idx = -1;
+    startAt = startAt || -1;
+    for (ii = startAt + 1; ii < self.tests.length; ii += 1) {
+      if (!self.tests[ii].pending) {
+        idx = ii;
+        break;
+      }
+    }
+    return idx;
+  };
+
+  /**
+   * Start the test suite.
+   *
+   */
   self.runAll = function (e) {
-    self.testIndex = 0;
+    self.testIndex = self.idxOfNextTest(-1);
     self.testSuiteComplete = false;
     self.testSuiteResults = {testResults: {}, numPassed: 0, numFailed: 0, startTimeMs: Transition.Stm.getTimeMs() };
     $(document).bind('Transition.test.completed', self.runNextTest);
@@ -163,9 +179,9 @@ Transition.Runner = Transition.Runner || (function () {
     navDiv.append('<button id="continue-test">Continue</button>');
     navDiv.append('<button id="reset-log-console">Clear Log</button>');
     navDiv.append('<button id="reload-current-test">Reload</button>');
-    navDiv.append('<button id="run-all">Run All</button>');
+    navDiv.append('<button id="run-all">Run Suite</button>');
     navDiv.append("<br />");
-    navDiv.append('<span>Current State: <span id="current-state"></span></span>');
+    navDiv.append('<span>Current State[<span id="suite-count"></span>]: <span id="current-state"></span></span>');
     logDiv = $('<div>');
     logDiv.attr('id', "test-content");
     logDiv.append('<div style="border : solid 1px #CCC; height: 50%; width: ' + divWidth + 'px; overflow : auto; margin: auto;"><pre id="test-log"></pre></div>');
@@ -175,6 +191,28 @@ Transition.Runner = Transition.Runner || (function () {
       var desc = '[' + Transition.Stm.currentState.name + '] ' + Transition.Stm.name;
       $('#current-state').html(desc);
     });
+
+    $('#suite-count').html(self.nonPendingTestCount() + "/" + self.pendingTestCount());
+  };
+
+  self.pendingTestCount = function () {
+    var count = 0, ii;
+    for ( ii = 0; ii < self.tests.length; ii += 1) {
+      if (self.tests[ii].pending) {
+        count += 1;
+      }
+    }
+    return count;
+  };
+
+  self.nonPendingTestCount = function () {
+    var count = 0, ii;
+    for ( ii = 0; ii < self.tests.length; ii += 1) {
+      if (!self.tests[ii].pending) {
+        count += 1;
+      }
+    }
+    return count;
   };
 
   self.init = function () {
