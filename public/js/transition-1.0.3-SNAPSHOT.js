@@ -321,10 +321,12 @@ Transition.Stm = (function () {
   };
 
   self.error = function () {
+    var currentStateName = self.currentState ? self.currentState.name : '**no current state**';
     Transition.error('[' + currentStateName + ']: ' + Transition.concatArguments(arguments));
   };
 
   self.logGood = function () {
+    var currentStateName = self.currentState ? self.currentState.name : '**no current state**';
     Transition.logGood('[' + currentStateName + ']: ' + Transition.concatArguments(arguments));
   };
 
