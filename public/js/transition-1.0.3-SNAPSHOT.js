@@ -171,6 +171,13 @@ var Transition = Transition || (function () {
     return false;
   };
 
+  self.clickAllNodes = function (selector) {
+    var elements = self.find(selector);
+    for (var i = 0;i < elements.length; i++) {
+      $(elements[i]).click();
+    }
+  };
+
   self.clickNode = function (selector) {
     var elt = self.find(selector);
     if (elt.length !== 1) {
