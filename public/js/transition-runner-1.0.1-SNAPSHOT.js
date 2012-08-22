@@ -134,7 +134,7 @@ Transition.Runner = Transition.Runner || (function () {
 
   self.idxOfNextTest = function (startAt) {
     var ii, idx = -1;
-    startAt = startAt || -1;
+    
     for (ii = startAt + 1; ii < self.tests.length; ii += 1) {
       if (!self.tests[ii].pending || self.doRunPendingTests()) {
         idx = ii;
