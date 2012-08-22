@@ -47,8 +47,6 @@ Transition.Runner = Transition.Runner || (function () {
 
     Transition.Stm.reset();
     self.loadScript(self.currentTest().uri);
-    //$.getScript(self.currentTest().uri);
-    Transition.log('Loaded ' + self.currentTest().name + ' from ' + self.currentTest().uri);
     return false;
   };
 
@@ -71,6 +69,7 @@ Transition.Runner = Transition.Runner || (function () {
       console.log('Error object available in Transition.lastError');
       console.error(errorThrown);
       Transition.lastError = errorThrown;
+      Transition.error('Error fetching test script: ' + url);
     };
   };
 
@@ -79,41 +78,71 @@ Transition.Runner = Transition.Runner || (function () {
       url:      url,
       dataType: "script",
       async:    false,
-      error:    self.scriptLoadErrorFn(url)
+      error:    self.scriptLoadErrorFn(url),
+      success:  function () {
+        Transition.logOk('Loaded ' + self.currentTest().name + ' from ' + self.currentTest().uri);
+      }
     });
   };
 
+  self.reportTestSuiteCompletion = function () {
+    var totalTestsRun = 0, successPercent = 0.0, msg;
+    // Clear the binding for this event
+    $(document).bind('Transition.test.completed');
+
+    // report a summary of the failures:
+    $.each(self.testSuiteResults.testResults, function (idx, testResult) {
+      if (testResult.status) {
+        Transition.logGood('...PASSED: ' + testResult.name);
+      }
+      else {
+        Transition.logBad('...FAILED: ' + testResult.name);
+      }
+    });
+
+
+    self.testSuiteComplete = true;
+    self.testSuiteResults.endTimeMs = Transition.Stm.getTimeMs();
+    self.testSuiteResults.elapsedTimeMs = self.testSuiteResults.endTimeMs - self.testSuiteResults.startTimeMs;
+
+    self.testSuiteResults.totalTestsRun = totalTestsRun = self.testSuiteResults.numPassed + self.testSuiteResults.numFailed;
+    self.testSuiteResults.successPercent = successPercent = (self.testSuiteResults.numPassed / totalTestsRun).toFixed(2) * 100;
+    msg = 'Full suite completed: ' + self.testSuiteResults.numPassed + ' of ' + totalTestsRun + ' passed ' + successPercent + '% in ' + self.testSuiteResults.elapsedTimeMs + ' ms.';
+
+    if (totalTestsRun === self.testSuiteResults.numPassed) {
+      Transition.logGood(msg);
+    }
+    else {
+      Transition.error(msg);
+    }
+
+    if (self.callbacks.onSuiteCompletion) {
+      self.callbacks.onSuiteCompletion(self.testSuiteResults);
+    }
+
+    return true;
+  };
+
   self.runNextTest = function (e) {
-    var totalTestsRun = 0, successPercent = 0.0;
     // TODO: check and track if test just run was successful
+    self.testSuiteResults.testResults[Transition.Stm.name].finished = new Date();
     if (Transition.Stm.currentState.properties.passed) {
       self.testSuiteResults.numPassed += 1;
-      self.testSuiteResults[Transition.Stm.name].finished = new Date();
+      self.testSuiteResults.testResults[Transition.Stm.name].status = true;
     }
     else {
       self.testSuiteResults.numFailed += 1;
+      self.testSuiteResults.testResults[Transition.Stm.name].status = false;
     }
 
     // TODO: set the current test in the drop-down
     // TODO: time each test, and the full suite
     self.testIndex = self.idxOfNextTest(self.testIndex);
-    if (self.testIndex >= self.tests.length || -1 == self.testIndex) {
-      // Clear the binding for this event
-      $(document).bind('Transition.test.completed');
+    $('#registered-tests:nth-child(' + self.testIndex + ')').attr('selected', 'selected');
 
-      self.testSuiteComplete = true;
-      self.testSuiteResults.endTimeMs = Transition.Stm.getTimeMs();
-      self.testSuiteResults.elapsedTimeMs = self.testSuiteResults.endTimeMs - self.testSuiteResults.startTimeMs;
-
-      self.testSuiteResults.totalTestsRun = totalTestsRun = self.testSuiteResults.numPassed + self.testSuiteResults.numFailed;
-      self.testSuiteResults.successPercent = successPercent = (self.testSuiteResults.numPassed / totalTestsRun).toFixed(2) * 100;
-      Transition.log('Full suite completed: ' + self.testSuiteResults.numPassed + ' of ' + totalTestsRun + ' passed ' + successPercent + '% in ' + self.testSuiteResults.elapsedTimeMs + ' ms.');
-
-      if (self.callbacks.onSuiteCompletion) {
-        self.callbacks.onSuiteCompletion(self.testSuiteResults);
-      }
-
-      return true;
+    // test suite is all done
+    if (self.testIndex >= self.tests.length || -1 === self.testIndex) {
+      return self.reportTestSuiteCompletion();
     }
 
     try {
@@ -122,8 +151,10 @@ Transition.Runner = Transition.Runner || (function () {
     catch (e2) {
     }
     self.loadScript(self.tests[self.testIndex].uri);
-    self.testSuiteResults[Transition.Stm.name] = {
-      started: new Date()
+    self.testSuiteResults.testResults[Transition.Stm.name] = {
+      started: new Date(),
+      name:    Transition.Stm.name,
+      status:  null
     };
     Transition.Stm.start();
   };
@@ -159,8 +190,10 @@ Transition.Runner = Transition.Runner || (function () {
     catch (e2) {
     }
     self.loadScript(self.tests[self.testIndex].uri);
-    self.testSuiteResults[Transition.Stm.name] = {
-      started: new Date()
+    self.testSuiteResults.testResults[Transition.Stm.name] = {
+      started: new Date(),
+      name:    Transition.Stm.name,
+      status:  null
     };
     Transition.Stm.start();
   };
@@ -189,7 +222,7 @@ Transition.Runner = Transition.Runner || (function () {
     navDiv.append('<span>Current State[<span id="suite-count"></span>]: <span id="current-state"></span></span>');
     logDiv = $('<div>');
     logDiv.attr('id', "test-content");
-    logDiv.append('<div style="border : solid 1px #CCC; height: 50%; width: ' + divWidth + 'px; overflow : auto; margin: auto;"><pre id="test-log"></pre></div>');
+    logDiv.append('<div style="border : solid 1px #CCC; height: 50%; width: ' + divWidth + 'px; overflow : auto; margin: auto;"><div id="test-log"></div></div>');
     body.append(navDiv);
     body.append(logDiv);
     $(document).bind('Transition.stateChanged', function (e) {
@@ -202,7 +235,7 @@ Transition.Runner = Transition.Runner || (function () {
 
   self.pendingTestCount = function () {
     var count = 0, ii;
-    for ( ii = 0; ii < self.tests.length; ii += 1) {
+    for (ii = 0; ii < self.tests.length; ii += 1) {
       if (self.tests[ii].pending) {
         count += 1;
       }
@@ -212,7 +245,7 @@ Transition.Runner = Transition.Runner || (function () {
 
   self.nonPendingTestCount = function () {
     var count = 0, ii;
-    for ( ii = 0; ii < self.tests.length; ii += 1) {
+    for (ii = 0; ii < self.tests.length; ii += 1) {
       if (!self.tests[ii].pending) {
         count += 1;
       }
@@ -250,9 +283,9 @@ Transition.Runner = Transition.Runner || (function () {
   };
 
   self.onReady = function () {
-    if (-1 !== parent.location.search.toString().indexOf("autoStart=true") ) {
+    if (-1 !== parent.location.search.toString().indexOf("autoStart=true")) {
       $('#run-all').click();
-    };
+    }
   };
 
   $(document).ready(self.onReady);
