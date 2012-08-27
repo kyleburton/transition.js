@@ -430,6 +430,8 @@ Transition.Stm = (function () {
     }
     catch (e2) {
       self.log('Error while executing handler for: ' + self.currentState.name);
+      console.error(e2);
+      self.log("  " + e2);
     }
     $(document).trigger('Transition.stateChanged');
 
