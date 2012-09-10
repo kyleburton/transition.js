@@ -233,6 +233,12 @@ var Transition = Transition || (function () {
     throw msg;
   };
 
+  self.constantly = function (val) {
+    return function () {
+      return val;
+    };
+  };
+
   return self;
 }());
 
