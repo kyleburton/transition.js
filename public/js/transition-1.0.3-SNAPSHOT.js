@@ -192,9 +192,11 @@ var Transition = Transition || (function () {
   };
 
   self.clickAllNodes = function (selector) {
-    var elements = self.find(selector);
-    for (var i = 0;i < elements.length; i++) {
-      $(elements[i]).click();
+    var elements = self.find(selector),
+        ii;
+
+    for (ii = 0; ii < elements.length; ii = ii + 1) {
+      $(elements[ii]).click();
     }
   };
 
