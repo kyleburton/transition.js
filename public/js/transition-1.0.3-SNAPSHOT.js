@@ -203,9 +203,11 @@ var Transition = Transition || (function () {
   self.clickNode = function (selector) {
     var elt = self.find(selector);
     if (elt.length !== 1) {
-      self.log('Error: unable to click: ' + selector);
+      self.error('Error: unable to click: ' + selector);
+      return false;
     }
     elt.click();
+    return true;
   };
 
   self.curryAll = function (fn) {
