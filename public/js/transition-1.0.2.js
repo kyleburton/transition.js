@@ -7,10 +7,6 @@ var Transition = Transition || (function () {
 
   self.maxAjaxWait = 10000;
   
-  self.loginPageLoaded = function () {
-    return parent.frames.main.WallLogin.initCompleted;
-  };
-
   self.document = function () {
     return parent[self.webAppFrameName];
   };
