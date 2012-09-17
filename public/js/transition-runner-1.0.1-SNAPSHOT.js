@@ -85,6 +85,7 @@ Transition.Runner = Transition.Runner || (function () {
 
   self.runNextTest = function (e) {
     var totalTestsRun = 0, successPercent = 0.0;
+
     // TODO: check and track if test just run was successful
     if (Transition.Stm.currentState.properties.passed) {
       self.testSuiteResults.numPassed += 1;
@@ -97,15 +98,18 @@ Transition.Runner = Transition.Runner || (function () {
     // TODO: set the current test in the drop-down
     // TODO: time each test, and the full suite
     self.testIndex = self.idxOfNextTest(self.testIndex);
+
     if (self.testIndex >= self.tests.length || -1 == self.testIndex) {
       // Clear the binding for this event
-      $(document).bind('Transition.test.completed');
+      $(document).off('Transition.test.completed');
 
       self.testSuiteComplete = true;
       self.testSuiteResults.endTimeMs = Transition.Stm.getTimeMs();
       self.testSuiteResults.elapsedTimeMs = self.testSuiteResults.endTimeMs - self.testSuiteResults.startTimeMs;
 
-      self.testSuiteResults.totalTestsRun = totalTestsRun = self.testSuiteResults.numPassed + self.testSuiteResults.numFailed;
+      totalTestsRun = self.testSuiteResults.numPassed + self.testSuiteResults.numFailed;
+      totalTestsRun = totalTestsRun < 1 ? 1 : totalTestsRun;
+      self.testSuiteResults.totalTestsRun = totalTestsRun;
       self.testSuiteResults.successPercent = successPercent = (self.testSuiteResults.numPassed / totalTestsRun).toFixed(2) * 100;
       Transition.log('Full suite completed: ' + self.testSuiteResults.numPassed + ' of ' + totalTestsRun + ' passed ' + successPercent + '% in ' + self.testSuiteResults.elapsedTimeMs + ' ms.');
 
@@ -120,12 +124,21 @@ Transition.Runner = Transition.Runner || (function () {
       Transition.Stm.reset();
     }
     catch (e2) {
+      console.error('Error: Transition.Stm.reset failed: %o', e2);
     }
+
     self.loadScript(self.tests[self.testIndex].uri);
+
     self.testSuiteResults[Transition.Stm.name] = {
       started: new Date()
     };
-    Transition.Stm.start();
+
+    try {
+      Transition.Stm.start();
+    }
+    catch(e3) {
+      console.error('Error: Transition.Stm.start failed: %o', e3);
+    }
   };
 
   self.doRunPendingTests = function () {
@@ -152,17 +165,24 @@ Transition.Runner = Transition.Runner || (function () {
     self.testIndex = self.idxOfNextTest(-1);
     self.testSuiteComplete = false;
     self.testSuiteResults = {testResults: {}, numPassed: 0, numFailed: 0, startTimeMs: Transition.Stm.getTimeMs() };
-    $(document).bind('Transition.test.completed', self.runNextTest);
+    $(document).on('Transition.test.completed', self.runNextTest);
     try {
       Transition.Stm.reset();
     }
     catch (e2) {
+      console.error('Error: Transition.Stm.reset failed: %o', e2);
     }
     self.loadScript(self.tests[self.testIndex].uri);
     self.testSuiteResults[Transition.Stm.name] = {
       started: new Date()
     };
-    Transition.Stm.start();
+
+    try {
+      Transition.Stm.start();
+    }
+    catch (e3) {
+      console.error('Error: Transition.Stm.start failed: %o', e2);
+    }
   };
 
   self.clearLogConsole = function () {
@@ -192,7 +212,7 @@ Transition.Runner = Transition.Runner || (function () {
     logDiv.append('<div style="border : solid 1px #CCC; height: 50%; width: ' + divWidth + 'px; overflow : auto; margin: auto;"><pre id="test-log"></pre></div>');
     body.append(navDiv);
     body.append(logDiv);
-    $(document).bind('Transition.stateChanged', function (e) {
+    $(document).on('Transition.stateChanged', function (e) {
       var desc = '[' + Transition.Stm.currentState.name + '] ' + Transition.Stm.name;
       $('#current-state').html(desc);
     });

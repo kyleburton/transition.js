@@ -229,7 +229,7 @@ var Transition = Transition || (function () {
   };
 
   self.raise = function (msg) {
-    self.log("Error: " + msg);
+    self.error("Error: " + msg);
     throw msg;
   };
 
@@ -313,7 +313,9 @@ Transition.Stm = (function () {
       self.startState.handler();
     }
     catch (e) {
-      self.log('Error while executing handler for startState: ' + self.startState.name);
+      self.error('Error while executing handler for startState: ' + self.startState.name);
+      console.error(e);
+      console.error('Error while executing handler for startState: ' + self.startState.name);
     }
 
     self.timeout = setTimeout(self.pollStates, self.pollTime);
@@ -359,8 +361,6 @@ Transition.Stm = (function () {
     }
 
     if (self.callbacks.onTestCompletion) {
-      console.log('STARTED AT: ' + self.startTimeMs);
-      console.log('ENDED AT:   ' + self.endTimeMs);
       self.callbacks.onTestCompletion({
         status:          status,
         suiteName:       self.suiteName,
