@@ -120,7 +120,7 @@ Transition.Runner = Transition.Runner || (function () {
 
       for (var name in self.testSuiteResults.testResults) {
         var result = self.testSuiteResults.testResults[name];
-        if (!result.status) {
+        if (!result.result) {
           Transition.logBad('  Failed Test: ' + result.name);
         }
       }
