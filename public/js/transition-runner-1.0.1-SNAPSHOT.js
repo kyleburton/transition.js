@@ -86,6 +86,11 @@ Transition.Runner = Transition.Runner || (function () {
   self.runNextTest = function (e) {
     var totalTestsRun = 0, successPercent = 0.0;
 
+    self.testSuiteResults.testResults[Transition.Stm.name] = {
+      name:   Transition.Stm.name,
+      result: Transition.Stm.currentState.properties.passed
+    };
+
     // TODO: check and track if test just run was successful
     if (Transition.Stm.currentState.properties.passed) {
       self.testSuiteResults.numPassed += 1;
@@ -112,6 +117,14 @@ Transition.Runner = Transition.Runner || (function () {
       self.testSuiteResults.totalTestsRun = totalTestsRun;
       self.testSuiteResults.successPercent = successPercent = (self.testSuiteResults.numPassed / totalTestsRun).toFixed(2) * 100;
       Transition.log('Full suite completed: ' + self.testSuiteResults.numPassed + ' of ' + totalTestsRun + ' passed ' + successPercent + '% in ' + self.testSuiteResults.elapsedTimeMs + ' ms.');
+
+      for (var name in self.testSuiteResults.testResults) {
+        var result = self.testSuiteResults.testResults[name];
+        if (!result.status) {
+          Transition.logBad('  Failed Test: ' + result.name);
+        }
+      }
+
 
       if (self.callbacks.onSuiteCompletion) {
         self.callbacks.onSuiteCompletion(self.testSuiteResults);
