@@ -202,7 +202,11 @@ var Transition = Transition || (function () {
       self.error('Error: unable to click: ' + selector);
       return false;
     }
-    elt.click();
+    if (typeof elt[0].href === 'undefined' && elt.click()) {
+      return true;
+    };
+
+    elt[0].click();
     return true;
   };
 
