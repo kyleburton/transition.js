@@ -168,6 +168,10 @@ var Transition = Transition || (function () {
     if (!url) {
       return false;
     }
+    if (url.indexOf("#") === 0) {
+      parent.main.window.location.hash = url;
+      return url;
+    }
     parent.main.window.location.href = url;
     return url;
   };
@@ -179,12 +183,13 @@ var Transition = Transition || (function () {
   };
 
   self.click = function (selector) {
-    var elt = self.find(selector);
-    if (elt.length > 0) {
-      return self.navigateTo(elt.attr('href'));
+    var elt = self.find(selector), href;
+    if (elt.length < 1) {
+      console.error('Sorry, could not find : ' + selector);
+      return false;
     }
-    console.error('Sorry, could not find : ' + selector);
-    return false;
+    href = elt.attr('href');
+    return self.navigateTo(href);
   };
 
   self.clickAllNodes = function (selector) {
