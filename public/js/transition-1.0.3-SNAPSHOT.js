@@ -170,6 +170,12 @@ var Transition = Transition || (function () {
     if (!url) {
       return false;
     }
+
+    if (url.indexOf("#") === 0) {
+      parent.frames.main.window.location.hash = url;
+      return url;
+    }
+
     parent.main.window.location.href = url;
     return url;
   };
