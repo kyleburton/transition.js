@@ -169,10 +169,10 @@ var Transition = Transition || (function () {
       return false;
     }
     if (url.indexOf("#") === 0) {
-      parent.main.window.location.hash = url;
+      parent.frames.main.window.location.hash = url;
       return url;
     }
-    parent.main.window.location.href = url;
+    parent.frames.main.window.location.href = url;
     return url;
   };
 
@@ -203,16 +203,19 @@ var Transition = Transition || (function () {
 
   self.clickNode = function (selector) {
     var elt = self.find(selector);
+
     if (elt.length !== 1) {
       self.error('Error: unable to click: ' + selector);
       return false;
     }
-    if (typeof elt[0].href === 'undefined' && elt.click()) {
-      return true;
+
+    if (typeof elt[0].href === 'undefined') {
+      if (elt.click()) {
+        return true;
+      }
     };
 
-    elt[0].click();
-    return true;
+    return self.click(selector);
   };
 
   self.curryAll = function (fn) {
