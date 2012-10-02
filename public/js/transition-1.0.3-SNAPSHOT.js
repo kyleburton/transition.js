@@ -70,6 +70,7 @@ var Transition = Transition || (function () {
   };
 
   self.log = function () {
+    //console.info(self.concatArguments(arguments));
     self.prependLogMesasge(self.concatArguments(arguments) + "\n");
   };
 
@@ -86,6 +87,7 @@ var Transition = Transition || (function () {
   };
 
   self.error = function () {
+    //console.error('ERROR: ' + self.concatArguments(arguments));
     self.prependLogMesasge('ERROR: ' + self.concatArguments(arguments) + "\n", self.colors.ERROR);
   };
 
@@ -168,11 +170,7 @@ var Transition = Transition || (function () {
     if (!url) {
       return false;
     }
-    if (url.indexOf("#") === 0) {
-      parent.frames.main.window.location.hash = url;
-      return url;
-    }
-    parent.frames.main.window.location.href = url;
+    parent.main.window.location.href = url;
     return url;
   };
 
@@ -181,15 +179,18 @@ var Transition = Transition || (function () {
       self.navigateTo(url);
     };
   };
+  
+  self.anchorClick = function (selector) {
+    var elt = self.find(selector);
+    if (elt.length > 0) {
+      return self.navigateTo(elt.attr('href'));
+    }
+    console.error('Sorry, could not find : ' + selector);
+    return false;
+  };
 
   self.click = function (selector) {
-    var elt = self.find(selector), href;
-    if (elt.length < 1) {
-      console.error('Sorry, could not find : ' + selector);
-      return false;
-    }
-    href = elt.attr('href');
-    return self.navigateTo(href);
+    return self.anchorClick(selector);
   };
 
   self.clickAllNodes = function (selector) {
@@ -201,21 +202,18 @@ var Transition = Transition || (function () {
     }
   };
 
-  self.clickNode = function (selector) {
+  self.jqClick = function (selector) {
     var elt = self.find(selector);
-
     if (elt.length !== 1) {
       self.error('Error: unable to click: ' + selector);
       return false;
     }
+    elt.click();
+    return true;
+  };
 
-    if (typeof elt[0].href === 'undefined') {
-      if (elt.click()) {
-        return true;
-      }
-    };
-
-    return self.click(selector);
+  self.clickNode = function (selector) {
+    return self.jqClick(selector);
   };
 
   self.curryAll = function (fn) {
