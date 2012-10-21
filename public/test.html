@@ -116,7 +116,7 @@
     <script id="transition-runner-current-test-state-tmpl" type="text/html">
       <div class="row-fluid">
         <div class="span6">
-          <span class="label"><%= get('name') %>/<%= get('currentState').get('name') %></span>
+          <span class="label <%= labelClass() %>"><%= get('name') %>/<%= get('currentState').get('name') %></span>
           <span class="badge">
             <i class="icon-thumbs-up"></i>
             <%= 0 %>

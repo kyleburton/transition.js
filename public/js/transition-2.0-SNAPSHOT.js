@@ -11,12 +11,12 @@
     Transition  = {
       Log:       {
         Levels: { 
-          TRACE: 0,
-          DEBUG: 0,
-          INFO:  0,
-          WARN:  0,
-          ERROR: 0,
-          FATAL: 0
+          TRACE: 99,
+          DEBUG: 80,
+          INFO:  60,
+          WARN:  40,
+          ERROR: 20,
+          FATAL: 10
         }
       },
       Views:     {},
@@ -82,7 +82,14 @@
   Models.Settings = Settings = Backbone.Model.extend({
     defaults: {
       perStateTimeout: 10 * 1000,
-      testTimeout:     30 * 1000
+      testTimeout:     30 * 1000,
+      // NB: hook this into the UI
+      maxTransitions:  20,
+      // NB: hook this into the UI
+      pollTimeout:     250,
+      // NB: hook this into the UI
+      logLevel:        Log.Levels.TRACE
+      //logLevel:        Log.Levels.INFO
     }
   });
 
@@ -105,7 +112,7 @@
     },
 
     last: function () {
-      return this.models[this.models.length-1];
+      return this.models[this.models.length - 1];
     }
 
   });
@@ -113,7 +120,8 @@
   Models.Test = Test = Backbone.Model.extend({
     defaults: {
       name:         '**no name**',
-      states:       new TestStates()
+      states:       new TestStates(),
+      isRunning: false
     },
 
     initialize: function (attributes) {
@@ -156,7 +164,7 @@
       if (!this.startState) {
         firstState = this.get('states').first();
         transitions = {};
-        transitions[firstState.get('name')] = {}
+        transitions[firstState.get('name')] = {};
         transitions[firstState.get('name')].to = firstState.get('name');
         transitions[firstState.get('name')].pred = Transition.constantly_(true);
         this.startState = new TestState({
@@ -188,6 +196,13 @@
       // NB: validate the graph: that there are no unreachable states
 
       this.set('currentState', this.startState);
+    },
+
+    labelClass: function () {
+      if (this.get('isRunning')) {
+        return 'label-success';
+      }
+      return '';
     }
   });
 
@@ -229,6 +244,7 @@
     },
 
     countRepeat: function () {
+      this.set('timestamp', new Date());
       this.set('repeatCount', 1 + this.get('repeatCount'));
     }
 
@@ -310,24 +326,23 @@
     },
 
     runClicked: function () {
-      console.log('runClicked');
+      Transition.runSuite();
     },
 
     startClicked: function () {
-      var test = models.suiteRunner.get('currentTest');
-      console.log('startClicked: running test: %o', test.get('name'));
+      Transition.runTest();
     },
 
     stopClicked: function () {
-      console.log('stopClicked');
+      Transition.stop();
     },
 
     stepClicked: function () {
-      console.log('stepClicked');
+      Transition.step();
     },
 
     continueClicked: function () {
-      console.log('continueClicked');
+      Transition.cont();
     },
 
     reloadClicked: function () {
@@ -485,6 +500,9 @@
       // NB: don't push it on if it's the same as the one at the top of the
       // list, just increment it's repeat count
       var entryView = new LogEntryView({logEntry: logEntry});
+      if (logEntry.get('level') > models.settings.get('logLevel')) {
+        return;
+      }
       entryView.render();
       this.entryViews[logEntry.cid] = entryView;
       this.$el.prepend(entryView.$el);
@@ -510,6 +528,45 @@
     view.render(rdata);
     view.$el.appendTo(appendToSelector);
     return view;
+  };
+
+  Transition.pollFn = function () {
+    Log.trace('Transition.pollFn');
+    Transition.pollTimeoutId = setTimeout(
+        Transition.pollFn,
+        models.settings.get('pollTimeout')
+    );
+  };
+
+  Transition.runSuite = function () {
+    console.log('Transition.runSuite: start the sutie at the first non-pending test, at it\'s start state');
+    Transition.pollTimeoutId = setTimeout(
+        Transition.pollFn,
+        models.settings.get('pollTimeout')
+    );
+  };
+
+  Transition.runTest = function () {
+    var test = models.suiteRunner.get('currentTest');
+    console.log('startClicked: start test at it\'s start state: %o', test.get('name'));
+    Transition.pollTimeoutId = setTimeout(
+        Transition.pollFn,
+        models.settings.get('pollTimeout')
+    );
+  };
+
+  Transition.stop = function () {
+    console.log('Transition.stop');
+    clearTimeout(Transition.pollTimeoutId);
+    Transition.pollTimeoutId = null;
+  };
+
+  Transition.step = function () {
+    console.log('Transition.step');
+  };
+
+  Transition.cont = function () {
+    console.log('Transition.cont');
   };
 
   /********************************************************************************
@@ -574,7 +631,7 @@
       testState:   models.suiteRunner.get('currentTest').get('currentState'),
       timestamp:   '*test state*',
       repeatCount: 1,
-      message:     _.reduce(arguments, function (acc, str) {
+      message:     _.reduce(args, function (acc, str) {
           return acc + str;
         },
         ''
@@ -592,27 +649,27 @@
   };
 
   Transition.Log.trace = function () {
-    Transition.Log.newEntry.apply(Log.Levels.TRACE, arguments);
+    Transition.Log.newEntry.call(Transition, Log.Levels.TRACE, arguments);
   };
 
   Transition.Log.debug = function () {
-    Transition.Log.newEntry.apply(Log.Levels.DEBUG, arguments);
+    Transition.Log.newEntry.call(Transition, Log.Levels.DEBUG, arguments);
   };
 
   Transition.Log.info = function () {
-    Transition.Log.newEntry.apply(Log.Levels.INFO, arguments);
+    Transition.Log.newEntry.call(Transition, Log.Levels.INFO, arguments);
   };
 
   Transition.Log.warn = function () {
-    Transition.Log.newEntry.apply(Log.Levels.WARN, arguments);
+    Transition.Log.newEntry.call(Transition, Log.Levels.WARN, arguments);
   };
 
   Transition.Log.error = function () {
-    Transition.Log.newEntry.apply(Log.Levels.ERROR, arguments);
+    Transition.Log.newEntry.call(Transition, Log.Levels.ERROR, arguments);
   };
 
   Transition.Log.fatal = function () {
-    Transition.Log.newEntry.apply(Log.Levels.FATAL, arguments);
+    Transition.Log.newEntry.call(Transition, Log.Levels.FATAL, arguments);
   };
 
   /********************************************************************************
