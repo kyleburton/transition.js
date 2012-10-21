@@ -108,6 +108,10 @@
     },
 
     initialize: function (attributes) {
+      // name, initialize, states
+      this.set('name', attributes.name || '**no name**');
+      this.set('initialize', attributes.initialize);
+      this.get('states').reset(attributes.states);
       // NB: if there is no start state, define one
       this.startState = new TestState({
         name:    'start',
@@ -139,8 +143,19 @@
 
   Models.SuiteRunner = SuiteRunner = Backbone.Model.extend({
     defaults: {
-      currentTest: new Test()
+      currentTest: new Test({})
+    },
+
+    initialize: function (ourModels, options) {
+      models.suite.on('add', this.trackCurrentTest, this);
+    },
+
+    trackCurrentTest: function (test) {
+      console.log('trackCurrentTest: %o', test);
+      this.set('currentTest', test);
+      models.suite.off('add', this.trackCurrentTest, this);
     }
+
   });
 
   Models.LogEntry = LogEntry = Backbone.Model.extend({
@@ -223,6 +238,7 @@
     events: {
       'click button[name=run]':      'runClicked',
       'click button[name=stop]':     'stopClicked',
+      'click button[name=start]':    'startClicked',
       'click button[name=step]':     'stepClicked',
       'click button[name=continue]': 'continueClicked',
       'click button[name=reload]':   'reloadClicked',
@@ -241,6 +257,11 @@
 
     runClicked: function () {
       console.log('runClicked');
+    },
+
+    startClicked: function () {
+      var test = models.suiteRunner.get('currentTest');
+      console.log('startClicked: running test: %o', test.get('name'));
     },
 
     stopClicked: function () {
@@ -506,7 +527,7 @@
     });
 
     if (models.logEntries.models.length > 1 &&
-        models.logEntries.first().get('message') === entry.get('message') ) {
+        models.logEntries.first().get('message') === entry.get('message')) {
       models.logEntries.first().countRepeat();
       return models.logEntries.first();
     }
