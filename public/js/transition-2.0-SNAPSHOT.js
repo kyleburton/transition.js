@@ -85,6 +85,7 @@
     defaults: {
       perStateTimeout: 10 * 1000,
       testTimeout:     30 * 1000,
+      suiteTimeout:    60 * 1000,
       // NB: hook this into the UI
       maxTransitions:       20,
       maxAttemptsPerState:  50,
@@ -687,8 +688,14 @@
         return;
       }
 
-      if (models.suiteRunner.elapsedTime() >= models.settings.get('testTimeout') ) {
-        Log.fatal('Suite: entire suite timed out at ' + (models.settings.get('testTimeout')/1000) +' seconds');
+      if (models.suiteRunner.elapsedTime() >= models.settings.get('suiteTimeout') ) {
+        Log.fatal('Suite timed out at ' + (models.settings.get('suiteTimeout')/1000) +' seconds');
+        Transition.stop();
+        return;
+      }
+
+      if (Transition.testRunner.elapsedTime() >= models.settings.get('testTimeout') ) {
+        Log.fatal('Test timed out at ' + (models.settings.get('testTimeout')/1000) +' seconds');
         Transition.stop();
         return;
       }
