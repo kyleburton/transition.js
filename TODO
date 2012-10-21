@@ -1,3 +1,25 @@
+Test
+  Each should have a pass/fail indicator.
+  Each should have a pending flag.
+  on initialize, call initialize()
+  on initialize, clear each TestState's 'visisted' flag
+Suite Counter should listen to change on the suite, update pass/total based on
+  test p/f indicator
+current-test-state
+  update state # / total states by listening to the TestStates collection
+    and listening to whether the state has been visited
+    and update the current-state-name
+  this view should be removed and re-created whenever a new test is chosen
+Settings:
+  add pollTimeout 250ms
+
+Navbar:
+  hide/show the navbar to save on screen real estate
+
+Controls:
+  have an alternate view for mobile
+  larger buttons, show/hide controls
+
 * Example: todo list app in sinatra
     * login
     * logout

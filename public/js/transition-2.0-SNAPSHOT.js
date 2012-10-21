@@ -1,6 +1,6 @@
 /********************************************************************************
  * Transition.js
- *
+ * Version: 2.0-SNAPSHOT
  ********************************************************************************/
 (function () {
   var root        = this, 
@@ -81,12 +81,18 @@
   Models.Test = Test = Backbone.Model.extend({
     defaults: {
       name: '**no name**',
-      states: null
+      states: new TestStates()
     }
   });
 
   Models.TestSuite = TestSuite = Backbone.Collection.extend({
     model: Test
+  });
+
+  Models.SuiteRunner = SuiteRunner = Backbone.Model.extend({
+    defaults: {
+      currentTest: new Test()
+    }
   });
 
   /********************************************************************************
@@ -207,6 +213,10 @@
       models.settings.on('change', 'render', this);
     },
 
+    remove: function () {
+      models.settings.off('change', 'render', this);
+    },
+
     render: function () {
       this.$el.html(tmpl(this.templateId, models.settings));
       this.$dialogEl = $('#transition-runner-settings-modal-container');
@@ -241,6 +251,26 @@
       this.$dialogEl.dialog('open');
     }
 
+  });
+
+  Views.CurrentTestState = Backbone.View.extend({
+    templateId: 'transition-runner-current-test-state-tmpl',
+
+    events: {
+    },
+
+    initialize: function (options) {
+      this.constructor.__super__.initialize.apply(this, []);
+      models.suiteRunner.on('all', this.render, this);
+    },
+
+    remove: function () {
+      models.suiteRunner.off('all', this.render, this);
+    },
+
+    render: function () {
+      this.$el.html(tmpl(this.templateId, models.suiteRunner.get('currentTest')));
+    },
   });
 
   /********************************************************************************
@@ -321,32 +351,44 @@
     },
 
     showTest: function (testName) {
-      //debugger;
+      var currTest;
+
+      if (models.suite.length < 1) {
+        return;
+      }
+
+      currTest = models.suite.find(function (elt) {
+        return elt.get('name') === testName;
+      });
+
+      models.suiteRunner.set('currentTest', currTest);
       console.log('route[showTest(' + testName + ')]');
     },
 
     main: function () {
-      //debugger;
       console.log('route[main] no test selected');
     }
 
   });
+
+  models.suite       = new TestSuite();
+  models.settings    = new Models.Settings();
+  models.suiteRunner = new SuiteRunner();
 
   /********************************************************************************
    * Construct the Runner
    *
    ********************************************************************************/
   Transition.buildRunner = function () {
-    Transition.router = new Transition.Router();
-    models.suite      = new TestSuite();
-    models.settings   = new Models.Settings();
-    addView('navBar',      Views.Navbar,           '#transition-runner-menubar');
-    addView('progressBar', Views.SuiteProgressBar, '#transition-runner-progress-bar');
-    addView('controls',    Views.Controls,         '#transition-runner-controls');
-    addView('settings',    Views.Settings,         '#transition-runner-settings-modal-container');
+    Transition.router  = new Transition.Router();
+    addView('navBar',           Views.Navbar,           '#transition-runner-menubar');
+    addView('progressBar',      Views.SuiteProgressBar, '#transition-runner-progress-bar');
+    addView('controls',         Views.Controls,         '#transition-runner-controls');
+    addView('settings',         Views.Settings,         '#transition-runner-settings-modal-container');
+    addView('currentTestState', Views.CurrentTestState, '#transition-runner-current-test-state');
     Backbone.history.start();
   };
 
 
-  Transition.buildRunner();
+  //Transition.buildRunner();
 }.call(this));

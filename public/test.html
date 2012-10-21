@@ -60,7 +60,10 @@
     </script>
 
     <script id="transition-runner-progress-bar-tmpl" type="text/html">
-      <div class="progress">
+      <div class="span1">
+        <span class="badge"><%= 0 %> / <%= Transition.models.suite.models.length %></span>
+      </div>
+      <div class="progress span11">
         <div class="bar bar-success" style="width: 0%;"></div>
         <div class="bar bar-warning" style="width: 0%;"></div>
         <div class="bar bar-danger" style="width: 0%;"></div>
@@ -69,15 +72,26 @@
     </script>
 
     <script id="transition-runner-controls-tmpl" type="text/html">
+      <!--
       <div class="btn-toolbar">
         <div class="btn-group">
           <button name="run"      class="btn">Run Suite</button>
+          <button name="stop"     class="btn">Start</button>
           <button name="stop"     class="btn">Stop</button>
           <button name="step"     class="btn">Step</button>
           <button name="continue" class="btn">Continue</button>
           <button name="reload"   class="btn">Reload</button>
+          <button name="reload"   class="btn">Clear Log</button>
         </div>
       </div>
+      -->
+      <button name="run"      class="btn">Run Suite</button>
+      <button name="stop"     class="btn">Start</button>
+      <button name="stop"     class="btn">Stop</button>
+      <button name="step"     class="btn">Step</button>
+      <button name="continue" class="btn">Continue</button>
+      <button name="reload"   class="btn">Reload</button>
+      <button name="reload"   class="btn">Clear Log</button>
     </script>
 
     <script id="transition-runner-settings-modal-tmpl" type="text/html">
@@ -102,6 +116,25 @@
       </div>
     </script>
 
+    <script id="transition-runner-current-test-state-tmpl" type="text/html">
+      <div class="row-fluid">
+        <div class="span6">
+          <span class="label"><%= get('name') %>/<%= 'curr-state-name' %></span>
+          <span class="badge"><%= 0 %> / <%= get('states').models.length %></span>
+          <span class="badge"><%= 10 %>s / <%= 30 %>s</span>
+        </div>
+        <div class="span6">
+          <div class="progress">
+            <div class="bar bar-success" style="width: 0%;"></div>
+            <div class="bar bar-warning" style="width: 0%;"></div>
+            <div class="bar bar-danger" style="width: 0%;"></div>
+            <div class="bar bar-info" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+
   </head>
 
   <body>
@@ -109,12 +142,21 @@
 
     <div id="transition-runner-menubar"> </div>
     <div class="container-fluid">
-      <div id="transition-runner-controls"> </div>
+      <div class="row">
+        <div id="transition-runner-controls" class="span6"> </div>
+        <div id="transition-runner-current-test-state" class="span6"> </div>
+      </div>
       <div id="transition-runner-progress-bar"> </div>
+    </div>
+
+    <div class="well span12">
     </div>
 
     <script src="/js/transition-2.0-SNAPSHOT.js"></script>
     <script src="/test-suite.js"></script>
+    <script>
+      Transition.buildRunner();
+    </script>
   </body>
 </html>
 
