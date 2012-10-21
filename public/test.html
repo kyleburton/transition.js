@@ -146,7 +146,7 @@
 
     <script id="transition-runner-log-entry-tmpl" type="text/html">
       <div>
-        <span class="label"><%= moment(get('timestamp')).format('HH:mm:ss') %></span>
+        <span class="label <%= classForLevel() %>"><%= moment(get('timestamp')).format('HH:mm:ss') %></span>
         <% if (get('repeatCount') > 1) { %>
           <span class="badge">
             <i class="icon-repeat"></i>

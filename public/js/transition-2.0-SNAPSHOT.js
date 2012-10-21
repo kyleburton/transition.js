@@ -246,6 +246,26 @@
     countRepeat: function () {
       this.set('timestamp', new Date());
       this.set('repeatCount', 1 + this.get('repeatCount'));
+    },
+
+    classForLevel: function () {
+      if (this.get('labelClass')) {
+        return this.get('labelClass');
+      }
+
+      if ( this.get('level') >= Log.Levels.DEBUG ) {
+        return '';
+      }
+      if ( this.get('level') >= Log.Levels.INFO ) {
+        return 'label-info';
+      }
+      if ( this.get('level') >= Log.Levels.WARN ) {
+        return 'label-warning';
+      }
+      if ( this.get('level') >= Log.Levels.ERROR ) {
+        return 'label-important';
+      }
+      return 'label-inverse';
     }
 
   });
