@@ -70,3 +70,21 @@ namespace :phantom do
     install_phantom
   end
 end
+
+namespace :twitter_bootstrap do
+  desc "download"
+  task :download do
+    unless File.exist? "software"
+      Dir.mkdir "software"
+    end
+    Dir.chdir "software" do
+      tbs_url = "http://twitter.github.com/bootstrap/assets/bootstrap.zip"
+      unless File.exist? File.basename(tbs_url)
+        system "wget", tbs_url
+      end
+      unless File.exist? "bootstrap"
+        system "unzip", File.basename(tbs_url)
+      end
+    end
+  end
+end

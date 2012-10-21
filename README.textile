@@ -1,3 +1,5 @@
+This is the 2.0 Branch of Transition.js.
+
 h1. Transition.js
 
 Detangled in-browser web application testing.

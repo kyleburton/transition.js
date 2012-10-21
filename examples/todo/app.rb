@@ -56,7 +56,7 @@ module Todo
       erb vname.to_sym
     end
 
-    get %r{/js/(transition-.+)} do
+    get %r{/js/(.+\.js)} do
       fname = "../../public/js/#{params[:captures].first}"
       content_type 'application/javascript'
       return pass unless File.exist? fname
@@ -77,6 +77,11 @@ module Todo
         return respond_json :status => 'OK'
       end
       respond_json :status => 'NotAuthorized'
+    end
+
+    get '*' do
+      fname = params[:splat].first
+      send_file fname
     end
 
   end
