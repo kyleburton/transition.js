@@ -12,10 +12,12 @@ current-test-state
   this view should be removed and re-created whenever a new test is chosen
 Settings:
   add pollTimeout 250ms
-
 Navbar:
   hide/show the navbar to save on screen real estate
   Tests selection should have a dynamic filter via a search box
+Log Viewer
+  log entries should have lots of details, there should be an interctive menu
+    option or setting to toggle between brief and detialed views
   
 
 Controls:
