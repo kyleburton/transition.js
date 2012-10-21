@@ -2,6 +2,7 @@
 /*global window, jQuery, _, Backbone, console, Transition */
 "use strict";
 
+debugger;
 Transition.addTest({
   name: 'Test Index Page',
   initialize: function () {

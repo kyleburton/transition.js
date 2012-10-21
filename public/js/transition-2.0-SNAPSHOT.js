@@ -95,12 +95,19 @@
 
   Models.TestState = TestState = Backbone.Model.extend({
     defaults: {
-      name:        '**no name**',
+      name:        '**no state name**',
       onEnter:     function () {
         throw 'no onEnter implemented!';
       },
       attrs:       {start: false, success: false, failure: false},
       transitions: {}
+    },
+
+    initialize: function (attributes) {
+      var name = attributes.name;
+      if (!attributes.name) {
+        throw 'Error: TestState must have a name!';
+      }
     }
   });
 
@@ -119,16 +126,15 @@
 
   Models.Test = Test = Backbone.Model.extend({
     defaults: {
-      name:         '**no name**',
-      states:       new TestStates(),
+      name:         '**no test name**',
       isRunning: false
     },
 
     initialize: function (attributes) {
       var firstState, lastState, transitions;
-      // name, initialize, states
-      this.set('name', attributes.name || '**no name**');
+      this.set('name', attributes.name || '**no test name**');
       this.set('initialize', attributes.initialize);
+      this.set('states', new TestStates());
       this.get('states').reset(attributes.states);
 
       _.each(this.get('states').models, function (state) {
@@ -203,6 +209,14 @@
         return 'label-success';
       }
       return '';
+    },
+
+    getState: function (name) {
+      var test;
+      this.get('states').each(function (st) {
+        return st.get('name') === name;
+      });
+      return test;
     }
   });
 
@@ -253,16 +267,16 @@
         return this.get('labelClass');
       }
 
-      if ( this.get('level') >= Log.Levels.DEBUG ) {
+      if (this.get('level') >= Log.Levels.DEBUG) {
         return '';
       }
-      if ( this.get('level') >= Log.Levels.INFO ) {
+      if (this.get('level') >= Log.Levels.INFO) {
         return 'label-info';
       }
-      if ( this.get('level') >= Log.Levels.WARN ) {
+      if (this.get('level') >= Log.Levels.WARN) {
         return 'label-warning';
       }
-      if ( this.get('level') >= Log.Levels.ERROR ) {
+      if (this.get('level') >= Log.Levels.ERROR) {
         return 'label-important';
       }
       return 'label-inverse';
@@ -505,11 +519,6 @@
       models.logEntries.on('reset',  this.render,         this);
       models.logEntries.on('add',    this.addLogEntry,    this);
       models.logEntries.on('remove', this.removeLogEntry, this);
-      models.logEntries.on('change', this.entryChanged,   this);
-    },
-
-    entryChanged: function (logEntry) {
-      console.log('LogViewer.entryChanged');
     },
 
     removeLogEntry: function (logEntry) {
@@ -568,6 +577,7 @@
 
   Transition.runTest = function () {
     var test = models.suiteRunner.get('currentTest');
+    test.set('currentState', test.getState('start'));
     console.log('startClicked: start test at it\'s start state: %o', test.get('name'));
     Transition.pollTimeoutId = setTimeout(
         Transition.pollFn,
@@ -595,23 +605,31 @@
    ********************************************************************************/
   Transition.newState = function () {
     var args = [].slice.call(arguments),
-        stateName = args.pop(),
-        onEnter   = args.pop(),
-        attrs     = args.pop();
-    return new TestState({
+        stateName = args.shift(),
+        onEnter   = args.shift(),
+        attrs     = args.shift(),
+        state = new TestState({
       name:        stateName,
       onEnter:     onEnter,
       attrs:       attrs,
       transitions: args
     });
+    return state;
   };
 
   Transition.addTest = function (options) {
-    models.suite.add(new Test({
-      name:   options.name,
-      states: new TestStates(options.states)
-    }));
-    return this;
+    try {
+      var test = new Test({
+        name:   options.name,
+        states: options.states
+      });
+      return this;
+    }
+    catch (e) {
+      console.log(e.get_stack());
+      console.error(e);
+      Log.fatal("Error registering test: " + options.name);
+    }
   };
 
   Transition.noop = function () {
