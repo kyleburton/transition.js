@@ -1,0 +1,87 @@
+<div id="tabs">
+  <ul>
+    <% @lists.each do |list| %>
+      <li><a href="#tabs-<%= list.id %>"><%= list.name.capitalize %></a></li>
+    <% end %>
+    <li><a href="#tabs-new-list">Add List +</a></li>
+  </ul>
+
+  <% @lists.each do |list| %>
+    <div id="tabs-<%= list.id %>" class="tab">
+      <div class="new-task">
+        <form action="/lists/<%= list.id %>/tasks" method="post" name="new_task">
+          <input type="hidden" name="task[list_id]" value="<%= list.id %>" />
+          <div class="split-fields">
+            <div class="field">
+              <div class="input string required">
+                <input siz="50" required="required" type="text" name="task[name]" value="" label="false" placeholder="Enter a new task"/>
+              </div>
+            </div>
+
+            <div class="button">
+              <input type="submit" name="Add Task" value="submit" />
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <ul class="tasks pending-tasks">
+        <% list.unfinished_tasks.each do |task| %>
+          <form action="/lists/<%= list.id %>/tasks/<%= task.id %>" method=post>
+            <li>
+              <input class="box" type="checkbox" name="task[done]" value="false" label="false" />
+              <input type="hidden" name="task[list_id]" value="<%= list.id %>" />
+              <%= task.name %>
+              <p class="delete-task"><a href="/lists/<%= list.id %>/tasks/<%= task.id %>" data-confirm="Are you sure?" data-method="delete" rel="nofollow">X</a></p>
+              <input class="button hidden" type="submit" value="Update Task" name="commit" />
+            </li>
+          </form>
+        <% end %>
+      </ul>
+
+      <ul class="tasks finished-tasks">
+        <% list.completed_tasks.each do |task| %>
+          <li class="finished">
+            <%= task.name %>
+            <p class="delete-task"><a href="/lists/<%= list.id %>/tasks/<%= task.id %>" data-confirm="Are you sure?"  data-method="delete" rel="nofollow">X</a></p>
+          </li>
+        <% end %>
+      </ul>
+
+      <p class="delete-list ">
+        <a href="/lists/<%= list.id %>" data-method="delete" data-confirm="Are you sure?" rel="nofollow">Delete this list</a>
+      </p>
+    </div>
+  <% end %>
+
+  <div id="tabs-new-list">
+    <h2>Add a New Task List</h2>
+    <form action="/lists" method="post">
+      <div class="split-fields">
+        <div class="field">
+          <input type="text" required="required" placeholder="Name" name="list[name]" value="" />
+        </div>
+
+        <div class="button">
+          <input type="submit" name="Add List" value="Add List" />
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(".box").click(function(event) {
+      console.log("Function click called for " + this)
+      $(this).siblings(".button").click();
+  });
+
+  $(function() {
+    var opts = {};
+    <% if @selected_list_index %>
+      opts.selected = <%= @selected_list_index %>
+    <% end %>
+
+    $("#tabs").tabs(opts);
+  });
+</script>

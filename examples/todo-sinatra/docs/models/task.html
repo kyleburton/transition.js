@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>task.rb</title>
+  <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="../app.html">app.rb</a>
+          <a class="source" href="list.html">list.rb</a>
+          <a class="source" href="task.html">task.rb</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>task.rb</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="k">module</span> <span class="nn">Todo</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-ActiveRecord_Task_Model'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-ActiveRecord_Task_Model">&#182;</a>
+        </div>
+        <h1>ActiveRecord Task Model</h1>
+
+<h3>Schema</h3>
+
+<ul>
+<li><code>id</code>: <code>Integer</code>, Primary Key</li>
+<li><code>name</code>: <code>String</code></li>
+<li><code>list_id</code>: Integer, Foreign Key referencing List.</li>
+<li><code>created_at</code>: <code>Timestamp</code></li>
+<li><code>updated_at</code>: <code>Timestamp</code></li>
+</ul>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="k">class</span> <span class="nc">Task</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+    <span class="n">belongs_to</span> <span class="ss">:list</span>
+
+    <span class="k">def</span> <span class="nf">completed?</span>
+      <span class="n">completed_at</span> <span class="o">!=</span> <span class="kp">nil</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">complete!</span>
+      <span class="n">update_attributes</span> <span class="ss">:completed_at</span> <span class="o">=&gt;</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span>
+    <span class="k">end</span>
+
+    <span class="k">def</span> <span class="nf">uncomplete!</span>
+      <span class="n">update_attributes</span> <span class="ss">:completed_at</span> <span class="o">=&gt;</span> <span class="kp">nil</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-Named_Scopes.'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-Named_Scopes.">&#182;</a>
+        </div>
+        <h1>Named Scopes.</h1>
+
+<p>For a while, I preferred writing class methods rather than named scopes
+since I could see no effective difference between the two and class
+methods are ORM agnostic. I&rsquo;ve since realized that the big win of named
+scopes over class methods is that named scopes work on relations whereas
+class methods work only on the global task object. If named scopes didn&rsquo;t
+exist, it would still be possible to use class methods to achieve the same
+result (by allowing the class method to take a block or lambda argument
+passed to Enumerable#select) but some of the object-oriented style is lost
+in that translation.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">scope</span> <span class="ss">:unfinished</span><span class="p">,</span> <span class="n">where</span><span class="p">(</span><span class="ss">:completed_at</span> <span class="o">=&gt;</span> <span class="kp">nil</span><span class="p">)</span>
+    <span class="n">scope</span> <span class="ss">:completed</span><span class="p">,</span> <span class="n">where</span><span class="p">(</span><span class="s2">&quot;completed_at IS NOT NULL&quot;</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>

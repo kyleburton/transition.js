@@ -3,8 +3,9 @@ Test
   Each should have a pending flag.
   on initialize, call initialize()
   on initialize, clear each TestState's 'visisted' flag
-Suite Counter should listen to change on the suite, update pass/total based on
-  test p/f indicator
+Suite
+  Failure summary
+  Support for re-running only those tests that failed
 current-test-state
   update state # / total states by listening to the TestStates collection
     and listening to whether the state has been visited
@@ -18,6 +19,11 @@ Navbar:
 Log Viewer
   log entries should have lots of details, there should be an interctive menu
     option or setting to toggle between brief and detialed views
+  Log filtering via a dynamic search box
+  Stop the log window from increasing the viewport - put a max-height on the log window
+
+External Logging
+  Used to be done via a sinatra app, could be done that way again
   
 
 Controls:

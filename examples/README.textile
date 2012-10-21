@@ -1,0 +1,3 @@
+Example TODO application cloned from:
+
+    https://github.com/engineyard/todo-sinatra
