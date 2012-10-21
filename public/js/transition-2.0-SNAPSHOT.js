@@ -295,8 +295,7 @@
 
     percentFailed: function () {
       return 100.0 * this.get('numFailed') / this.get('total');
-    },
-
+    }
 
   });
 
@@ -373,16 +372,19 @@
 
   Models.TestRunner = TestRunner = Backbone.Model.extend({
     initialize: function (attributes) {
-      this.set('test',  attributes.test);
-      this.set('state', attributes.test.getState('start'));
+      this.set('test',            attributes.test);
+      this.set('currStateNumber', 0);
+      this.set('state',           attributes.test.getState('start'));
     },
 
     start: function () {
+      this.trigger('change');
       this.set('isRunning', true);
       this.set('startTime', new Date());
       this.set('stateReport', new StateReport({
         state: this.get('state')
       }));
+      this.set('currStateNumber', 1);
       try {
         this.get('test').get('initialize').call(this.get('state'));
         this.get('state').get('onEnter').call(this.get('state'));
@@ -399,7 +401,7 @@
           test  = this.get('test'),
           state = this.get('state');
 
-      // did we time out?
+      this.trigger('change');
 
       _.each(state.get('transitions'), function (tr) {
         if (tr.pred.call(test, state, tr)) {
@@ -416,6 +418,7 @@
       if (dests.length === 1) {
         state.set('endTime', new Date());
         Log.info("Transitioning from " + state.get('name') + " to " + dests[0].to);
+        this.set('currStateNumber', 1 + this.get('currStateNumber'));
         state = test.getState(dests[0].to);
         this.set('state', state);
         try {
@@ -444,10 +447,23 @@
     },
 
     elapsedTime: function () {
-      return (new Date()).getTime() - this.get('startTime').getTime();
+      return (new Date()).getTime() - (this.get('startTime')|| new Date()).getTime();
+    },
+
+    percentTimeRemaining: function () {
+      var d = models.settings.get('testTimeout');
+      if (this.elapsedTime() < 10) {
+        return 100.0;
+      }
+      return 100.0 * ((d - this.elapsedTime()) / d);
+    },
+
+    percentTimeElapsed: function () {
+      return 100.0 * (this.elapsedTime() / models.settings.get('testTimeout'));
     },
 
     fail: function () {
+      this.trigger('change');
       var state = this.get('test').getState('failure');
       this.set('state', state);
       this.set('isDone', true);
@@ -652,18 +668,25 @@
 
     initialize: function (options) {
       this.constructor.__super__.initialize.apply(this, []);
-      models.suiteRunner.on('all', this.render, this);
+      options = options || {};
+      this.testRunner = options.testRunner || new TestRunner({
+        test: new Test({name: 'none'})
+      });
+      this.testRunner.on('change', this.render, this);
       models.settings.on('change', this.render, this);
     },
 
     remove: function () {
-      models.suiteRunner.off('all', this.render, this);
+      this.testRunner.off('change', this.render, this);
       models.settings.off('change', this.render, this);
       this.$el.remove();
     },
 
     render: function () {
-      this.$el.html(tmpl(this.templateId, models.suiteRunner.get('currentTest')));
+      this.$el.html(tmpl(this.templateId, {
+        test:   this.testRunner.get('test'),
+        runner: this.testRunner
+      }));
     }
   });
 
@@ -816,6 +839,10 @@
     var test = models.suiteRunner.get('currentTest');
     Transition.testRunner = new TestRunner({
       test: test
+    });
+    Transition.views.currentTestState.remove();
+    addView('currentTestState', Views.CurrentTestState, '#transition-runner-current-test-state', {
+      testRunner: Transition.testRunner
     });
     // NB: set up the observers for the UI here...
     // it might be simplest (from an event observation

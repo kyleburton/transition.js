@@ -116,26 +116,23 @@
     <script id="transition-runner-current-test-state-tmpl" type="text/html">
       <div class="row-fluid">
         <div class="span6">
-          <span class="label <%= labelClass() %>"><%= get('name') %>/<%= get('currentState').get('name') %></span>
+          <span class="label <%= test.labelClass() %>"><%= test.get('name') %>/<%= test.get('currentState').get('name') %></span>
           <span class="badge">
             <i class="icon-thumbs-up"></i>
-            <%= 0 %>
-            /
-            <i class="icon-hand-right"></i>
-            <%= get('states').models.length %>
+            <%= runner.get('currStateNumber') %>
           </span>
           <span class="badge">
-            <%= Transition.models.settings.get('perStateTimeout')/1000 %>s
+            <%= runner.elapsedTime()/1000 %>s
             /
             <%= Transition.models.settings.get('testTimeout')/1000 %>s
           </span>
         </div>
         <div class="span6">
           <div class="progress">
-            <div class="bar bar-success" style="width: 0%;"></div>
+            <div class="bar bar-success" style="width: <%= runner.percentTimeRemaining() %>%;"></div>
             <div class="bar bar-warning" style="width: 0%;"></div>
             <div class="bar bar-danger" style="width: 0%;"></div>
-            <div class="bar bar-info" style="width: 100%;"></div>
+            <div class="bar bar-info" style="width: <%= runner.percentTimeElapsed() %>%;"></div>
           </div>
         </div>
       </div>
