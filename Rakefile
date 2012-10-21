@@ -45,7 +45,7 @@ end
 
 desc "run jslintrb on js files"
 task :lint do
-  Dir["public/js/transition*.js"].each do |f|
+  %w[examples/todo/public/test-suite.js].concat(Dir["public/js/transition*.js"]).each do |f|
     puts "jslintrb: #{f}"
     res = system "jslintrb", f
     unless res
