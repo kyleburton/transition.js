@@ -93,3 +93,11 @@ namespace :twitter_bootstrap do
     end
   end
 end
+
+desc "Run the TODO application"
+task :todo do
+  Dir.chdir("examples/todo-sinatra") do
+    system "rake", "db:migrate"
+    system "rake", "rerun"
+  end
+end
