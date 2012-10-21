@@ -623,6 +623,7 @@
         name:   options.name,
         states: options.states
       });
+      models.suite.add(test);
       return this;
     }
     catch (e) {
