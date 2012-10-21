@@ -49,6 +49,8 @@
     TestSuite,
     SuiteRunner,
     LogEntryView,
+    StateReport,
+    TestRunner,
     Log = Transition.Log,
     models = Transition.models;
 
@@ -84,7 +86,8 @@
       perStateTimeout: 10 * 1000,
       testTimeout:     30 * 1000,
       // NB: hook this into the UI
-      maxTransitions:  20,
+      maxTransitions:       20,
+      maxAttemptsPerState:  50,
       // NB: hook this into the UI
       pollTimeout:     250,
       // NB: hook this into the UI
@@ -133,7 +136,7 @@
     initialize: function (attributes) {
       var firstState, lastState, transitions;
       this.set('name', attributes.name || '**no test name**');
-      this.set('initialize', attributes.initialize);
+      this.set('initialize', attributes.initialize || Transition.noop);
       this.set('states', new TestStates());
       this.get('states').reset(attributes.states);
 
@@ -190,8 +193,9 @@
         this.successState = new TestState({
           name:    'success',
           onEnter: Transition.noop,
-          attrs:   {start: true, 
-            success: false,
+          attrs:   {
+            start: true, 
+            success: true,
           failure: false
           },
           transitions: {}
@@ -212,11 +216,13 @@
     },
 
     getState: function (name) {
-      var test;
-      this.get('states').each(function (st) {
-        return st.get('name') === name;
+      var res;
+      _.each(this.get('states').models, function (st) {
+        if (st.get('name') === name) {
+          res = st;
+        }
       });
-      return test;
+      return res;
     }
   });
 
@@ -292,6 +298,91 @@
       }
       return null;
     }
+  });
+
+  Models.StateReport = StateReport = Backbone.Model.extend({
+    defaults: {
+      startTime: null,
+      endTime:   null,
+      state:     null,
+      passed:    null,
+      checks:    1
+    },
+
+    initialize: function (attributes) {
+      this.set('state', attributes.state);
+      this.set('startTime', new Date());
+    },
+
+    elapsedTime: function () {
+      return (new Date()).getTime() - this.get('startTime').getTime();
+    }
+
+  });
+
+  Models.TestRunner = TestRunner = Backbone.Model.extend({
+    initialize: function (attributes) {
+      this.set('test',  attributes.test);
+      this.set('state', attributes.test.getState('start'));
+    },
+
+    start: function () {
+      this.set('startTime', new Date());
+      this.set('stateReport', new StateReport({
+        state: this.get('state')
+      }));
+      try {
+        this.get('test').get('initialize').call(this.get('state'));
+        this.get('state').get('onEnter').call(this.get('state'));
+      }
+      catch (e) {
+        console.error(e);
+        this.set('error', e);
+        Log.error(e);
+      }
+    },
+
+    transition: function () {
+      var dests = [], 
+          test  = this.get('test'),
+          state = this.get('state');
+      // if any of the exit predicates pass...
+      _.each(state.get('transitions'), function (tr) {
+        if (tr.pred.call(test, state, tr)) {
+          dests.push(tr);
+        }
+      });
+
+      if (dests.length > 1) {
+        this.set('passed', false);
+        this.set('error', "Error: more than 1 transition out of " + this.get('state').get('name') + " :" + JSON.stringify(dests));
+        Log.error();
+      }
+
+      if (dests.length === 1) {
+        state.set('endTime', new Date());
+        Log.info("Transitioning from " + state.get('name') + " to " + dests[0].to);
+        state = test.getState(dests[0].to);
+        this.set('state', state);
+        state.get('onEnter').call(state, dests[0]);
+
+        if (state.get('attrs').success || state.get('attrs').failure) {
+          this.set('isDone', true);
+          this.set('elapsedTime', this.elapsedTime());
+        }
+
+        return true;
+      }
+
+      Log.trace("No transition from " + state.get('name') + " yet..." + this.get('stateReport').elapsedTime() + "/" + this.elapsedTime());
+
+      return false;
+    },
+
+    elapsedTime: function () {
+      return (new Date()).getTime() - this.get('startTime').getTime();
+    }
+
   });
 
   /********************************************************************************
@@ -560,7 +651,14 @@
   };
 
   Transition.pollFn = function () {
-    Log.trace('Transition.pollFn');
+    // stop if we've exceeded the testTimeout
+    // or if we've extend the maxTransitions
+    // or if we've extend the maxAttemptsPerState
+    if (Transition.testRunner.get('isDone')) {
+      Log.info('Test completed!');
+      return;
+    }
+    Transition.testRunner.transition();
     Transition.pollTimeoutId = setTimeout(
         Transition.pollFn,
         models.settings.get('pollTimeout')
@@ -577,6 +675,13 @@
 
   Transition.runTest = function () {
     var test = models.suiteRunner.get('currentTest');
+    Transition.testRunner = new TestRunner({
+      test: test
+    });
+    // NB: set up the observers for the UI here...
+    // it might be simplest (from an event observation
+    // model) if we have 1 runner that we keep re-using.
+    Transition.testRunner.start();
     test.set('currentState', test.getState('start'));
     console.log('startClicked: start test at it\'s start state: %o', test.get('name'));
     Transition.pollTimeoutId = setTimeout(
@@ -620,8 +725,9 @@
   Transition.addTest = function (options) {
     try {
       var test = new Test({
-        name:   options.name,
-        states: options.states
+        name:       options.name,
+        states:     options.states,
+        initialize: options.initialize
       });
       models.suite.add(test);
       return this;
@@ -643,7 +749,7 @@
   };
 
   Transition.navigateTo = function (dest) {
-    mainFrame.document.location = dest;
+    parent.frames.main.document.location = dest;
   };
 
   Transition.navigateTo_ = function (dest) {
@@ -652,8 +758,12 @@
     };
   };
 
+  Transition.find = function (selector) {
+    return $(parent.frames.main.document).find(selector);
+  };
+
   Transition.elementExists = function (selector) {
-    var result = $(mainFrame).find(selector);
+    var result = Transition.find(selector);
     return result.length > 0;
   };
 
@@ -737,7 +847,7 @@
     },
 
     main: function () {
-      console.log('route[main] no test selected');
+      // set the default selected test here?
     }
 
   });

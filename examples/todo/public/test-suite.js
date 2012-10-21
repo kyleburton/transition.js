@@ -5,7 +5,7 @@
 Transition.addTest({
   name: 'Test Index Page',
   initialize: function () {
-    console.log('assert initial state: ensure we\'re logged out');
+    console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
   },
   states: [
     Transition.newState('init', Transition.navigateTo_('about:blank'), {},
@@ -20,7 +20,7 @@ Transition.addTest({
 Transition.addTest({
   name: 'Test Login',
   initialize: function () {
-    console.log('assert initial state: ensure we\'re logged out');
+    console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
   },
   states: [
     Transition.newState('init', Transition.navigateTo_('about:blank'), {},
