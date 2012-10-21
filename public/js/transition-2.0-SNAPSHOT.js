@@ -1,38 +1,61 @@
+/*jslint browser: true, maxerr: 50, indent: 2, nomen: false, regexp: false, newcap:false */
+/*global window, jQuery, _, Backbone, console */
+"use strict";
+
 /********************************************************************************
  * Transition.js
  * Version: 2.0-SNAPSHOT
  ********************************************************************************/
 (function () {
   var root        = this, 
-      Transition  = {
-        Views:     {},
-        Models:    {},
-        Templates: {
-          Runner: {}
-        },
-        views: {},
-        models: {},
+    Transition  = {
+      Log:       {
+        Levels: { 
+          TRACE: 0,
+          DEBUG: 0,
+          INFO:  0,
+          WARN:  0,
+          ERROR: 0,
+          FATAL: 0
+        }
       },
-      Views       = Transition.Views,
-      Models      = Transition.Models,
-      Templates   = Transition.Templates,
-      mainFrame   = {
-        document: this.parent.frames.main,
-      }, 
-      runnerFrame = {
-        document: this.parent.frames.test,
-        $:        this.parent.frames.test && this.parent.frames.test.$
+      Views:     {},
+      Models:    {},
+      Templates: {
+        Runner: {}
       },
-      $ = this.parent.frames.test ? this.parent.frames.test.$ : jQuery,
-      tmpl,
-      addView,
-      Settings,
-      models = Transition.models;
+      views: {},
+      models: {}
+    },
+    Views       = Transition.Views,
+    Models      = Transition.Models,
+    Templates   = Transition.Templates,
+    mainFrame   = {
+      document: this.parent.frames.main
+    }, 
+    runnerFrame = {
+      document: this.parent.frames.test,
+      $:        this.parent.frames.test && this.parent.frames.test.$
+    },
+    $ = this.parent.frames.test ? this.parent.frames.test.$ : jQuery,
+    tmpl,
+    addView,
+    Settings,
+    TestState,
+    TestStates,
+    Test,
+    LogEntry,
+    LogEntries,
+    TestSuite,
+    SuiteRunner,
+    LogEntryView,
+    Log = Transition.Log,
+    models = Transition.models;
 
   root.Transition = Transition;
   Transition.$    = root.jQuery;
   if (!Transition.$) {
-    throw('Error: jQuery not found.');
+    throw 'Error: jQuery not found.';
   }
 
   /********************************************************************************
@@ -43,9 +66,9 @@
   Transition.tmpl = tmpl = function (tmplId, data) {
     var tmpl = Transition.tmplCache[tmplId], tmplElt;
     if (!tmpl) {
-      tmplElt = $('#'+tmplId);
+      tmplElt = $('#' + tmplId);
       if (tmplElt.length === 0) {
-        throw('Error: template for id ' + tmplId + ' not found!');
+        throw 'Error: template for id ' + tmplId + ' not found!';
       }
       tmpl = Transition.tmplCache[tmplId] = _.template(tmplElt.html());
     }
@@ -67,7 +90,7 @@
     defaults: {
       name:        '**no name**',
       onEnter:     function () {
-        throw('no onEnter implemented!');
+        throw 'no onEnter implemented!';
       },
       attrs:       {start: false, success: false, failure: false},
       transitions: {}
@@ -80,8 +103,33 @@
 
   Models.Test = Test = Backbone.Model.extend({
     defaults: {
-      name: '**no name**',
-      states: new TestStates()
+      name:         '**no name**',
+      states:       new TestStates()
+    },
+
+    initialize: function (attributes) {
+      // NB: if there is no start state, define one
+      this.startState = new TestState({
+        name:    'start',
+        onEnter: Transition.noop,
+        attrs:   {start: true, 
+          success: false,
+          failure: false
+        },
+        transitions: {}
+      });
+      // NB: if there is no success state, define one
+      this.successState = new TestState({
+        name:    'success',
+        onEnter: Transition.noop,
+        attrs:   {start: true, 
+          success: false,
+          failure: false
+        },
+        transitions: {}
+      });
+
+      this.currentState = this.startState;
     }
   });
 
@@ -92,6 +140,38 @@
   Models.SuiteRunner = SuiteRunner = Backbone.Model.extend({
     defaults: {
       currentTest: new Test()
+    }
+  });
+
+  Models.LogEntry = LogEntry = Backbone.Model.extend({
+    defaults: {
+      level:       Transition.Log.Levels.INFO,
+      test:        null,
+      testState:   null,
+      timestamp:   '*test state*',
+      repeatCount: 1,
+      message:     '*message*'
+    },
+
+    initialize: function (attributes) {
+      this.set('timestamp', new Date());
+      this.set('test',      models.suiteRunner.get('currentTest'));
+      this.set('testState', models.suiteRunner.get('currentTest').get('currentState'));
+    },
+
+    countRepeat: function () {
+      this.set('repeatCount', 1 + this.get('repeatCount'));
+    }
+
+  });
+
+  Models.LogEntries = LogEntries = Backbone.Collection.extend({
+    model: LogEntry,
+    first: function () {
+      if (this.models.length > 0) {
+        return this.models[0];
+      }
+      return null;
     }
   });
 
@@ -270,8 +350,68 @@
 
     render: function () {
       this.$el.html(tmpl(this.templateId, models.suiteRunner.get('currentTest')));
-    },
+    }
   });
+
+  Views.LogEntryView = LogEntryView = Backbone.View.extend({
+    templateId: 'transition-runner-log-entry-tmpl',
+
+    initialize: function (options) {
+      this.constructor.__super__.initialize.apply(this, []);
+      this.logEntry = options.logEntry;
+      this.logEntry.on('change', this.render, this);
+    },
+
+    remove: function () {
+      this.logEntry.off('change', this.render, this);
+    },
+
+    render: function () {
+      this.$el.html(tmpl(this.templateId, this.logEntry));
+      return this;
+    }
+
+  });
+
+  Views.LogViewer = Backbone.View.extend({
+    tagName: 'div',
+
+    entryViews: {},
+
+    initialize: function (options) {
+      this.constructor.__super__.initialize.apply(this, []);
+      models.logEntries.on('reset', this.render, this);
+      models.logEntries.on('add', this.addLogEntry, this);
+      models.logEntries.on('remove', this.removeLogEntry, this);
+      models.logEntries.on('change', this.entryChanged, this);
+    },
+
+    entryChanged: function (logEntry) {
+      console.log('LogViewer.entryChanged');
+    },
+
+    removeLogEntry: function (logEntry) {
+      console.log('LogViewer.removeLogEntry');
+    },
+
+    addLogEntry: function (logEntry) {
+      // NB: don't push it on if it's the same as the one at the top of the
+      // list, just increment it's repeat count
+      var entryView = new LogEntryView({logEntry: logEntry});
+      entryView.render();
+      this.entryViews[logEntry.cid] = entryView;
+      this.$el.prepend(entryView.$el);
+    },
+
+    render: function () {
+      _.each(this.entryViews, function (entry, cid) {
+        entry.remove();
+      });
+      models.logEntries.each(this.addLogEntry, this);
+    }
+
+  });
+
 
   /********************************************************************************
    * View Helpers
@@ -320,7 +460,7 @@
   };
 
   Transition.navigateTo = function (dest) {
-    return mainFrame.document.location = dest;
+    mainFrame.document.location = dest;
   };
 
   Transition.navigateTo_ = function (dest) {
@@ -338,6 +478,54 @@
     return function () {
       return Transition.elementExists(selector);
     };
+  };
+
+  Transition.Log.newEntry = function (level, args) {
+    var entry = new LogEntry({
+      level:       level,
+      testName:    models.suiteRunner.get('currentTest'),
+      testState:   models.suiteRunner.get('currentTest').get('currentState'),
+      timestamp:   '*test state*',
+      repeatCount: 1,
+      message:     _.reduce(arguments, function (acc, str) {
+          return acc + str;
+        },
+        ''
+      )
+    });
+
+    if (models.logEntries.models.length > 1 &&
+        models.logEntries.first().get('message') === entry.get('message') ) {
+      models.logEntries.first().countRepeat();
+      return models.logEntries.first();
+    }
+
+    models.logEntries.unshift(entry);
+    return entry;
+  };
+
+  Transition.Log.trace = function () {
+    Transition.Log.newEntry.apply(Log.Levels.TRACE, arguments);
+  };
+
+  Transition.Log.debug = function () {
+    Transition.Log.newEntry.apply(Log.Levels.DEBUG, arguments);
+  };
+
+  Transition.Log.info = function () {
+    Transition.Log.newEntry.apply(Log.Levels.INFO, arguments);
+  };
+
+  Transition.Log.warn = function () {
+    Transition.Log.newEntry.apply(Log.Levels.WARN, arguments);
+  };
+
+  Transition.Log.error = function () {
+    Transition.Log.newEntry.apply(Log.Levels.ERROR, arguments);
+  };
+
+  Transition.Log.fatal = function () {
+    Transition.Log.newEntry.apply(Log.Levels.FATAL, arguments);
   };
 
   /********************************************************************************
@@ -374,6 +562,7 @@
   models.suite       = new TestSuite();
   models.settings    = new Models.Settings();
   models.suiteRunner = new SuiteRunner();
+  models.logEntries  = new LogEntries();
 
   /********************************************************************************
    * Construct the Runner
@@ -381,12 +570,16 @@
    ********************************************************************************/
   Transition.buildRunner = function () {
     Transition.router  = new Transition.Router();
+    Log.info('router initialized');
     addView('navBar',           Views.Navbar,           '#transition-runner-menubar');
     addView('progressBar',      Views.SuiteProgressBar, '#transition-runner-progress-bar');
     addView('controls',         Views.Controls,         '#transition-runner-controls');
     addView('settings',         Views.Settings,         '#transition-runner-settings-modal-container');
     addView('currentTestState', Views.CurrentTestState, '#transition-runner-current-test-state');
+    addView('logViewer',        Views.LogViewer,        '#transition-runner-log-viewer');
+    Log.info('views initialized');
     Backbone.history.start();
+    Log.info('runner initialization completed.');
   };
 
 

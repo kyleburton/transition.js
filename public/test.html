@@ -9,6 +9,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/jquery-ui.min.js"></script>
     <script src="/js/underscore-min.js"></script>
     <script src="/js/backbone.js"></script>
+    <script src="/js/moment.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css" rel="stylesheet">
@@ -61,7 +62,13 @@
 
     <script id="transition-runner-progress-bar-tmpl" type="text/html">
       <div class="span1">
-        <span class="badge"><%= 0 %> / <%= Transition.models.suite.models.length %></span>
+        <span class="badge">
+          <i class="icon-thumbs-up"></i>
+          <%= 0 %>
+          /
+          <i class="icon-thumbs-down"></i>
+          <%= Transition.models.suite.models.length %>
+        </span>
       </div>
       <div class="progress span11">
         <div class="bar bar-success" style="width: 0%;"></div>
@@ -120,7 +127,13 @@
       <div class="row-fluid">
         <div class="span6">
           <span class="label"><%= get('name') %>/<%= 'curr-state-name' %></span>
-          <span class="badge"><%= 0 %> / <%= get('states').models.length %></span>
+          <span class="badge">
+            <i class="icon-thumbs-up"></i>
+            <%= 0 %>
+            /
+            <i class="icon-thumbs-down"></i>
+            <%= get('states').models.length %>
+          </span>
           <span class="badge"><%= 10 %>s / <%= 30 %>s</span>
         </div>
         <div class="span6">
@@ -134,22 +147,35 @@
       </div>
     </script>
 
+    <script id="transition-runner-log-entry-tmpl" type="text/html">
+      <div>
+        <span class="label"><%= moment(get('timestamp')).format('HH:mm:ss') %></span>
+        <% if (get('repeatCount') > 1) { %>
+          <span class="badge">
+            <i class="icon-repeat"></i>
+            <%= get('repeatCount') %>
+          </span>
+        <% } %>
+        <span class="log-message"><%= get('message') %></span>
+      <div>
+    </script>
 
   </head>
 
   <body>
-    <div id="transition-runner-settings-modal-container" style="display: none;"> </div>
-
-    <div id="transition-runner-menubar"> </div>
     <div class="container-fluid">
-      <div class="row">
-        <div id="transition-runner-controls" class="span6"> </div>
-        <div id="transition-runner-current-test-state" class="span6"> </div>
-      </div>
-      <div id="transition-runner-progress-bar"> </div>
-    </div>
+      <div id="transition-runner-settings-modal-container" style="display: none;"> </div>
 
-    <div class="well span12">
+      <div id="transition-runner-menubar"> </div>
+      <div class="container-fluid">
+        <div class="row-fluid">
+          <div id="transition-runner-controls" class="span6"> </div>
+          <div id="transition-runner-current-test-state" class="span6"> </div>
+        </div>
+        <div id="transition-runner-progress-bar"> </div>
+      </div>
+
+      <div id="transition-runner-log-viewer" class="span12 well"> </div>
     </div>
 
     <script src="/js/transition-2.0-SNAPSHOT.js"></script>

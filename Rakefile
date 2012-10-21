@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'fileutils'
+require 'colorize'
 
 def chdir! path
   unless File.exist? path
@@ -44,8 +45,12 @@ end
 
 desc "run jslintrb on js files"
 task :lint do
-  Dir["public/js/*.js"].each do |f|
-    system "jslint", f
+  Dir["public/js/transition*.js"].each do |f|
+    puts "jslintrb: #{f}"
+    res = system "jslintrb", f
+    unless res
+      $stderr.puts "JSLINT FAILED: #{f}".red
+    end
   end
 end
 
