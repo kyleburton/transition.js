@@ -195,6 +195,7 @@
 
     remove: function () {
       models.suite.off('all', this.render);
+      this.$el.remove();
     },
 
     showSettings: function () {
@@ -224,7 +225,8 @@
       'click button[name=stop]':     'stopClicked',
       'click button[name=step]':     'stepClicked',
       'click button[name=continue]': 'continueClicked',
-      'click button[name=reload]':   'reloadClicked'
+      'click button[name=reload]':   'reloadClicked',
+      'click button[name=clear]':    'clearClicked'
     },
 
     initialize: function () {
@@ -234,6 +236,7 @@
       _.bindAll(this, 'stepClicked');
       _.bindAll(this, 'continueClicked');
       _.bindAll(this, 'reloadClicked');
+      _.bindAll(this, 'clearClicked');
     },
 
     runClicked: function () {
@@ -254,6 +257,11 @@
 
     reloadClicked: function () {
       console.log('reloadClicked');
+    },
+
+    clearClicked: function (evt) {
+      console.log('clearClicked');
+      models.logEntries.reset([]);
     },
 
     render: function () {
@@ -295,6 +303,7 @@
 
     remove: function () {
       models.settings.off('change', 'render', this);
+      this.$el.remove();
     },
 
     render: function () {
@@ -346,6 +355,7 @@
 
     remove: function () {
       models.suiteRunner.off('all', this.render, this);
+      this.$el.remove();
     },
 
     render: function () {
@@ -364,6 +374,7 @@
 
     remove: function () {
       this.logEntry.off('change', this.render, this);
+      this.$el.remove();
     },
 
     render: function () {
@@ -380,10 +391,10 @@
 
     initialize: function (options) {
       this.constructor.__super__.initialize.apply(this, []);
-      models.logEntries.on('reset', this.render, this);
-      models.logEntries.on('add', this.addLogEntry, this);
+      models.logEntries.on('reset',  this.render,         this);
+      models.logEntries.on('add',    this.addLogEntry,    this);
       models.logEntries.on('remove', this.removeLogEntry, this);
-      models.logEntries.on('change', this.entryChanged, this);
+      models.logEntries.on('change', this.entryChanged,   this);
     },
 
     entryChanged: function (logEntry) {
@@ -404,8 +415,8 @@
     },
 
     render: function () {
-      _.each(this.entryViews, function (entry, cid) {
-        entry.remove();
+      _.each(this.entryViews, function (entryView, cid) {
+        entryView.remove();
       });
       models.logEntries.each(this.addLogEntry, this);
     }
