@@ -98,7 +98,16 @@
   });
 
   Models.TestStates = TestStates = Backbone.Collection.extend({
-    model: TestState
+    model: TestState,
+
+    first: function () {
+      return this.models[0];
+    },
+
+    last: function () {
+      return this.models[this.models.length-1];
+    }
+
   });
 
   Models.Test = Test = Backbone.Model.extend({
@@ -108,32 +117,77 @@
     },
 
     initialize: function (attributes) {
+      var firstState, lastState, transitions;
       // name, initialize, states
       this.set('name', attributes.name || '**no name**');
       this.set('initialize', attributes.initialize);
       this.get('states').reset(attributes.states);
-      // NB: if there is no start state, define one
-      this.startState = new TestState({
-        name:    'start',
-        onEnter: Transition.noop,
-        attrs:   {start: true, 
-          success: false,
-          failure: false
-        },
-        transitions: {}
-      });
-      // NB: if there is no success state, define one
-      this.successState = new TestState({
-        name:    'success',
-        onEnter: Transition.noop,
-        attrs:   {start: true, 
-          success: false,
-          failure: false
-        },
-        transitions: {}
+
+      _.each(this.get('states').models, function (state) {
+        if (state.get('attrs').start) {
+          if (this.startState) {
+            throw "Error: multiple start states in: " + this.get('name');
+          }
+          this.startState = state;
+        }
+
+        if (state.get('attrs').success) {
+          if (this.successState) {
+            throw "Error: multiple success states in: " + this.get('name');
+          }
+          this.successState = state;
+        }
       });
 
-      this.currentState = this.startState;
+      if (!this.get('states').first()) {
+        this.get('states').add(new TestState({
+          name:    'start',
+          onEnter: Transition.noop,
+          attrs:   {
+            start: true, 
+            success: false,
+            failure: false
+          },
+          transitions: transitions
+        }));
+        this.startState = this.get('states').first();
+      }
+
+      if (!this.startState) {
+        firstState = this.get('states').first();
+        transitions = {};
+        transitions[firstState.get('name')] = {}
+        transitions[firstState.get('name')].to = firstState.get('name');
+        transitions[firstState.get('name')].pred = Transition.constantly_(true);
+        this.startState = new TestState({
+          name:    'start',
+          onEnter: Transition.noop,
+          attrs:   {
+            start: true, 
+            success: false,
+            failure: false
+          },
+          transitions: transitions
+        });
+        this.get('states').add(this.startState);
+      }
+
+      if (!this.successState) {
+        this.successState = new TestState({
+          name:    'success',
+          onEnter: Transition.noop,
+          attrs:   {start: true, 
+            success: false,
+          failure: false
+          },
+          transitions: {}
+        });
+        this.get('states').add(this.successState);
+      }
+
+      // NB: validate the graph: that there are no unreachable states
+
+      this.set('currentState', this.startState);
     }
   });
 
@@ -319,11 +373,11 @@
       _.bindAll(this, 'display');
       _.bindAll(this, 'testTimeoutUpdated');
       _.bindAll(this, 'stateTimeoutUpdated');
-      models.settings.on('change', 'render', this);
+      models.settings.on('change', this.render, this);
     },
 
     remove: function () {
-      models.settings.off('change', 'render', this);
+      models.settings.off('change', this.render, this);
       this.$el.remove();
     },
 
@@ -342,19 +396,18 @@
     },
 
     closeClicked: function () {
+      console.log('closeClicked');
       this.$dialogEl.dialog('close');
     },
 
     testTimeoutUpdated: function (evt) {
-      evt.preventDefault();
-      evt.stopPropagation();
-      console.log('testTimeoutUpdated %o', $(evt.target).val());
+      models.settings.set('testTimeout', $(evt.target).val());
+      return true;
     },
 
     stateTimeoutUpdated: function (evt) {
-      evt.preventDefault();
-      evt.stopPropagation();
-      console.log('stateTimeoutUpdated %o', $(evt.target).val());
+      models.settings.set('perStateTimeout', $(evt.target).val());
+      return true;
     },
 
     display: function () {
@@ -372,10 +425,12 @@
     initialize: function (options) {
       this.constructor.__super__.initialize.apply(this, []);
       models.suiteRunner.on('all', this.render, this);
+      models.settings.on('change', this.render, this);
     },
 
     remove: function () {
       models.suiteRunner.off('all', this.render, this);
+      models.settings.off('change', this.render, this);
       this.$el.remove();
     },
 

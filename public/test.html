@@ -67,6 +67,9 @@
           <%= 0 %>
           /
           <i class="icon-thumbs-down"></i>
+          <%= 0 %>
+          /
+          <i class="icon-hand-right"></i>
           <%= Transition.models.suite.models.length %>
         </span>
       </div>
@@ -113,15 +116,22 @@
     <script id="transition-runner-current-test-state-tmpl" type="text/html">
       <div class="row-fluid">
         <div class="span6">
-          <span class="label"><%= get('name') %>/<%= 'curr-state-name' %></span>
+          <span class="label"><%= get('name') %>/<%= get('currentState').get('name') %></span>
           <span class="badge">
             <i class="icon-thumbs-up"></i>
             <%= 0 %>
             /
             <i class="icon-thumbs-down"></i>
+            <%= 0 %>
+            /
+            <i class="icon-hand-right"></i>
             <%= get('states').models.length %>
           </span>
-          <span class="badge"><%= 10 %>s / <%= 30 %>s</span>
+          <span class="badge">
+            <%= Transition.models.settings.get('perStateTimeout')/1000 %>s
+            /
+            <%= Transition.models.settings.get('testTimeout')/1000 %>s
+          </span>
         </div>
         <div class="span6">
           <div class="progress">
