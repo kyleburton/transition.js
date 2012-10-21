@@ -237,12 +237,17 @@
 
     initialize: function (ourModels, options) {
       models.suite.on('add', this.trackCurrentTest, this);
+      this.set('startTime', new Date());
     },
 
     trackCurrentTest: function (test) {
       console.log('trackCurrentTest: %o', test);
       this.set('currentTest', test);
       models.suite.off('add', this.trackCurrentTest, this);
+    },
+
+    elapsedTime: function () {
+      return (new Date()).getTime() - this.get('startTime').getTime();
     }
 
   });
@@ -282,10 +287,8 @@
       if (this.get('level') >= Log.Levels.WARN) {
         return 'label-warning';
       }
-      if (this.get('level') >= Log.Levels.ERROR) {
-        return 'label-important';
-      }
-      return 'label-inverse';
+      // ERROR and FATAL
+      return 'label-important';
     }
 
   });
@@ -327,6 +330,7 @@
     },
 
     start: function () {
+      this.set('isRunning', true);
       this.set('startTime', new Date());
       this.set('stateReport', new StateReport({
         state: this.get('state')
@@ -369,12 +373,14 @@
         if (state.get('attrs').success || state.get('attrs').failure) {
           this.set('isDone', true);
           this.set('elapsedTime', this.elapsedTime());
+          this.set('isRunning', false);
         }
 
         return true;
       }
 
-      Log.trace("No transition from " + state.get('name') + " yet..." + this.get('stateReport').elapsedTime() + "/" + this.elapsedTime());
+      //Log.trace("No transition from " + state.get('name') + " yet..." + this.get('stateReport').elapsedTime() + "/" + this.elapsedTime());
+      Log.trace("No transition from " + state.get('name') + " yet...");
 
       return false;
     },
@@ -667,10 +673,41 @@
 
   Transition.runSuite = function () {
     console.log('Transition.runSuite: start the sutie at the first non-pending test, at it\'s start state');
-    Transition.pollTimeoutId = setTimeout(
-        Transition.pollFn,
-        models.settings.get('pollTimeout')
-    );
+    var tests    = models.suite.models, 
+        currTest = tests.shift();
+
+    Transition.stopSuite = false;
+    models.suiteRunner.set('currentTest', currTest);
+    models.suiteRunner.set('startTime', new Date());
+    Transition.runTest();
+
+    Transition.suitePollFn = function () {
+      if(Transition.stopSuite) {
+        Log.info('Suite: halted.');
+        return;
+      }
+
+      if (models.suiteRunner.elapsedTime() >= models.settings.get('testTimeout') ) {
+        Log.fatal('Suite: entire suite timed out at ' + (models.settings.get('testTimeout')/1000) +' seconds');
+        Transition.stop();
+        return;
+      }
+
+      if (Transition.testRunner.get('isDone')) {
+        clearTimeout(Transition.pollTimeoutId);
+        Log.info('Suite: current test is done');
+        currTest = tests.shift();
+        if (currTest) {
+          models.suiteRunner.set('currentTest', currTest);
+          Transition.runTest();
+          Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
+          return;
+        }
+      }
+      Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
+    };
+
+    Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
   };
 
   Transition.runTest = function () {
@@ -681,6 +718,7 @@
     // NB: set up the observers for the UI here...
     // it might be simplest (from an event observation
     // model) if we have 1 runner that we keep re-using.
+    Log.info(test.get('name') + ' start!');
     Transition.testRunner.start();
     test.set('currentState', test.getState('start'));
     console.log('startClicked: start test at it\'s start state: %o', test.get('name'));
@@ -694,6 +732,7 @@
     console.log('Transition.stop');
     clearTimeout(Transition.pollTimeoutId);
     Transition.pollTimeoutId = null;
+    Transition.stopSuite = true;
   };
 
   Transition.step = function () {
