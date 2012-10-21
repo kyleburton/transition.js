@@ -1,3 +1,7 @@
+/*jslint browser: true, maxerr: 50, indent: 2, nomen: false, regexp: false, newcap:false */
+/*global window, jQuery, _, Backbone, console, Transition */
+"use strict";
+
 Transition.addTest({
   name: 'Test Index Page',
   initialize: function () {
@@ -5,9 +9,11 @@ Transition.addTest({
   },
   states: [
     Transition.newState('init', Transition.navigateTo_('about:blank'), {},
-      {to: 'mainPage', pred: Transition.constantly_(true) }),
+      {to: 'mainPage', pred: Transition.constantly_(true) }
+      ),
     Transition.newState('mainPage', Transition.navigateTo_('/'), {},
-      {to: 'success', pred: Transition.elementExists_('input[name="email"]') }),
+      {to: 'success', pred: Transition.elementExists_('input[name="email"]') }
+      )
   ]
 });
 
@@ -18,11 +24,14 @@ Transition.addTest({
   },
   states: [
     Transition.newState('init', Transition.navigateTo_('about:blank'), {},
-      {to: 'mainPage', pred: Transition.constantly_(true) }),
+      {to: 'mainPage', pred: Transition.constantly_(true) }
+      ),
     Transition.newState('mainPage', Transition.navigateTo_('/'), {},
-      {to: 'login', pred: Transition.elementExists_('input[name="email"]') }),
+      {to: 'login', pred: Transition.elementExists_('input[name="email"]') }
+      ),
     Transition.newState('login', 'loginViaEmail', {},
-      {to: 'success', pred: Transition.elementExists_('div#todo-list') }),
+      {to: 'success', pred: Transition.elementExists_('div#todo-list') }
+      )
   ],
 
   loginViaEmail: function () {
