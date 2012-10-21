@@ -250,6 +250,7 @@
   Models.SuiteRunner = SuiteRunner = Backbone.Model.extend({
     defaults: {
       currentTest: new Test({}),
+      total:       0,
       numPassed:   0,
       numFailed:   0
     },
@@ -279,7 +280,23 @@
 
       return false;
 
-    }
+    },
+
+    percentRemaining: function () {
+      if (!this.get('total')) {
+        return 100.0;
+      }
+      return 100.0 * (this.get('numPassed') + this.get('numFailed')) / this.get('total');
+    },
+
+    percentPassed: function () {
+      return 100.0 * this.get('numPassed') / this.get('total');
+    },
+
+    percentFailed: function () {
+      return 100.0 * this.get('numFailed') / this.get('total');
+    },
+
 
   });
 
@@ -742,6 +759,7 @@
     models.suiteRunner.set('numPassed', 0);
     models.suiteRunner.set('numFailed', 0);
     models.suiteRunner.set('queue', new TestSuite(models.suite.models));
+    models.suiteRunner.set('total', models.suite.models.length);
     models.suiteRunner.set('stopSuite', false);
     models.suiteRunner.nextTest();
     models.suiteRunner.set('startTime', new Date());

@@ -74,10 +74,10 @@
         </span>
       </div>
       <div class="progress span11">
-        <div class="bar bar-success" style="width: 0%;"></div>
+        <div class="bar bar-success" style="width: <%= Transition.models.suiteRunner.percentPassed() %>%;"></div>
         <div class="bar bar-warning" style="width: 0%;"></div>
-        <div class="bar bar-danger"  style="width: 0%;"></div>
-        <div class="bar bar-info"    style="width: 100%;"></div>
+        <div class="bar bar-danger"  style="width: <%= Transition.models.suiteRunner.percentFailed() %>%;"></div>
+        <div class="bar bar-info"    style="width: <%= Transition.models.suiteRunner.percentRemaining() %>%;"></div>
       </div>
     </script>
 
