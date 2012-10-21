@@ -369,7 +369,14 @@
         Log.info("Transitioning from " + state.get('name') + " to " + dests[0].to);
         state = test.getState(dests[0].to);
         this.set('state', state);
-        state.get('onEnter').call(state, dests[0]);
+        try {
+          state.get('onEnter').call(state, dests[0]);
+        }
+        catch (e) {
+          console.error(e);
+          this.set('error', e);
+          Log.error(e);
+        }
 
         if (state.get('attrs').success || state.get('attrs').failure) {
           this.set('isDone', true);
