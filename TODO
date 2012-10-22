@@ -24,6 +24,9 @@ Log Viewer
   Stop the log window from increasing the viewport - put a max-height on the log window
 Logging
   Support colors regardless of level, this will be useful for reporting on test pass/failure
+Documentation
+  Document 2.x
+  Update the gh-pages branch to include both the 1.x and 2.x branches.
 
 External Logging
   Used to be done via a sinatra app, could be done that way again
