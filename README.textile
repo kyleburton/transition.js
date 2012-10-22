@@ -47,9 +47,9 @@ In your project's document root (where ever it serves up html files from), creat
 
 Then you should be able to load @/transition/index.html@ from your web application.
 
-For example, if your app is running on localhost:9292, then the following should be the link:
+For example, if your app is running on localhost:9292, then the following should be the correct link:
 
 <pre>
-   http://localhost:4567/transition/index.html
+   http://localhost:9292/transition/index.html
 </pre>
 
