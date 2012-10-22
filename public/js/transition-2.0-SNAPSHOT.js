@@ -1065,6 +1065,9 @@
     Log.info('views initialized');
     Backbone.history.start();
     Log.info('runner initialization completed.');
+    if (models.suite.models.length < 1) {
+      Log.fatal('No Test Suite Found, please place your tests in <a href="../test-suite.js">../test-suite.js</a>');
+    }
   };
 
 }.call(this));
