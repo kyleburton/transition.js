@@ -6,6 +6,38 @@ Detangled in-browser web application testing.
 
 h1. "Documentation":http://kyleburton.github.com/transition.js
 
+h1. Example
 
+Check out the source code:
 
+    $ cd ~/projects
+    $ git clone https://github.com/kyleburton/transition.js.git
+    $ cd transition.js
+    $ git checkout -t origin/transition.js-2.0
+
+Run the sample application:
+
+    $ rake todo
+
+Browse to: "http://localhost:9292/transition/index.html":http://localhost:9292/transition/index.html
+
+h1. Getting Started
+
+Check out the source code:
+
+    $ cd ~/projects
+    $ git clone https://github.com/kyleburton/transition.js.git
+    $ cd transition.js
+    $ git checkout -t origin/transition.js-2.0
+
+In your project's document root (where ever it serves up html files from), create a symlink to the @transition.js/public@ directory
+
+   $ cd ~/projects/my-webapp/public
+   $ ln -s ~/projects/transition.js/public ./transition
+
+Then you should be able to load @/transition/index.html@ from your web application.
+
+For example, if your app is running on localhost:9292, then the following should be the link:
+
+   http://localhost:4567/transition/index.html
 

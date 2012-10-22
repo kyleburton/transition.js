@@ -1,3 +1,4 @@
+Support Factored out tests in separate files.
 Test
   Each should have a pass/fail indicator.
   Each should have a pending flag.
@@ -21,6 +22,8 @@ Log Viewer
     option or setting to toggle between brief and detialed views
   Log filtering via a dynamic search box
   Stop the log window from increasing the viewport - put a max-height on the log window
+Logging
+  Support colors regardless of level, this will be useful for reporting on test pass/failure
 
 External Logging
   Used to be done via a sinatra app, could be done that way again
@@ -30,18 +33,6 @@ Controls:
   have an alternate view for mobile
   larger buttons, show/hide controls
 
-* Example: todo list app in sinatra
-    * login
-    * logout
-    * view your todo items
-    * add an item
-    * mark an item as done
-    * delete items
-    * view the archive [tasks marked as done]
-* Example: in-browser, frame based test runner
-    * clear console button not working
-    * implement a RunAll button with test suite reporting
-    * have transition-runner create the test GUI / Debugger UI dynamically
 * Documentation:
     * update docs to describe and show how to use the new frames based test
       runner
