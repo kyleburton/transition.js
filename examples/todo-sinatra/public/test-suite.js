@@ -23,21 +23,29 @@ Transition.addTest({
     // delete all lists named 'test'
     console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
   },
+
   states: [
-    Transition.newState('init', Transition.navigateTo_('about:blank'), {},
-      {to: 'mainPage', pred: Transition.constantly_(true) }
+    Transition.newState('init', Transition.navigateTo_('/'), {},
+      {to: 'deleteTestList', pred: Transition.elementExists_('li a:contains("Test")') }
+      ),
+    Transition.newState('deleteTestList', 'deleteTestList', {},
+      {to: 'deleteTestList',     pred: Transition.elementExists_('li a:contains("Test")') },
+      {to: 'mainPage',           pred: Transition.elementNotExists_('li a:contains("Test")') }
       ),
     Transition.newState('mainPage', Transition.navigateTo_('/'), {},
-      {to: 'login', pred: Transition.elementExists_('input[name="email"]') }
+      {to: 'createList', pred: Transition.elementExists_('input[name="list[name]"]:visible') }
       ),
-    Transition.newState('login', 'loginViaEmail', {},
-      {to: 'success', pred: Transition.elementExists_('div#todo-list') }
+    Transition.newState('createList', 'createList', {},
+      {to: 'success', pred: Transition.elementExists_('li a:contains("Test")') }
       )
   ],
 
-  loginViaEmail: function () {
-    this.$('input[name="email"]').val('foo@bar.com');
-    this.$('input[name="pass"]').val('secret');
-    this.$('button').click();
+  deleteTestList: function () {
+    Transition.find('p.delete-list a').click();
+  },
+
+  createList: function () {
+    Transition.find('input[name="list[name]"]').val('Test');
+    Transition.find('input[type=submit]:visible').click();
   }
 });

@@ -112,6 +112,19 @@
       if (!attributes.name) {
         throw 'Error: TestState must have a name!';
       }
+    },
+
+    callOnEnter: function (test, args) {
+      var onEnter = this.get('onEnter');
+      if (typeof onEnter != "function") {
+        onEnter = test.get(onEnter);
+      }
+
+      if (typeof onEnter != "function") {
+        throw('Error: onEnter[' + this.get('onEnter') +'] is not a valid function');
+      }
+
+      onEnter.apply(test, args);
     }
   });
 
@@ -387,7 +400,7 @@
       this.set('currStateNumber', 1);
       try {
         this.get('test').get('initialize').call(this.get('state'));
-        this.get('state').get('onEnter').call(this.get('state'));
+        this.get('state').callOnEnter(this.get('test'), this.get('state'));
       }
       catch (e) {
         console.error(e);
@@ -422,7 +435,7 @@
         state = test.getState(dests[0].to);
         this.set('state', state);
         try {
-          state.get('onEnter').call(state, dests[0]);
+          state.callOnEnter(test, dests[0]);
         }
         catch (e) {
           console.error(e);
@@ -892,11 +905,7 @@
 
   Transition.addTest = function (options) {
     try {
-      var test = new Test({
-        name:       options.name,
-        states:     options.states,
-        initialize: options.initialize
-      });
+      var test = new Test(options);
       models.suite.add(test);
       return this;
     }
@@ -941,6 +950,21 @@
     };
   };
 
+  Transition.elementNotExists = function (selector) {
+    var result = Transition.find(selector);
+    return result.length === 0;
+  };
+
+  Transition.elementNotExists_ = function (selector) {
+    return function () {
+      return Transition.elementNotExists(selector);
+    };
+  };
+
+  /********************************************************************************
+   * Logging
+   *
+   ********************************************************************************/
   Transition.Log.newEntry = function (level, args) {
     var entry = new LogEntry({
       level:       level,
