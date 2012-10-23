@@ -941,7 +941,17 @@
 
   Transition.addTest = function (options) {
     try {
-      var test = new Test(options);
+      var test = new Test(options),
+          existing = models.suite.find(function (t) {
+            return t.get('name') === test.get('name');
+          });
+
+      if (existing) {
+        Log.info("Replacing test in suite: '%s'", test.get('name'));
+        existing.set(test.toJSON());
+        return this;
+      }
+
       models.suite.add(test);
       return this;
     }
