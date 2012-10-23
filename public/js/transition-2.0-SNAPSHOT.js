@@ -391,7 +391,6 @@
     },
 
     start: function () {
-      this.trigger('change');
       this.set('isRunning', true);
       this.set('startTime', new Date());
       this.set('stateReport', new StateReport({
@@ -415,7 +414,16 @@
           state = this.get('state'),
           error;
 
-      this.trigger('change');
+      //this.trigger('change');
+
+      if (state.get('attrs').success || state.get('attrs').failure) {
+        this.set('isDone', true);
+        this.set('elapsedTime', this.elapsedTime());
+        this.set('isRunning', false);
+        this.set('succeeded', this.succeeded());
+        return;
+      }
+
 
       _.each(state.get('transitions'), function (tr) {
         if (tr.pred.call(test, state, tr)) {
@@ -445,17 +453,9 @@
           Log.error(e);
         }
 
-        if (state.get('attrs').success || state.get('attrs').failure) {
-          this.set('isDone', true);
-          this.set('elapsedTime', this.elapsedTime());
-          this.set('isRunning', false);
-          this.set('succeeded', this.succeeded());
-        }
-
         return true;
       }
 
-      //Log.trace("No transition from " + state.get('name') + " yet..." + this.get('stateReport').elapsedTime() + "/" + this.elapsedTime());
       Log.trace("No transition from " + state.get('name') + " yet...");
 
       return false;
@@ -853,7 +853,7 @@
     Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
   };
 
-  Transition.runTest = function () {
+  Transition.initTestRunner = function () {
     var test = models.suiteRunner.get('currentTest');
     Transition.testRunner = new TestRunner({
       test: test
@@ -865,8 +865,12 @@
 
     Log.info('START: ' + test.get('name'));
     Transition.testRunner.start();
-    test.set('currentState', test.getState('start'));
-    console.log('startClicked: start test at it\'s start state: %o', test.get('name'));
+    // NB: this should no longer be necessary
+    // test.set('currentState', test.getState('start'));
+  };
+
+  Transition.runTest = function () {
+    Transition.initTestRunner();
     Transition.pollTimeoutId = setTimeout(
         Transition.pollFn,
         models.settings.get('pollTimeout')
@@ -881,8 +885,18 @@
   };
 
   Transition.step = function () {
-    // if the current test is not running start it
-    console.log('Transition.step');
+
+    if (Transition.testRunner && Transition.testRunner.get('isDone')) {
+      Log.info('Test Completed');
+      Transition.testRunner = null;
+      return;
+    }
+
+    if (!Transition.testRunner || !Transition.testRunner.get('isRunning')) {
+      Transition.initTestRunner();
+    }
+
+    Transition.testRunner.transition();
   };
 
   Transition.cont = function () {
