@@ -412,7 +412,8 @@
     transition: function () {
       var dests = [], 
           test  = this.get('test'),
-          state = this.get('state');
+          state = this.get('state'),
+          error;
 
       this.trigger('change');
 
@@ -423,9 +424,10 @@
       });
 
       if (dests.length > 1) {
-        this.set('passed', false);
-        this.set('error', "Error: more than 1 transition out of " + this.get('state').get('name') + " :" + JSON.stringify(dests));
-        Log.error();
+        this.fail();
+        error = "Error: more than 1 transition out of " + this.get('state').get('name') + " :" + JSON.stringify(dests);
+        this.set('error', error);
+        Log.error(error);
       }
 
       if (dests.length === 1) {
@@ -768,6 +770,9 @@
    ********************************************************************************/
   Transition.addView = addView = function (name, clazz, appendToSelector, cdata, rdata) {
     var view = new clazz(cdata);
+    if (Transition.views[name]) {
+      Transition.views[name].remove();
+    }
     Transition.views[name] = view;
     view.render(rdata);
     view.$el.appendTo(appendToSelector);
@@ -853,13 +858,11 @@
     Transition.testRunner = new TestRunner({
       test: test
     });
-    Transition.views.currentTestState.remove();
+
     addView('currentTestState', Views.CurrentTestState, '#transition-runner-current-test-state', {
       testRunner: Transition.testRunner
     });
-    // NB: set up the observers for the UI here...
-    // it might be simplest (from an event observation
-    // model) if we have 1 runner that we keep re-using.
+
     Log.info('START: ' + test.get('name'));
     Transition.testRunner.start();
     test.set('currentState', test.getState('start'));
@@ -878,6 +881,7 @@
   };
 
   Transition.step = function () {
+    // if the current test is not running start it
     console.log('Transition.step');
   };
 
@@ -936,7 +940,8 @@
   };
 
   Transition.find = function (selector) {
-    return $(parent.frames.main.document).find(selector);
+    var result = $(parent.frames.main.document).find(selector);
+    return result;
   };
 
   Transition.elementExists = function (selector) {
