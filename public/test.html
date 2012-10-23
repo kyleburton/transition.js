@@ -48,12 +48,12 @@
                 </form>
               </li>
               <li class="divider"></li>
-              <li><a tabindex="-1" href="#">Trace</a></li>
-              <li><a tabindex="-1" href="#">Debug</a></li>
-              <li><a tabindex="-1" href="#">Info</a></li>
-              <li><a tabindex="-1" href="#">Warn</a></li>
-              <li><a tabindex="-1" href="#">Error</a></li>
-              <li><a tabindex="-1" href="#">Fatal</a></li>
+              <li><a tabindex="-1" class="set-log-trace" href="#">Trace<% if (Transition.Log.isTrace()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" class="set-log-debug" href="#">Debug<% if (Transition.Log.isDebug()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" class="set-log-info" href="#">Info<% if (Transition.Log.isInfo()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" class="set-log-warn" href="#">Warn<% if (Transition.Log.isWarn()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" class="set-log-error" href="#">Error<% if (Transition.Log.isError()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" class="set-log-fatal" href="#">Fatal<% if (Transition.Log.isFatal()) { %> <i class="icon-ok"></i><% } %></a></li>
               <li class="divider"></li>
               <li><a class="clear-log" tabindex="-1" href="#">Clear Log</a></li>
             </ul>

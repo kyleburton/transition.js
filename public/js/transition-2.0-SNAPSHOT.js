@@ -274,7 +274,6 @@
     },
 
     trackCurrentTest: function (test) {
-      console.log('trackCurrentTest: %o', test);
       this.set('currentTest', test);
       models.suite.off('add', this.trackCurrentTest, this);
     },
@@ -554,6 +553,12 @@
       'click .settings':                'showSettings',
       'click a.test':                   'testSelected',
       'click a.clear-log':              'clearLog',
+      'click a.set-log-trace':          'setLogTrace',
+      'click a.set-log-debug':          'setLogDebug',
+      'click a.set-log-info':           'setLogInfo',
+      'click a.set-log-warn':           'setLogWarn',
+      'click a.set-log-error':          'setLogError',
+      'click a.set-log-fatal':          'setLogFatal',
       'change input[name=log-filter]':  'filterLog',
       'keyup input[name=log-filter]':   'filterLog'
     },
@@ -562,22 +567,22 @@
       this.constructor.__super__.initialize.apply(this, []);
       _.bindAll(this, 'showSettings');
       models.suite.on('all', this.render, this);
+      models.settings.on('change', this.render, this);
     },
 
     remove: function () {
       models.suite.off('all', this.render);
+      models.settings.off('change', this.render, this);
       this.$el.remove();
     },
 
     showSettings: function () {
-      console.log('show the settings dialog');
       Transition.views.settings.display();
     },
 
     testSelected: function (evt) {
       evt.preventDefault();
       var dest = $(evt.target).attr('href');
-      console.log('testSelected: %o => %o', $(evt.target), dest);
       Transition.router.navigate(dest, {trigger: true});
     },
 
@@ -587,8 +592,31 @@
 
     filterLog: function (evt) {
       var str = $(evt.target).val();
-      console.log('filterLog: %o', str);
       Transition.views.logViewer.filter(str);
+    },
+
+    setLogTrace: function () {
+      models.settings.set('logLevel', Log.Levels.TRACE);
+    },
+
+    setLogDebug: function () {
+      models.settings.set('logLevel', Log.Levels.DEBUG);
+    },
+
+    setLogInfo: function () {
+      models.settings.set('logLevel', Log.Levels.INFO);
+    },
+
+    setLogWarn: function () {
+      models.settings.set('logLevel', Log.Levels.WARN);
+    },
+
+    setLogError: function () {
+      models.settings.set('logLevel', Log.Levels.ERROR);
+    },
+
+    setLogFatal: function () {
+      models.settings.set('logLevel', Log.Levels.FATAL);
     },
 
     render: function () {
@@ -667,7 +695,6 @@
     },
 
     update: function () {
-      console.log('Views.SuiteProgressBar.update : ' + models.suiteRunner.get('numPassed'));
       this.$el.html(tmpl(this.templateId, {}));
     },
 
@@ -716,7 +743,6 @@
     },
 
     closeClicked: function () {
-      console.log('closeClicked');
       this.$dialogEl.dialog('close');
     },
 
@@ -805,12 +831,13 @@
     },
 
     addLogEntry: function (logEntry) {
-      // NB: don't push it on if it's the same as the one at the top of the
-      // list, just increment it's repeat count
-      var entryView = new LogEntryView({logEntry: logEntry});
+      var entryView;
+
       if (logEntry.get('level') > models.settings.get('logLevel')) {
         return;
       }
+
+      entryView = new LogEntryView({logEntry: logEntry});
       entryView.render();
       this.entryViews[logEntry.cid] = entryView;
 
@@ -823,7 +850,16 @@
       if (!this.filterBy) {
         return true;
       }
-      return logEntry.get("message").toLowerCase().indexOf(this.filterBy.toLowerCase()) !== -1;
+
+      if (logEntry.get("message").toLowerCase().indexOf(this.filterBy.toLowerCase()) !== -1) {
+        return true;
+      }
+
+      if (logEntry.get("slevel").toLowerCase().indexOf(this.filterBy.toLowerCase()) !== -1) {
+        return true;
+      }
+
+      return false;
     },
 
     filter: function (filterBy) {
@@ -872,8 +908,6 @@
   };
 
   Transition.runSuite = function () {
-    console.log('Transition.runSuite: start the sutie at the first non-pending test, at it\'s start state');
-
     models.suiteRunner.set('numPassed', 0);
     models.suiteRunner.set('numFailed', 0);
     models.suiteRunner.set('queue', new TestSuite(models.suite.models));
@@ -955,7 +989,6 @@
   };
 
   Transition.stop = function () {
-    console.log('Transition.stop');
     clearTimeout(Transition.pollTimeoutId);
     Transition.pollTimeoutId = null;
     models.suiteRunner.set('stopSuite', true);
@@ -1101,8 +1134,9 @@
    * Logging
    *
    ********************************************************************************/
-  Transition.Log.newEntry = function (level, args) {
+  Transition.Log.newEntry = function (slevel, level, args) {
     var entry = new LogEntry({
+      slevel:      slevel,
       level:       level,
       testName:    models.suiteRunner.get('currentTest'),
       testState:   models.suiteRunner.get('currentTest').get('currentState'),
@@ -1110,6 +1144,10 @@
       repeatCount: 1,
       message:     sprintf.apply(sprintf, args)
     });
+
+    if (level >= models.settings.get('logLevel')) {
+      return;
+    }
 
     if (models.logEntries.models.length > 0 &&
         models.logEntries.last().get('message') === entry.get('message')) {
@@ -1122,27 +1160,51 @@
   };
 
   Transition.Log.trace = function () {
-    Transition.Log.newEntry.call(Transition, Log.Levels.TRACE, arguments);
+    Transition.Log.newEntry.call(Transition, 'TRACE', Log.Levels.TRACE, arguments);
   };
 
   Transition.Log.debug = function () {
-    Transition.Log.newEntry.call(Transition, Log.Levels.DEBUG, arguments);
+    Transition.Log.newEntry.call(Transition, 'DEBUG', Log.Levels.DEBUG, arguments);
   };
 
   Transition.Log.info = function () {
-    Transition.Log.newEntry.call(Transition, Log.Levels.INFO, arguments);
+    Transition.Log.newEntry.call(Transition, 'INFO', Log.Levels.INFO, arguments);
   };
 
   Transition.Log.warn = function () {
-    Transition.Log.newEntry.call(Transition, Log.Levels.WARN, arguments);
+    Transition.Log.newEntry.call(Transition, 'WARN', Log.Levels.WARN, arguments);
   };
 
   Transition.Log.error = function () {
-    Transition.Log.newEntry.call(Transition, Log.Levels.ERROR, arguments);
+    Transition.Log.newEntry.call(Transition, 'ERROR', Log.Levels.ERROR, arguments);
   };
 
   Transition.Log.fatal = function () {
-    Transition.Log.newEntry.call(Transition, Log.Levels.FATAL, arguments);
+    Transition.Log.newEntry.call(Transition, 'FATAL', Log.Levels.FATAL, arguments);
+  };
+
+  Transition.Log.isTrace = function () {
+    return models.settings.get('logLevel') === Log.Levels.TRACE;
+  };
+
+  Transition.Log.isDebug = function () {
+    return models.settings.get('logLevel') === Log.Levels.DEBUG;
+  };
+
+  Transition.Log.isInfo = function () {
+    return models.settings.get('logLevel') === Log.Levels.INFO;
+  };
+
+  Transition.Log.isWarn = function () {
+    return models.settings.get('logLevel') === Log.Levels.WARN;
+  };
+
+  Transition.Log.isError = function () {
+    return models.settings.get('logLevel') === Log.Levels.ERROR;
+  };
+
+  Transition.Log.isFatal = function () {
+    return models.settings.get('logLevel') === Log.Levels.FATAL;
   };
 
   /********************************************************************************
@@ -1167,7 +1229,6 @@
       });
 
       models.suiteRunner.set('currentTest', currTest);
-      console.log('route[showTest(' + testName + ')]');
     },
 
     main: function () {
