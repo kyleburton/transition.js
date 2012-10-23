@@ -396,6 +396,14 @@
       this.set('test',            attributes.test);
       this.set('currStateNumber', 0);
       this.set('state',           attributes.test.getState('start'));
+      this.set('visited',         []);
+    },
+
+    visited: function (name) {
+      var a = this.get('visited');
+      a.unshift(name);
+      this.set('visited', a);
+      return this;
     },
 
     start: function () {
@@ -405,6 +413,7 @@
         state: this.get('state')
       }));
       this.set('currStateNumber', 1);
+      this.visited(this.get('state').get('name'));
       try {
         this.get('test').get('initialize').call(this.get('state'));
         this.get('state').callOnEnter(this.get('test'), this.get('state'));
@@ -432,7 +441,6 @@
         return;
       }
 
-
       _.each(state.get('transitions'), function (tr) {
         if (tr.pred.call(test, state, tr)) {
           dests.push(tr);
@@ -447,11 +455,13 @@
       }
 
       if (dests.length === 1) {
+        // NB: this is nearly identical to part of stepBack below
         state.set('endTime', new Date());
         Log.info("Transitioning from " + state.get('name') + " to " + dests[0].to);
         this.set('currStateNumber', 1 + this.get('currStateNumber'));
         state = test.getState(dests[0].to);
         this.set('state', state);
+        this.visited(this.get('state').get('name'));
         try {
           state.callOnEnter(test, dests[0]);
         }
@@ -467,6 +477,37 @@
       Log.trace("No transition from " + state.get('name') + " yet...");
 
       return false;
+    },
+
+    stepBack: function () {
+      var test  = this.get('test'),
+          state = this.get('state');
+      var visited = this.get('visited'),
+          prev;
+
+      if (visited.length < 2) {
+        return this;
+      }
+
+      prev = visited.shift();
+      this.set('visited', visited);
+
+      // NB: this is nearly identical to part of transition above
+      state.set('endTime', new Date());
+      Log.info('rewinding from %s to %s', prev, visited[0]);
+      this.set('currStateNumber', 1 + this.get('currStateNumber'));
+      state = test.getState(prev);
+      this.set('state', state);
+      try {
+        // NB: there is predicate map to pass when we're stepping back...
+        state.callOnEnter(test);
+      }
+      catch (e) {
+        console.error(e);
+        this.set('error', e);
+        Log.error(e);
+      }
+
     },
 
     elapsedTime: function () {
@@ -565,6 +606,7 @@
       'click button[name=stop]':     'stopClicked',
       'click button[name=start]':    'startClicked',
       'click button[name=step]':     'stepClicked',
+      'click button[name=back]':     'backClicked',
       'click button[name=continue]': 'continueClicked',
       'click button[name=reload]':   'reloadClicked'
     },
@@ -574,6 +616,7 @@
       _.bindAll(this, 'runClicked');
       _.bindAll(this, 'stopClicked');
       _.bindAll(this, 'stepClicked');
+      _.bindAll(this, 'backClicked');
       _.bindAll(this, 'continueClicked');
       _.bindAll(this, 'reloadClicked');
     },
@@ -592,6 +635,10 @@
 
     stepClicked: function () {
       Transition.step();
+    },
+
+    backClicked: function () {
+      Transition.back();
     },
 
     continueClicked: function () {
@@ -929,6 +976,15 @@
     Transition.testRunner.transition();
   };
 
+  Transition.back = function () {
+    if (!Transition.testRunner) {
+      Log.warn("Can't step back, no test is running.");
+      return;
+    }
+
+    Transition.testRunner.stepBack();
+  };
+
   Transition.reload = function () {
     Transition.loadScript('../test-suite.js');
     if (Transition.testRunner && Transition.testRunner.get('test').get('url')) {
@@ -937,7 +993,10 @@
   };
 
   Transition.cont = function () {
-    console.log('Transition.cont');
+    Transition.pollTimeoutId = setTimeout(
+        Transition.pollFn,
+        models.settings.get('pollTimeout')
+    );
   };
 
   /********************************************************************************
