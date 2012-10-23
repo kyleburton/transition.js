@@ -39,19 +39,26 @@
             <!--
             <li><a href="#">Reports</a></li>
             -->
-            <li><a href="#" class="settings">Settings</a></li>
-            <!--
             <li class="dropdown">
-            <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html"> Settings <b class="caret"></b> </a>
+            <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html"> Log <b class="caret"></b> </a>
             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-              <li><a tabindex="-1" href="#">Run Pending</a></li>
-              <li><a tabindex="-1" href="#">Another action</a></li>
-              <li><a tabindex="-1" href="#">Something else here</a></li>
+              <li>
+                <form class="navbar-search pull-left" action="">
+                  <input type="text" class="search-query span2" placeholder="Search">
+                </form>
+              </li>
               <li class="divider"></li>
-              <li><a tabindex="-1" href="#">Separated link</a></li>
+              <li><a tabindex="-1" href="#">Trace</a></li>
+              <li><a tabindex="-1" href="#">Debug</a></li>
+              <li><a tabindex="-1" href="#">Info</a></li>
+              <li><a tabindex="-1" href="#">Warn</a></li>
+              <li><a tabindex="-1" href="#">Error</a></li>
+              <li><a tabindex="-1" href="#">Fatal</a></li>
+              <li class="divider"></li>
+              <li><a class="clear-log" tabindex="-1" href="#">Clear Log</a></li>
             </ul>
             </li>
-            -->
+            <li><a href="#" class="settings">Settings</a></li>
           </ul>
 
           <!--
@@ -89,7 +96,6 @@
       <button name="step"     class="btn">Step</button>
       <button name="continue" class="btn">Continue</button>
       <button name="reload"   class="btn">Reload</button>
-      <button name="clear"    class="btn">Clear Log</button>
     </script>
 
     <script id="transition-runner-settings-modal-tmpl" type="text/html">

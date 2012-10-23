@@ -502,8 +502,9 @@
     templateId: 'navbar-tmpl',
 
     events: {
-      'click .settings': 'showSettings',
-      'click a.test':    'testSelected'
+      'click .settings':   'showSettings',
+      'click a.test':      'testSelected',
+      'click a.clear-log': 'clearLog'
     },
 
     initialize: function () {
@@ -529,6 +530,10 @@
       Transition.router.navigate(dest, {trigger: true});
     },
 
+    clearLog: function () {
+      models.logEntries.reset([]);
+    },
+
     render: function () {
       this.$el.html(tmpl(this.templateId, {suite: models.suite}));
       this.$('.dropdown-toggle').dropdown();
@@ -545,8 +550,7 @@
       'click button[name=start]':    'startClicked',
       'click button[name=step]':     'stepClicked',
       'click button[name=continue]': 'continueClicked',
-      'click button[name=reload]':   'reloadClicked',
-      'click button[name=clear]':    'clearClicked'
+      'click button[name=reload]':   'reloadClicked'
     },
 
     initialize: function () {
@@ -556,7 +560,6 @@
       _.bindAll(this, 'stepClicked');
       _.bindAll(this, 'continueClicked');
       _.bindAll(this, 'reloadClicked');
-      _.bindAll(this, 'clearClicked');
     },
 
     runClicked: function () {
@@ -581,11 +584,6 @@
 
     reloadClicked: function () {
       Transition.reload();
-    },
-
-    clearClicked: function (evt) {
-      console.log('clearClicked');
-      models.logEntries.reset([]);
     },
 
     render: function () {
