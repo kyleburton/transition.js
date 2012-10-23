@@ -355,9 +355,17 @@
 
   Models.LogEntries = LogEntries = Backbone.Collection.extend({
     model: LogEntry,
+
     first: function () {
       if (this.models.length > 0) {
         return this.models[0];
+      }
+      return null;
+    },
+
+    last: function () {
+      if (this.models.length > 0) {
+        return this.models[this.models.length - 1];
       }
       return null;
     }
@@ -502,9 +510,11 @@
     templateId: 'navbar-tmpl',
 
     events: {
-      'click .settings':   'showSettings',
-      'click a.test':      'testSelected',
-      'click a.clear-log': 'clearLog'
+      'click .settings':                'showSettings',
+      'click a.test':                   'testSelected',
+      'click a.clear-log':              'clearLog',
+      'change input[name=log-filter]':  'filterLog',
+      'keyup input[name=log-filter]':   'filterLog'
     },
 
     initialize: function () {
@@ -532,6 +542,12 @@
 
     clearLog: function () {
       models.logEntries.reset([]);
+    },
+
+    filterLog: function (evt) {
+      var str = $(evt.target).val();
+      console.log('filterLog: %o', str);
+      Transition.views.logViewer.filter(str);
     },
 
     render: function () {
@@ -734,6 +750,7 @@
       models.logEntries.on('reset',  this.render,         this);
       models.logEntries.on('add',    this.addLogEntry,    this);
       models.logEntries.on('remove', this.removeLogEntry, this);
+      this.filterBy = null;
     },
 
     removeLogEntry: function (logEntry) {
@@ -749,7 +766,22 @@
       }
       entryView.render();
       this.entryViews[logEntry.cid] = entryView;
-      this.$el.prepend(entryView.$el);
+
+      if (this.passesFilter(logEntry)) {
+        this.$el.prepend(entryView.$el);
+      }
+    },
+
+    passesFilter: function (logEntry) {
+      if (!this.filterBy) {
+        return true;
+      }
+      return logEntry.get("message").toLowerCase().indexOf(this.filterBy.toLowerCase()) !== -1;
+    },
+
+    filter: function (filterBy) {
+      this.filterBy = filterBy;
+      this.render();
     },
 
     render: function () {
@@ -1020,13 +1052,13 @@
       message:     sprintf.apply(sprintf, args)
     });
 
-    if (models.logEntries.models.length > 1 &&
-        models.logEntries.first().get('message') === entry.get('message')) {
-      models.logEntries.first().countRepeat();
-      return models.logEntries.first();
+    if (models.logEntries.models.length > 0 &&
+        models.logEntries.last().get('message') === entry.get('message')) {
+      models.logEntries.last().countRepeat();
+      return models.logEntries.last();
     }
 
-    models.logEntries.unshift(entry);
+    models.logEntries.add(entry);
     return entry;
   };
 
