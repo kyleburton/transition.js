@@ -97,6 +97,7 @@ end
 desc "Run the TODO application"
 task :todo do
   Dir.chdir("examples/todo-sinatra") do
+    system "bundle", "install"
     system "rake", "db:migrate"
     system "rake", "rerun"
   end
