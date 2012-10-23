@@ -955,8 +955,9 @@
         if (models.suiteRunner.nextTest()) {
           Transition.runTest();
           Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
-          return;
         }
+
+        return;
       }
       Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
     };
@@ -1104,7 +1105,8 @@
   };
 
   Transition.find = function (selector) {
-    var result = $(parent.frames.main.document).find(selector);
+    var jq = parent.frames.main.document.$ || $(parent.frames.main.document),
+        result = jq.find(selector);
     return result;
   };
 
