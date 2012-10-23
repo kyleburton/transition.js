@@ -2,6 +2,21 @@
 /*global window, jQuery, _, Backbone, console, Transition */
 "use strict";
 
+(function () {
+  var root        = this,
+      TodoTestLib = {};
+
+  this.TodoTestLib = TodoTestLib;
+
+  TodoTestLib.deleteTestList = function () {
+    var old = parent.frames.main.confirm;
+    parent.frames.main.confirm = function () { return true; };
+    parent.frames.main.$('a[data-method=delete]').click();
+    parent.frames.main.confirm = old;
+  };
+
+}.call(this));
+
 Transition.addTest({
   name: 'Test Index Page',
   initialize: function () {
@@ -26,9 +41,10 @@ Transition.addTest({
 
   states: [
     Transition.newState('init', Transition.navigateTo_('/'), {},
-      {to: 'deleteTestList', pred: Transition.elementExists_('li a:contains("Test")') }
+      {to: 'deleteTestList', pred: Transition.elementExists_('li a:contains("Test")') },
+      {to: 'mainPage',       pred: Transition.elementNotExists_('li a:contains("Test")') }
       ),
-    Transition.newState('deleteTestList', 'deleteTestList', {},
+    Transition.newState('deleteTestList', TodoTestLib.deleteTestList, {},
       {to: 'deleteTestList',     pred: Transition.elementExists_('li a:contains("Test")') },
       {to: 'mainPage',           pred: Transition.elementNotExists_('li a:contains("Test")') }
       ),
@@ -39,13 +55,6 @@ Transition.addTest({
       {to: 'success', pred: Transition.elementExists_('li a:contains("Test")') }
       )
   ],
-
-  deleteTestList: function () {
-    var old = parent.frames.main.confirm;
-    parent.frames.main.confirm = function () { return true; };
-    parent.frames.main.$('a[data-method=delete]').click();
-    parent.frames.main.confirm = old;
-  },
 
   createList: function () {
     Transition.find('input[name="list[name]"]').val('Test');
