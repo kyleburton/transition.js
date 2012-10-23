@@ -580,7 +580,7 @@
     },
 
     reloadClicked: function () {
-      console.log('reloadClicked');
+      Transition.reload();
     },
 
     clearClicked: function (evt) {
@@ -899,6 +899,13 @@
     Transition.testRunner.transition();
   };
 
+  Transition.reload = function () {
+    Transition.loadScript('../test-suite.js');
+    if (Transition.testRunner && Transition.testRunner.get('test').get('url')) {
+      Transition.loadScript(Transition.testRunner.get('test').get('url'));
+    }
+  };
+
   Transition.cont = function () {
     console.log('Transition.cont');
   };
@@ -907,6 +914,17 @@
    * Test Suite Management and Helpers
    *
    ********************************************************************************/
+  Transition.loadScript = function (url) {
+    $.ajax({
+      url:      url,
+      dataType: "script",
+      async:    false,
+      error:    function () {
+        Log.error("Error loading script: %s", url);
+      }
+    });
+  };
+
   Transition.newState = function () {
     var args = [].slice.call(arguments),
         stateName = args.shift(),
@@ -1079,7 +1097,7 @@
     addView('logViewer',        Views.LogViewer,        '#transition-runner-log-viewer');
     Log.info('views initialized');
     Backbone.history.start();
-    Log.info('runner initialization completed.');
+    Log.info('runner initialization completed: %a');
     if (models.suite.models.length < 1) {
       Log.fatal('No Test Suite Found, please place your tests in <a href="../test-suite.js">../test-suite.js</a>');
     }

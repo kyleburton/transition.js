@@ -1,6 +1,10 @@
 Issues
   The example test suite fails to run on the iPad
 
+Runner:
+  'Go Back' button.
+  Reload should reload the current test's URL if it was loaded via a url
+  otherwise reload test-suite.js...
 
 Support Factored out tests in separate files.
 Test
