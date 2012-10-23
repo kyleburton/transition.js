@@ -41,7 +41,10 @@ Transition.addTest({
   ],
 
   deleteTestList: function () {
-    Transition.find('p.delete-list a').click();
+    var old = parent.frames.main.confirm;
+    parent.frames.main.confirm = function () { return true; };
+    parent.frames.main.$('a[data-method=delete]').click();
+    parent.frames.main.confirm = old;
   },
 
   createList: function () {
