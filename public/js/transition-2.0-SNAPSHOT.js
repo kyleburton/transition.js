@@ -991,11 +991,7 @@
       testState:   models.suiteRunner.get('currentTest').get('currentState'),
       timestamp:   '*test state*',
       repeatCount: 1,
-      message:     _.reduce(args, function (acc, str) {
-          return acc + str;
-        },
-        ''
-      )
+      message:     sprintf.apply(sprintf, args)
     });
 
     if (models.logEntries.models.length > 1 &&
