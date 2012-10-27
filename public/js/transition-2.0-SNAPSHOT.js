@@ -53,6 +53,7 @@
     SuiteRunner,
     LogEntryView,
     StateReport,
+    SuiteDropdown,
     TestRunner,
     Log = Transition.Log,
     models = Transition.models;
@@ -656,8 +657,10 @@
     initialize: function () {
       this.constructor.__super__.initialize.apply(this, []);
       _.extend(this.events, {
-        'change input[name=log-filter]':  'filterLog',
-        'keyup input[name=log-filter]':   'filterLog'
+        'change input[name=log-filter]':    'filterLog',
+        'keyup input[name=log-filter]':     'filterLog',
+        'change input[name=suite-filter]':  'filterSuite',
+        'keyup input[name=suite-filter]':   'filterSuite'
       });
       _.bindAll(this, 'showSettings');
       models.suite.on('all', this.render, this);
@@ -712,8 +715,46 @@
       models.settings.set('logLevel', Log.Levels.FATAL);
     },
 
+    filterSuite: function (evt) {
+      var str = $(evt.target).val();
+      console.log('filterSuite: %o', str);
+      this.$el.find('#suite-dropdown-divider ~ li').remove();
+      this.suiteDropdown.setFilter(str);
+      this.suiteDropdown.render().$el.appendTo(this.$el.find('.dropdown-menu'));
+    },
+
     render: function () {
       this.$el.html(tmpl(this.templateId, {suite: models.suite}));
+      this.suiteDropdown = new SuiteDropdown();
+      this.suiteDropdown.render().$el.appendTo(this.$el.find('.dropdown-menu'));
+      return this;
+    }
+  });
+
+  Views.SuiteDropdown = SuiteDropdown = Backbone.View.extend({
+    templateId: 'suite-dropdown-tmpl',
+
+    initialize: function () {
+      this.constructor.__super__.initialize.apply(this, []);
+      models.suite.on('change', this.render, this);
+    },
+
+    setFilter: function (filterBy) {
+      this.filterBy = filterBy;
+    },
+
+    testsToShow: function () {
+      var self = this;
+      if (!self.filterBy || self.filterBy.length < 1) {
+        return models.suite.models;
+      }
+      return _.filter(models.suite.models, function (test) {
+        return -1 !== test.get('name').toLowerCase().indexOf(self.filterBy.toLowerCase());
+      });
+    },
+
+    render: function () {
+      this.$el.html(tmpl(this.templateId, this));
       return this;
     }
   });
