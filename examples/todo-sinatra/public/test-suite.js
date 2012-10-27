@@ -24,80 +24,12 @@
 
 }.call(this));
 
-Transition.addTest({
-  name: 'Test Index Page',
-  initialize: function () {
-    console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
-  },
-  states: [
-    Transition.newState('init', Transition.navigateTo_('about:blank'), {},
-      {to: 'mainPage', pred: Transition.constantly_(true) }
-      ),
-    Transition.newState('mainPage', Transition.navigateTo_('/'), {},
-      {to: 'success', pred: Transition.elementExists_('form[action="/lists"]') }
-      )
-  ]
-});
-
-Transition.addTest({
-  name: 'Add a List',
-  initialize: function () {
-    // delete all lists named 'test'
-    console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
-  },
-
-  states: [
-    Transition.newState('init', Transition.navigateTo_('/'), {},
-      {to: 'deleteTestList', pred: Transition.elementExists_('li a:contains("Test")') },
-      {to: 'mainPage',       pred: Transition.elementNotExists_('li a:contains("Test")') }
-      ),
-    Transition.newState('deleteTestList', TodoTestLib.deleteTestList, {},
-      {to: 'deleteTestList',     pred: Transition.elementExists_('li a:contains("Test")') },
-      {to: 'mainPage',           pred: Transition.elementNotExists_('li a:contains("Test")') }
-      ),
-    Transition.newState('mainPage', Transition.navigateTo_('/'), {},
-      {to: 'createList', pred: Transition.elementExists_('input[name="list[name]"]:visible') }
-      ),
-    Transition.newState('createList', TodoTestLib.createTestList, {},
-      {to: 'success', pred: Transition.elementExists_('li a:contains("Test")') }
-      )
-  ]
-
-});
-
-Transition.addTest({
-  name: 'Add an entry to a List',
-  initialize: function () {
-    console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
-  },
-
-  states: [
-    Transition.newState('init', Transition.navigateTo_('/'), {},
-      {to: 'deleteTestList', pred: Transition.elementExists_('li a:contains("Test")') },
-      {to: 'mainPage',       pred: Transition.elementNotExists_('li a:contains("Test")') }
-      ),
-    Transition.newState('deleteTestList', TodoTestLib.deleteTestList, {},
-      {to: 'deleteTestList',     pred: Transition.elementExists_('li a:contains("Test")') },
-      {to: 'mainPage',           pred: Transition.elementNotExists_('li a:contains("Test")') }
-      ),
-    Transition.newState('mainPage', Transition.navigateTo_('/'), {},
-      {to: 'createList', pred: Transition.elementExists_('input[name="list[name]"]:visible') }
-      ),
-    Transition.newState('createList', TodoTestLib.createTestList, {},
-      {to: 'addItem', pred: Transition.elementExists_('li a:contains("Test")') }
-      ),
-    Transition.newState('addItem', 'addItem', {},
-      {to: 'success', pred: Transition.elementExists_('li:contains("item")') }
-      )
-  ],
-
-  addItem: function () {
-    Transition.find('input[name="task[name]"]').val('item');
-    Transition.find('form:visible').submit();
-  }
-});
 
 // Other tests to create:
-// *) Mark an item as done
 // *) Delete an item
+
+Transition.loadScript('/tests/index-page.js');
+Transition.loadScript('/tests/add-a-list.js');
+Transition.loadScript('/tests/add-todo-item.js');
+Transition.loadScript('/tests/mark-item-as-done.js');
 

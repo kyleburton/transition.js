@@ -4,7 +4,6 @@ For Events (a real click), recording, etc, look at:
 Issues
   The example test suite fails to run on the iPad
 
-Support Factored out tests in separate files.
 Test
   Each should have a pending flag.
 Suite
