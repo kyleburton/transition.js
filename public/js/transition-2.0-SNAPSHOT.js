@@ -25,7 +25,10 @@
         Runner: {}
       },
       views: {},
-      models: {}
+      models: {},
+      KEYS: {
+        ESC: 27
+      }
     },
     Views       = Transition.Views,
     Models      = Transition.Models,
@@ -571,6 +574,7 @@
     events: {
       'click a.dropdown-toggle':  'toggleDropdownMenu',
       'click .dropdown-menu a':   'menuItemClicked',
+      'keyup':                    'checkIfEscapePressed',
       'click a':                  'buttonClicked'
     },
 
@@ -633,6 +637,12 @@
       return this;
     },
 
+    checkIfEscapePressed: function (evt) {
+      if (evt.keyCode === Transition.KEYS.ESC) {
+        evt.preventDefault();
+        return this.closeAllMenus();
+      }
+    },
 
     render: function () {
       this.$el.html(tmpl(this.templateId, {suite: models.suite}));
