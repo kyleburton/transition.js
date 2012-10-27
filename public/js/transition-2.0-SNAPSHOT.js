@@ -130,7 +130,7 @@
         throw('Error: onEnter[' + this.get('onEnter') +'] is not a valid function');
       }
 
-      onEnter.apply(test, args);
+      onEnter.call(test, args);
     }
   });
 
@@ -424,6 +424,7 @@
         this.get('state').callOnEnter(this.get('test'), this.get('state'));
       }
       catch (e) {
+        console.error('Error initialzing test or calling onEnter!');
         console.error(e);
         this.set('error', e);
         Log.error(e);
@@ -626,8 +627,6 @@
 
       evt.preventDefault();
 
-      console.log('toggleDropdownMenu');
-
       if (li.hasClass('open')) {
         li.removeClass('open');
         return;
@@ -715,9 +714,14 @@
       models.settings.set('logLevel', Log.Levels.FATAL);
     },
 
+    reloadClicked: function (evt) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      Transition.reload();
+    },
+
     filterSuite: function (evt) {
       var str = $(evt.target).val();
-      console.log('filterSuite: %o', str);
       this.$el.find('#suite-dropdown-divider ~ li').remove();
       this.suiteDropdown.setFilter(str);
       this.suiteDropdown.render().$el.appendTo(this.$el.find('.dropdown-menu'));
@@ -1359,7 +1363,6 @@
         return elt.get('name') === testName;
       });
 
-      console.log('setting test to %o', currTest);
       models.suiteRunner.set('currentTest', currTest);
 
       Transition.testRunner = new TestRunner({

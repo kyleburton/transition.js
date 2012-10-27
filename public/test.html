@@ -30,17 +30,14 @@
             <li class="dropdown">
             <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html"> Suite <b class="caret"></b> </a>
             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+              <li><a data-item="reload" tabindex="-1" href="#">Reload</a></li>
+              <li class="divider"></li>
               <li>
                 <form class="navbar-search" action="">
                   <input type="text" name="suite-filter" class="search-query" placeholder="Search">
                 </form>
               </li>
               <li id="suite-dropdown-divider" class="divider"></li>
-              <!--
-              <% _.each( suite.models, function (test) { %>
-                <li><a class="test" data-item="testSelected" tabindex="-1" href="test/<%= test.get('name') %>">Test <%= test.get('name') %></a></li>
-              <% }); %>
-              -->
             </ul>
             </li>
             <!--
@@ -103,7 +100,6 @@
       <button name="step"     class="btn">Step</button>
       <button name="back"     class="btn">Back</button>
       <button name="continue" class="btn">Continue</button>
-      <button name="reload"   class="btn">Reload</button>
     </script>
 
     <script id="transition-runner-settings-modal-tmpl" type="text/html">
