@@ -56,6 +56,8 @@
 
   root.Transition = Transition;
   Transition.$    = root.jQuery;
+  Transition.Views.Bootstrap = {};
+
   if (!Transition.$) {
     throw 'Error: jQuery not found.';
   }
@@ -546,7 +548,56 @@
    * Views
    *
    ********************************************************************************/
-  Views.Navbar = Backbone.View.extend({
+  Views.Bootstrap.Navbar = Backbone.View.extend({
+    templateId: 'navbar-tmpl',
+
+    events: {
+      'click a.dropdown-toggle':  'toggleDropdownMenu',
+      'click .dropdown-menu a':   'menuItemClicked'
+    },
+
+    menuItemClicked: function (evt) {
+      var target = $(evt.target),
+          item = target.attr('data-item'),
+          handler = item + 'Clicked';
+
+      console.log('menu item clicked!');
+      this.closeAllMenus();
+
+      if (this[handler]) {
+        this[handler](evt);
+      }
+
+    },
+
+    closeAllMenus: function () {
+      this.$el.find('.dropdown').removeClass('open');
+    },
+
+    toggleDropdownMenu: function (evt) {
+      var target = $(evt.target),
+          li = target.parent('li');
+
+      console.log('toggleDropdownMenu');
+
+      if (li.hasClass('open')) {
+        li.removeClass('open');
+        return;
+      }
+
+      this.closeAllMenus();
+      li.addClass('open');
+      return this;
+    },
+
+
+    render: function () {
+      this.$el.html(tmpl(this.templateId, {suite: models.suite}));
+      return this;
+    }
+  });
+
+  Views.Navbar = Views.Bootstrap.Navbar.extend({
     templateId: 'navbar-tmpl',
 
     events: {
@@ -583,6 +634,7 @@
     testSelected: function (evt) {
       evt.preventDefault();
       var dest = $(evt.target).attr('href');
+      console.log('testSelected: %o', dest);
       Transition.router.navigate(dest, {trigger: true});
     },
 
@@ -621,7 +673,6 @@
 
     render: function () {
       this.$el.html(tmpl(this.templateId, {suite: models.suite}));
-      this.$('.dropdown-toggle').dropdown();
       return this;
     }
   });
