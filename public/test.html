@@ -41,23 +41,23 @@
             <li class="dropdown">
             <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html"> Log <b class="caret"></b> </a>
             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+              <li><a data-item="clearLog" tabindex="-1" href="#">Clear Log</a></li>
+              <li class="divider"></li>
               <li>
-                <form class="navbar-search pull-left" action="">
-                  <input type="text" name="log-filter" class="search-query span1" placeholder="Search">
+                <form class="navbar-search" action="">
+                  <input type="text" name="log-filter" class="search-query" placeholder="Search">
                 </form>
               </li>
               <li class="divider"></li>
-              <li><a tabindex="-1" class="set-log-trace" href="#">Trace<% if (Transition.Log.isTrace()) { %> <i class="icon-ok"></i><% } %></a></li>
-              <li><a tabindex="-1" class="set-log-debug" href="#">Debug<% if (Transition.Log.isDebug()) { %> <i class="icon-ok"></i><% } %></a></li>
-              <li><a tabindex="-1" class="set-log-info" href="#">Info<% if (Transition.Log.isInfo()) { %> <i class="icon-ok"></i><% } %></a></li>
-              <li><a tabindex="-1" class="set-log-warn" href="#">Warn<% if (Transition.Log.isWarn()) { %> <i class="icon-ok"></i><% } %></a></li>
-              <li><a tabindex="-1" class="set-log-error" href="#">Error<% if (Transition.Log.isError()) { %> <i class="icon-ok"></i><% } %></a></li>
-              <li><a tabindex="-1" class="set-log-fatal" href="#">Fatal<% if (Transition.Log.isFatal()) { %> <i class="icon-ok"></i><% } %></a></li>
-              <li class="divider"></li>
-              <li><a class="clear-log" tabindex="-1" href="#">Clear Log</a></li>
+              <li><a tabindex="-1" data-item="setLogTrace" href="#">Trace<% if (Transition.Log.isTrace()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogDebug" href="#">Debug<% if (Transition.Log.isDebug()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogInfo" href="#">Info<% if (Transition.Log.isInfo()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogWarn" href="#">Warn<% if (Transition.Log.isWarn()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogError" href="#">Error<% if (Transition.Log.isError()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogFatal" href="#">Fatal<% if (Transition.Log.isFatal()) { %> <i class="icon-ok"></i><% } %></a></li>
             </ul>
             </li>
-            <li><a href="#" class="settings">Settings</a></li>
+            <li><a href="#" data-item="showSettings" class="settings">Settings</a></li>
           </ul>
 
           <!--

@@ -553,7 +553,8 @@
 
     events: {
       'click a.dropdown-toggle':  'toggleDropdownMenu',
-      'click .dropdown-menu a':   'menuItemClicked'
+      'click .dropdown-menu a':   'menuItemClicked',
+      'click a':                  'buttonClicked'
     },
 
     menuItemClicked: function (evt) {
@@ -561,11 +562,34 @@
           item = target.attr('data-item'),
           handler = item + 'Clicked';
 
+      evt.preventDefault();
       console.log('menu item clicked!');
       this.closeAllMenus();
 
       if (this[handler]) {
-        this[handler](evt);
+        return this[handler](evt);
+      }
+
+      if (this[item]) {
+        return this[item](evt);
+      }
+
+    },
+
+    buttonClicked: function (evt) {
+      var target = $(evt.target),
+          item = target.attr('data-item'),
+          handler = item + 'Clicked';
+
+
+      if (this[handler]) {
+        evt.preventDefault();
+        return this[handler](evt);
+      }
+
+      if (this[item]) {
+        evt.preventDefault();
+        return this[item](evt);
       }
 
     },
@@ -577,6 +601,8 @@
     toggleDropdownMenu: function (evt) {
       var target = $(evt.target),
           li = target.parent('li');
+
+      evt.preventDefault();
 
       console.log('toggleDropdownMenu');
 
@@ -600,22 +626,12 @@
   Views.Navbar = Views.Bootstrap.Navbar.extend({
     templateId: 'navbar-tmpl',
 
-    events: {
-      'click .settings':                'showSettings',
-      'click a.test':                   'testSelected',
-      'click a.clear-log':              'clearLog',
-      'click a.set-log-trace':          'setLogTrace',
-      'click a.set-log-debug':          'setLogDebug',
-      'click a.set-log-info':           'setLogInfo',
-      'click a.set-log-warn':           'setLogWarn',
-      'click a.set-log-error':          'setLogError',
-      'click a.set-log-fatal':          'setLogFatal',
-      'change input[name=log-filter]':  'filterLog',
-      'keyup input[name=log-filter]':   'filterLog'
-    },
-
     initialize: function () {
       this.constructor.__super__.initialize.apply(this, []);
+      _.extend(this.events, {
+        'change input[name=log-filter]':  'filterLog',
+        'keyup input[name=log-filter]':   'filterLog'
+      });
       _.bindAll(this, 'showSettings');
       models.suite.on('all', this.render, this);
       models.settings.on('change', this.render, this);
@@ -751,7 +767,6 @@
 
     render: function () {
       this.$el.html(tmpl(this.templateId, {}));
-      $('.dropdown-toggle').dropdown();
       return this;
     }
   });
