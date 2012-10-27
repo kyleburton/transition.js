@@ -540,7 +540,24 @@
     succeeded: function () {
       return this.get('isDone') && 
              this.get('state').get('attrs').success;
-    }
+    },
+
+    labelClass: function () {
+      if (this.get('isRunning')) {
+        return 'label-info';
+      }
+
+      if (this.get('isDone') && this.succeeded()) {
+        return 'label-success';
+      }
+
+      if (this.get('isDone') && !this.succeeded()) {
+        return 'label-important';
+      }
+
+      return '';
+    },
+
 
   });
 
@@ -562,15 +579,15 @@
           item = target.attr('data-item'),
           handler = item + 'Clicked';
 
-      evt.preventDefault();
-      console.log('menu item clicked!');
       this.closeAllMenus();
 
       if (this[handler]) {
+        evt.preventDefault();
         return this[handler](evt);
       }
 
       if (this[item]) {
+        evt.preventDefault();
         return this[item](evt);
       }
 
@@ -648,9 +665,7 @@
     },
 
     testSelected: function (evt) {
-      evt.preventDefault();
       var dest = $(evt.target).attr('href');
-      console.log('testSelected: %o', dest);
       Transition.router.navigate(dest, {trigger: true});
     },
 
@@ -830,9 +845,6 @@
 
   Views.CurrentTestState = Backbone.View.extend({
     templateId: 'transition-runner-current-test-state-tmpl',
-
-    events: {
-    },
 
     initialize: function (options) {
       this.constructor.__super__.initialize.apply(this, []);
@@ -1296,7 +1308,17 @@
         return elt.get('name') === testName;
       });
 
+      console.log('setting test to %o', currTest);
       models.suiteRunner.set('currentTest', currTest);
+
+      Transition.testRunner = new TestRunner({
+        test: models.suiteRunner.get('currentTest')
+      });
+
+      addView('currentTestState', Views.CurrentTestState, '#transition-runner-current-test-state', {
+        testRunner: Transition.testRunner
+      });
+
     },
 
     main: function () {
