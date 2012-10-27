@@ -4,34 +4,19 @@ For Events (a real click), recording, etc, look at:
 Issues
   The example test suite fails to run on the iPad
 
-Runner:
-  'Go Back' button.
-  Reload should reload the current test's URL if it was loaded via a url
-  otherwise reload test-suite.js...
-
 Support Factored out tests in separate files.
 Test
-  Each should have a pass/fail indicator.
   Each should have a pending flag.
-  on initialize, call initialize()
-  on initialize, clear each TestState's 'visisted' flag
 Suite
   Failure summary
   Support for re-running only those tests that failed
-current-test-state
-  update state # / total states by listening to the TestStates collection
-    and listening to whether the state has been visited
-    and update the current-state-name
-  this view should be removed and re-created whenever a new test is chosen
 Settings:
   add pollTimeout 250ms
 Navbar:
   hide/show the navbar to save on screen real estate
-  Tests selection should have a dynamic filter via a search box
 Log Viewer
   log entries should have lots of details, there should be an interctive menu
     option or setting to toggle between brief and detialed views
-  Log filtering via a dynamic search box
   Stop the log window from increasing the viewport - put a max-height on the log window
 Logging
   Support colors regardless of level, this will be useful for reporting on test pass/failure
@@ -42,7 +27,6 @@ Documentation
 External Logging
   Used to be done via a sinatra app, could be done that way again
   
-
 Controls:
   have an alternate view for mobile
   larger buttons, show/hide controls
