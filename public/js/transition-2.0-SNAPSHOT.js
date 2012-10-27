@@ -1,5 +1,5 @@
 /*jslint browser: true, maxerr: 50, indent: 2, nomen: false, regexp: false, newcap:false */
-/*global window, jQuery, _, Backbone, console */
+/*global window, jQuery, _, Backbone, console, sprintf */
 "use strict";
 
 /********************************************************************************
@@ -96,7 +96,8 @@
       maxTransitions:       20,
       maxAttemptsPerState:  50,
       // NB: hook this into the UI
-      pollTimeout:     250,
+      //pollTimeout:     250,
+      pollTimeout:     500,
       // NB: hook this into the UI
       logLevel:        Log.Levels.TRACE
       //logLevel:        Log.Levels.INFO
@@ -122,12 +123,12 @@
 
     callOnEnter: function (test, args) {
       var onEnter = this.get('onEnter');
-      if (typeof onEnter != "function") {
+      if (typeof onEnter !== "function") {
         onEnter = test.get(onEnter);
       }
 
-      if (typeof onEnter != "function") {
-        throw('Error: onEnter[' + this.get('onEnter') +'] is not a valid function');
+      if (typeof onEnter !== "function") {
+        throw 'Error: onEnter[' + this.get('onEnter') + '] is not a valid function';
       }
 
       onEnter.call(test, args);
@@ -487,8 +488,8 @@
 
     stepBack: function () {
       var test  = this.get('test'),
-          state = this.get('state');
-      var visited = this.get('visited'),
+          state = this.get('state'),
+          visited = this.get('visited'),
           prev;
 
       if (visited.length < 2) {
@@ -517,7 +518,7 @@
     },
 
     elapsedTime: function () {
-      return (new Date()).getTime() - (this.get('startTime')|| new Date()).getTime();
+      return (new Date()).getTime() - (this.get('startTime') || new Date()).getTime();
     },
 
     percentTimeRemaining: function () {
@@ -561,8 +562,7 @@
       }
 
       return '';
-    },
-
+    }
 
   });
 

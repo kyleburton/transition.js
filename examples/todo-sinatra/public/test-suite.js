@@ -1,5 +1,5 @@
 /*jslint browser: true, maxerr: 50, indent: 2, nomen: false, regexp: false, newcap:false */
-/*global window, jQuery, _, Backbone, console, Transition */
+/*global window, jQuery, _, Backbone, console, Transition, TodoTestLib */
 "use strict";
 
 (function () {
@@ -10,7 +10,9 @@
 
   TodoTestLib.deleteTestList = function () {
     var old = parent.frames.main.confirm;
-    parent.frames.main.confirm = function () { return true; };
+    parent.frames.main.confirm = function () {
+      return true;
+    };
     parent.frames.main.$('a[data-method=delete]').click();
     parent.frames.main.confirm = old;
   };
