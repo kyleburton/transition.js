@@ -2,36 +2,32 @@
 /*global window, jQuery, _, Backbone, console, Transition, TodoTestLib */
 "use strict";
 
-Transition.addTest({
-  name: 'Add an entry to a List',
-  initialize: function () {
-    //console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
-  },
+(function () {
+  this.addTest({
+    name: 'Add an entry to a List',
+    initialize: function () {
+      //console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
+    },
+  
+    states: [
+      this.newState('init', this.navigateTo_('/'))
+        .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
+        .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
+      this.newState('deleteTestList', TodoTestLib.deleteTestList)
+        .to('deleteTestList',     this.elementExists_('li a:contains("Test")'))
+        .to('mainPage',           this.elementNotExists_('li a:contains("Test")')),
+      this.newState('mainPage', this.navigateTo_('/'))
+        .to('createList', this.elementExists_('input[name="list[name]"]:visible')),
+      this.newState('createList', TodoTestLib.createTestList)
+        .to('addItem', this.elementExists_('li a:contains("Test")')),
+      this.newState('addItem', 'addItem')
+        .to('success', this.elementExists_('li:contains("item")'))
+    ],
+  
+    addItem: function () {
+      this.find('input[name="task[name]"]').val('item');
+      this.find('form:visible').submit();
+    }
+  });
 
-  states: [
-    Transition.newState('init', Transition.navigateTo_('/'), {},
-      {to: 'deleteTestList', pred: Transition.elementExists_('li a:contains("Test")') },
-      {to: 'mainPage',       pred: Transition.elementNotExists_('li a:contains("Test")') }
-      ),
-    Transition.newState('deleteTestList', TodoTestLib.deleteTestList, {},
-      {to: 'deleteTestList',     pred: Transition.elementExists_('li a:contains("Test")') },
-      {to: 'mainPage',           pred: Transition.elementNotExists_('li a:contains("Test")') }
-      ),
-    Transition.newState('mainPage', Transition.navigateTo_('/'), {},
-      {to: 'createList', pred: Transition.elementExists_('input[name="list[name]"]:visible') }
-      ),
-    Transition.newState('createList', TodoTestLib.createTestList, {},
-      {to: 'addItem', pred: Transition.elementExists_('li a:contains("Test")') }
-      ),
-    Transition.newState('addItem', 'addItem', {},
-      {to: 'success', pred: Transition.elementExists_('li:contains("item")') }
-      )
-  ],
-
-  addItem: function () {
-    Transition.find('input[name="task[name]"]').val('item');
-    Transition.find('form:visible').submit();
-  }
-});
-
-
+}.call(Transition));

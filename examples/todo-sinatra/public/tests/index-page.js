@@ -2,18 +2,17 @@
 /*global window, jQuery, _, Backbone, console, Transition, TodoTestLib */
 "use strict";
 
-Transition.addTest({
-  name: 'Test Index Page',
-  initialize: function () {
-    //console.log(this.get('name') + ' assert initial state: ensure we\'re logged out');
-  },
-  states: [
-    Transition.newState('init', Transition.navigateTo_('about:blank'), {},
-      {to: 'mainPage', pred: Transition.constantly_(true) }
-      ),
-    Transition.newState('mainPage', Transition.navigateTo_('/'), {},
-      {to: 'success', pred: Transition.elementExists_('form[action="/lists"]') }
-      )
-  ]
-});
+(function () {
 
+  this.addTest({
+    name: 'Test Index Page',
+
+    states: [
+      this.newState('init', this.navigateTo_('about:blank'))
+        .to('mainPage', this.constantly_(true)),
+      this.newState('mainPage', this.navigateTo_('/'))
+        .to('success', this.elementExists_('form[action="/lists"]'))
+    ]
+  });
+
+}.call(Transition));

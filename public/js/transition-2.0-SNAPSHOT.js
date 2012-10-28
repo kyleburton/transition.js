@@ -119,6 +119,10 @@
       if (!attributes.name) {
         throw 'Error: TestState must have a name!';
       }
+
+      if (!this.get('attrs')) {
+        this.set('attrs', {});
+      }
     },
 
     callOnEnter: function (test, args) {
@@ -132,6 +136,17 @@
       }
 
       onEnter.call(test, args);
+    },
+
+    to: function (targetStateName, predicate ) {
+      var info = {
+          to:   targetStateName,
+          pred: predicate
+        },
+        transitions = this.get('transitions') || [];
+      transitions.push(info);
+      this.set('transitions', transitions);
+      return this;
     }
   });
 
@@ -159,7 +174,7 @@
       this.set('name', attributes.name || '**no test name**');
       this.set('initialize', attributes.initialize || Transition.noop);
       this.set('states', new TestStates());
-      this.get('states').reset(attributes.states);
+      this.get('states').reset(attributes.states || []);
 
       _.each(this.get('states').models, function (state) {
         if (state.get('attrs').start) {
@@ -175,6 +190,7 @@
           }
           this.successState = state;
         }
+
       });
 
       if (!this.get('states').first()) {
@@ -240,6 +256,11 @@
         this.get('states').add(failureState);
       }
 
+      this.find             = Transition.find;
+      this.elementExists    = Transition.elementExists;
+      this.elementNotExists = Transition.elementNotExists;
+      this.navigateTo       = Transition.navigateTo;
+
       // NB: validate the graph: that there are no unreachable states
 
       this.set('currentState', this.startState);
@@ -261,6 +282,7 @@
       });
       return res;
     }
+
   });
 
   Models.TestSuite = TestSuite = Backbone.Collection.extend({
@@ -1189,13 +1211,13 @@
   Transition.newState = function () {
     var args = [].slice.call(arguments),
         stateName = args.shift(),
-        onEnter   = args.shift(),
-        attrs     = args.shift(),
+        onEnter   = args.shift() || Transition.noop,
+        attrs     = args.shift() || {},
         state = new TestState({
       name:        stateName,
       onEnter:     onEnter,
       attrs:       attrs,
-      transitions: args
+      transitions: args || []
     });
     return state;
   };
@@ -1217,9 +1239,10 @@
       return this;
     }
     catch (e) {
-      console.log(e.get_stack());
+      Log.error("Error registering test: %s : %s<pre>%s</pre>", options.name, e.message, e.stack);
       console.error(e);
-      Log.fatal("Error registering test: " + options.name);
+      console.log(e.message);
+      console.log(e.stack);
     }
   };
 
