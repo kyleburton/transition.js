@@ -1,3 +1,5 @@
+task :default => ["jekyll:autogen"]
+
 namespace :jekyll do
   desc "run jekyll in auto mode"
   task :autogen do
