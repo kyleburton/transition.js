@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Transition.js : Detangled in-Browser Webapp Testing" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="/transition.js/site/stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/transition.js/site/css/transition.js.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/transition.js/site/css/pygments.css">
+
+    <title>Transition.js - Detangled in browser Web Testing</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/kyleburton/transition.js/tree/transition.js-2.0">View on GitHub</a>
+
+          <h1 id="project_title"><a href="/transition.js/">Transition.js 2.0</a></h1>
+          <h2 id="project_tagline">Detangled in-Browser Webapp Testing</h2>
+
+          
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/kyleburton/transition.js/zipball/transition.js-2.0">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/kyleburton/transition.js/tarball/transition.js-2.0">Download this project as a tar.gz file</a>
+            </section>
+          
+
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+
+      
+
+      <section id="main_content" class="inner">
+      <h3>Overview</h3>
+<p>Transition.js is an in-browser testing framework designed to make testing asynchronous web applications easier.</p>
+<p>I had the following goals when I created Transition.js:</p>
+<ul>
+	<li>To run on mobile devices (iPhone, Android Phones) with minimal manual intervention</li>
+	<li>Make testing asynchronous web applications easier</li>
+	<li>To run <a href="http://phantomjs.org/">headless</a> execution of the test suite to support <a href="http://en.wikipedia.org/wiki/Continuous_integration">CI</a></li>
+</ul>
+<h3>A First Example</h3>
+<p>Transition.js comes with an example application,  <a href="https://github.com/engineyard/todo-sinatra">Engineyard&#8217;s Todo App in Sinatra</a>.  There is a small test suite which tests the Todo application.</p>
+<p>This test adds a Todo List and asserts that it is visible:</p>
+<div class="highlight"><pre><code class="javascript"><span class="cm">/*jslint browser: true, maxerr: 50, indent: 2, nomen: false, regexp: false, newcap:false */</span>
+<span class="cm">/*global window, jQuery, _, Backbone, console, Transition, TodoTestLib */</span>
+<span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
+
+<span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">addTest</span><span class="p">({</span>
+    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Add a List&#39;</span><span class="p">,</span>
+
+    <span class="nx">states</span><span class="o">:</span> <span class="p">[</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;deleteTestList&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;li a:contains(&quot;Test&quot;)&#39;</span><span class="p">))</span>
+        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span>       <span class="k">this</span><span class="p">.</span><span class="nx">elementNotExists_</span><span class="p">(</span><span class="s1">&#39;li a:contains(&quot;Test&quot;)&#39;</span><span class="p">)),</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;deleteTestList&#39;</span><span class="p">,</span> <span class="nx">TodoTestLib</span><span class="p">.</span><span class="nx">deleteTestList</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;deleteTestList&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;li a:contains(&quot;Test&quot;)&#39;</span><span class="p">))</span>
+        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span>       <span class="k">this</span><span class="p">.</span><span class="nx">elementNotExists_</span><span class="p">(</span><span class="s1">&#39;li a:contains(&quot;Test&quot;)&#39;</span><span class="p">)),</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;createList&#39;</span><span class="p">,</span>     <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;input[name=&quot;list[name]&quot;]:visible&#39;</span><span class="p">)),</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;createList&#39;</span><span class="p">,</span> <span class="nx">TodoTestLib</span><span class="p">.</span><span class="nx">createTestList</span><span class="p">)</span>
+        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">,</span>        <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;li a:contains(&quot;Test&quot;)&#39;</span><span class="p">))</span>
+    <span class="p">],</span>
+
+    <span class="nx">deleteTestList</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">old</span> <span class="o">=</span> <span class="nx">parent</span><span class="p">.</span><span class="nx">frames</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">confirm</span><span class="p">;</span>
+      <span class="nx">parent</span><span class="p">.</span><span class="nx">frames</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">confirm</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="p">};</span>
+      <span class="nx">parent</span><span class="p">.</span><span class="nx">frames</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;a[data-method=delete]&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">();</span>
+      <span class="nx">parent</span><span class="p">.</span><span class="nx">frames</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">confirm</span> <span class="o">=</span> <span class="nx">old</span><span class="p">;</span>
+    <span class="p">},</span>
+
+    <span class="nx">createTestList</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;input[name=&quot;list[name]&quot;]&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;Test&#39;</span><span class="p">);</span>
+      <span class="nx">Transition</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;input[type=submit]:visible&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+<span class="p">}.</span><span class="nx">call</span><span class="p">(</span><span class="nx">Transition</span><span class="p">));</span>
+</code></pre>
+</div>
+<h3>Ready to get started?</h3>
+<p>Start with the <a href="documentation/install">installation instructions</a> then browse the <a href="documentation/">Documentation</a>.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Transition.js maintained by <a href="https://github.com/kyleburton">kyleburton</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+  </body>
+</html>

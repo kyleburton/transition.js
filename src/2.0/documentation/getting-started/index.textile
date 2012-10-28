@@ -1,0 +1,238 @@
+---
+layout: default2
+title: Getting Started
+navigation: documentation
+---
+
+* <a href="#overview">Overview</a>
+* <a href="#using-the-state-machine">Using The State Machine</a>
+* <a href="#laying-out-your-tests">Laying Out Your Tests</a>
+* <a href="#helpers">Helpers</a>
+* <a href="#frames-framework">Frames Based Testing Framework</a>
+* <a href="#using-with-phantom">Using Transition.js with Phantom.js for Headless Automated Testing</a>
+* <a href="#automating-frames-frameowrk-tests">Automating the Frames based testing Framework</a>
+
+<a name="overview"></a>
+
+h3. Overview
+
+Transition.js tests are implemented as state machines.  This allows you to decouple the logic of waiting for the web site to complete an operation from the logic of what to do next.
+
+<a name="using-the-state-machine"></a>
+
+h3. Using the state machine
+
+There are four things that you must do in order to use the state machine:
+
+1. Set your test's name
+2. Define your test's states
+3. Initialize the State Machine
+4. Start the State Machine
+
+When it runs, the state machine will poll the current state's exit transitions until either the test times out, or one of the predicates returns true.  The machine will progress until either the success or failure states have been reached.
+
+h6. 1. Set The Test Name
+
+To set your test's name, assign to the @name@ parameter in the State Machine object:
+
+{% highlight javascript %}
+  Transition.Stm.name = "Login Test";
+{% endhighlight %}
+
+h6. 2. Defining A State
+
+States can be defined by calling @newState@:
+
+{% highlight javascript %}
+  Transition.Stm.newState('logout', self.doLogout, {start: true},
+    {to: 'viewLogin', pred: self.isLoggedOut }
+  );
+{% endhighlight %}
+
+@newState@ requires a state name (@logout@), a function that will be invoked when the state is entered, a context, and a list of transitions.
+
+Transitions contain the name of the target state: @to@, and a boolean predicate: @pred@.  When the predicate returns true, the state machine will move to the target state.
+
+*Note* that the first state in your test must be declared with the parameter @start@ in the context: @{start: true}@.
+
+The State Machine will define two states for you automatically: @success@, and @failure@.  If your test throws an exeption, or times out (controlled by @Transition.Stm.maxTestTimeout@, which defaults to 10s), it will enter the @failure@ state.
+
+h6. 3. Initialize The State Machine
+
+After declaring all of your states, you must call @init()@:
+
+{% highlight javascript %}
+  Transition.Stm.init();
+{% endhighlight %}
+
+This allows the state machine to validate the graph, and create the success and failure states.
+
+h6. 4. Start the State Machine
+
+To begin executing the test, call @start@:
+
+{% highlight javascript %}
+  Transition.Stm.start();
+{% endhighlight %}
+
+
+<a name="helpers"></a>
+
+h3. Helpers
+
+A full list of the functions in Transition.js is available in the "API Documentation":/documentation/api.
+
+h6. @Transition.log@
+
+<a name="laying-out-your-tests"></a>
+
+h3. Laying out your tests
+
+<a name="frames-framework"></a>
+
+h3. Frames based testing framework.
+
+The Frames based testing framework allwows you to interactively test your application, watch its progress, and single step your test.  The Frames style tests can be run from any browser.  I have found these tests to be valuable when testing mulitple devices.  Being able to bring up the test on a mobile phone, a challenging environemnt in which to test, and step the test while watching the UI and the test log aids in troubleshooting.
+
+To use the frames based testing framework, create an @index.html@ file with the following content:
+
+h6. index.html
+
+{% highlight html %}
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <frameset rows="67%,33%">
+   <frame name="main" />
+   <frame name="test" src="test.html" />
+  </frameset>
+</html>
+{% endhighlight %}
+
+For the TODO example application, the tests are located at @/test/@.
+
+In the @test.html@ file, include  jquery, the Transition.js testing framework, the APIs from the application you are testing (in this case, easy-api.js and todo.js), as well as the Transition test runner, transition-runner.js.  Finally, include your test suite and call @Transition.Runner.init()@ which will process the test suite and build the test runner UI.
+
+h6. test.html
+
+{% highlight html %}
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=8" />
+    <title>Test Frame</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+    <script src="/js/transition-1.0.0-SNAPSHOT.js" type="text/javascript"></script>
+    <script src="/js/easy-api.js" type="text/javascript"></script>
+    <script src="/js/todo.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <script src="/js/transition-runner-1.0.0-SNAPSHOT.js" type="text/javascript"></script>
+    <script src="suite.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      Transition.Runner.init();
+    </script>
+  </body>
+</html>
+{% endhighlight %}
+
+h6. suite.js
+
+Use @suite.js@ to register your individual tests with a name, a uri and tags to help you organize your tests.
+
+{% highlight javascript %}
+/*jslint browser: true, maxerr: 50, indent: 2, nomen: false */
+/*global window, console, Transition */
+"use strict";
+Transition.Runner.addTests(
+  {name: "Login", uri: "suite/login.js", tags: ["login"] }
+);
+{% endhighlight %}
+
+h6. site/login.js
+
+Finally, here is the @login.js@ test from the example application:
+
+{% highlight javascript %}
+var LoginTest = LoginTest || (function () {
+  var self = {state: {}};
+
+  Transition.Stm.name = "Login Test";
+
+  self.doLogout = function () {
+    self.state.isLoggedOut = false;
+    Todo.logoutRequest()
+      .onStatus('OK', function (response) {
+        self.state.isLoggedOut = true;
+      })
+      .run();
+  };
+
+  self.doLogin = function () {
+    Transition.find('input[name=email]').val('kyle.burton@gmail.com');
+    Transition.find('input[name=password]').val('secret');
+    Transition.find('button#login').click();
+
+  };
+
+  Transition.Stm.newState('logout', self.doLogout, {start: true},
+    {to: 'viewLogin', pred: function () { return self.state.isLoggedOut; } }
+  );
+
+  Transition.Stm.newState('viewLogin', Transition.navigateTo_('/login'), {},
+    {to: 'doLogin', pred: Transition.elementExists_('input[name=email]') }
+  );
+
+  Transition.Stm.newState('doLogin', self.doLogin, {},
+    {to: 'success', pred: Transition.elementExists_('div#todo-list') }
+  );
+
+  Transition.Stm.init();
+
+  return self;
+}());
+{% endhighlight %}
+
+<a name="using-with-phantom"></a>
+
+h3. Using Transtion.js with "Phantom.js":http://phantomjs.org/
+
+The file "phantom-runner.js":https://github.com/kyleburton/transition.js/blob/master/examples/phantom-runner.js can be used to execute your test suite using "Phantom.js":http://phantomjs.org for automated, headless testing.  The @Rakefile@ that is part of Transtion.js has an installer for Phantom.js:
+
+{% highlight bash %}
+$ rake phantom:install
+{% endhighlight %}
+
+Once installed you can invoke the Phantom runner, pointing it at your test suite:
+
+{% highlight bash %}
+$ ./software/phantomjs-1.5.0/bin/phantomjs examples/phantom-runner.js http://localhost:4567/tests/
+>>>Thu Jun 07 2012 17:23:20 GMT-0400 (EDT): [logout]: Starting [Login Test]
+
+[object Object]
+[logout] trying pred[viewLogin] :true
+>>>Thu Jun 07 2012 17:23:20 GMT-0400 (EDT): [logout]: transitioning to: viewLogin
+
+[object Object]
+[viewLogin] trying pred[doLogin] :true
+>>>Thu Jun 07 2012 17:23:21 GMT-0400 (EDT): [viewLogin]: transitioning to: doLogin
+
+ajax failure for GET, /todo
+[object Object]
+[doLogin] trying pred[success] :true
+>>>Thu Jun 07 2012 17:23:21 GMT-0400 (EDT): [doLogin]: transitioning to: success
+
+>>>Thu Jun 07 2012 17:23:21 GMT-0400 (EDT): [success]: TEST PASSED [Login Test] 
+
+>>>Thu Jun 07 2012 17:23:21 GMT-0400 (EDT): Full suite completed: 1 of 1 passed 100%.
+
+1 passed, 0 failed, out of 1 100%
+{% endhighlight %}
+
+<a name="automating-frames-frameowrk-tests"></a>
+
+h3. Automation of Frames Based Tests
+
+This can be accomplished through invocation of the @Transtion.Runner@'s @runAll@ method.
+
+h3. Using a Proxy to Separate your testing framework from your web application.
+
+You may not want to expose your test suite with your public website (it may contain test user data that is either invalid or you do not want exposed).  We often use "Nginx":http://wiki.nginx.org/Main and define a local server configuration that serves up our tests from local disk, and forwards all other requests to a staging or development server.
+

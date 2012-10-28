@@ -1,0 +1,29 @@
+---
+layout: default2
+title: Install
+navigation: documentation
+---
+
+h1. Installation
+
+Transition.js is implemented in HTML and JavaScript, it depends on jQuery both for itself as well as for the web applications that it tests.
+
+To get started, clone the Transition.js git repository:
+
+{% highlight bash %}
+$ cd ~/projects
+$ git clone git@github.com:kyleburton/transition.js.git
+{% endhighlight %}
+
+In your project, symlink the `transition.js/public` directory within your Web application's document root:
+
+{% highlight bash %}
+$ cd ~/projects/my-project/web-root
+$ ln -s ~/transition.js/public ./transition
+{% endhighlight %}
+
+You should then be able to browse to `/transition/index.html` within your web application and see the test runner.
+
+Implement your test suite in the file `test-suite.js` in your Web application's document root.
+
+Continue on to the "Documentation":../../documentation

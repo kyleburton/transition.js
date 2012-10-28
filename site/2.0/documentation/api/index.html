@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Transition.js : Detangled in-Browser Webapp Testing" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="/transition.js/site/stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/transition.js/site/css/transition.js.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/transition.js/site/css/pygments.css">
+
+    <title>API Documentation</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/kyleburton/transition.js/tree/transition.js-2.0">View on GitHub</a>
+
+          <h1 id="project_title"><a href="/transition.js/">Transition.js 2.0</a></h1>
+          <h2 id="project_tagline">Detangled in-Browser Webapp Testing</h2>
+
+          
+
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+
+      
+        <section id="nav-documentation" class="inner">
+          <a href="/transition.js/site/documentation">Documentation</a>
+        </section>
+      
+
+      <section id="main_content" class="inner">
+      <h2>Transition</h2>
+<p>Unles otherwise noted, each of the <span class="caps">DOM</span> helpers acts on the main frame (the frame dispalying the target web applicaiton being tested).</p>
+<h6><code>Transition.document()</code></h6>
+<p>In the frames based testing framework, this functon returns the main frame.</p>
+<h3><code>Transition.noop()</code></h3>
+<p>This function performs no action, it is useful for declaring states that do not need a trigger function.</p>
+<h3><code>Transition.log(msg)</code></h3>
+<p>This logs a message to the Test Frame&#8217;s log div.  New messages appear at the top of the div.</p>
+<h3><code>Transition.error(msg)</code></h3>
+<p>This logs an error message to the Test Frame&#8217;s log div.  New error messages appear at the top of the div.</p>
+<h3><code>Transition.dom</code></h3>
+<p>This returns the document, <span class="caps">DOM</span>, of the main frame.</p>
+<h3><code>Transition.findVisibleText(text)</code></h3>
+<p>Finds a dom element in the main frame containing text, which has the jQuery pseudo class <code>:visible</code> (i.e. not hidden).</p>
+<h3><code>Transition.find(selctor)</code></h3>
+<p>Delegates to the jQuery object in the main frame &#8211; searches for <span class="caps">DOM</span> elements using the given jQuery selector.</p>
+<h3><code>Transition.findText(selctor)</code></h3>
+<p>Delegates to the jQuery object in the main frame, finding the element that matches the selector, returning it&#8217;s text content.</p>
+<h3><code>Transition.elementExists(selctor)</code></h3>
+<p>In the main frame, tests if the selector finds one or more <span class="caps">DOM</span> elements.</p>
+<h3><code>Transition.elementExists_(selctor)</code></h3>
+<p>This is a defered form of <code>elementExists</code>, useful in the declaration of transition predicates:</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">),</span> <span class="p">{},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;doLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>
+</code></pre>
+</div>
+<p>It returns a zero argument function that will test if the given element exists when called.</p>
+<h3><code>Transition.isChecked(selctor)</code></h3>
+<p>Tests if the checkbox or radio button identified by the jQuery selector is checked.</p>
+<h3><code>Transition.isChecked_(selctor)</code></h3>
+<p>Defered form of <code>isChecked</code>.</p>
+<h3><code>Transition.isNotChecked(selctor)</code></h3>
+<p>Tests if the checkbox or radio button identified by the jQuery selector is checked.</p>
+<h3><code>Transition.isNotChecked_(selctor)</code></h3>
+<p>Defered form of <code>isNotChecked</code>.</p>
+<h3><code>Transition.navigateTo(selector)</code></h3>
+<p>Sets <code>window.location</code> in the main frame.</p>
+<h3><code>Transition.navigateTo_(selector)</code></h3>
+<p>Defered form of <code>navigateTo</code>.</p>
+<h3><code>Transition.click(selector)</code></h3>
+<p>&#8216;Clicks&#8217; on the anchor tag identified by the selector.  This is accomplished by finding the anchor tag, getting its <code>href</code> attribute and then invoking <code>navigateTo</code>.</p>
+<h3><code>Transition.clickNode(selector)</code></h3>
+<p>Fires the click handler of the identified dom element.</p>
+<h3><code>Transition.clickNode_(selector)</code></h3>
+<p>Defered version of <code>clickNode</code>.</p>
+<h3><code>Transition.propertyExists(object, property)</code></h3>
+<p>Tests if the object has the given property.  This is useful in situations where your test is setting itself up, or you are awaiting a condition that is not visible in the UI.</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">doLogout</span><span class="p">,</span> <span class="p">{</span><span class="nx">start</span><span class="o">:</span> <span class="kc">true</span><span class="p">},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">propertyExists_</span><span class="p">(</span><span class="nx">self</span><span class="p">.</span><span class="nx">state</span><span class="p">,</span> <span class="s1">&#39;isLoggedOut&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>  
+</code></pre>
+</div>
+<h3><code>Transition.propertyExists_(object, property)</code></h3>
+<p>Defered form of <code>propertyExists</code>.</p>
+<h3><code>Transition.throw(msg)</code></h3>
+<p>This logs an error and then throws the message.  <strong>Note</strong> throwing will fail the test.</p>
+<h2>Transition.Stm</h2>
+<h3><code>Transition.Stm.start()</code></h3>
+<p>Starts the state machine.</p>
+<h3><code>Transition.Stm.log(msg)</code></h3>
+<p>Defers to <code>Transition.log</code>, prending the name of the current state to the message.</p>
+<h3><code>Transition.Stm.terminateTest(status, message)</code></h3>
+<p>Halts the state machine, marking the test as failed.  <strong>Note</strong> this does not effect the current state, it just halts the testing.</p>
+<h3><code>Transition.Stm.pollStates()</code></h3>
+<p>This internal function should not be called by your tests.  It checkes for test timeout and executes the exit prediates of the current state.</p>
+<h3><code>Transition.Stm.summarizeExitPredicates()</code></h3>
+<p>This internal function is used by <code>pollStates</code> when logging.</p>
+<h3><code>Transition.Stm.scheduleNextPoll()</code></h3>
+<p>This internal function is used by <code>pollStates</code> to scheudle the next time to test the transition predicates.</p>
+<h3><code>Transition.Stm.getTimeMs()</code></h3>
+<p>Returns the current time in miliseconds.</p>
+<h3><code>Transition.Stm.elapsedTimeMs()</code></h3>
+<p>Returns the elapsed time since the state machine was started.</p>
+<h3><code>Transition.Stm.newState(name, handler, context, transitions...)</code></h3>
+<p>Adds a state to the state machine.</p>
+<ul>
+	<li>name: the name of the state, must be unique within the test.</li>
+	<li>handler: a zero argument function that will be called when the state is entered.</li>
+	<li>context: a set of properties for the defined state.  The signficant properties are: <code>start</code> which if set to true defines the state as a start state; <code>stop</code> which if set to true defines the state as a terminal state; and <code>passwd</code> which if set to true indicates that the given stop state represents a successful test execution.<br />
+@ transitions&#8230; the remaining arguments are treated as the transition declarations.</li>
+</ul>
+<p>Transition declarations have 2 properties:</p>
+<ul>
+	<li>to: the name of the target state</li>
+	<li>pred: a zero argument boolean function to indicate the transition should be followed.</li>
+</ul>
+<h3><code>Transition.Stm.stopPolling()</code></h3>
+<p>Stops the polling loop.  This does not cause the test to fail, nor succeed.</p>
+<h3><code>Transition.Stm.compliment(fn)</code></h3>
+<p>Returns a new function that is the logical inversion of the given function.  Assumes a zero agument boolean function.</p>
+<h3><code>Transition.Stm.stopTest()</code></h3>
+<p>Halts the test, allowing it to be continued or stepped.</p>
+<h3><code>Transition.Stm.stepTest()</code></h3>
+<p>Steps the test forward 1 and only 1 state.  <strong>Note</strong> the test may still time out if no exit predicates indicate an edge to follow.</p>
+<h3><code>Transition.Stm.continueTest()</code></h3>
+<p>Resumes the test, all subsequent transitions will happen automatically.</p>
+<h3><code>Transition.Stm.init()</code></h3>
+<p>Initializes the state machine and testing framework.</p>
+<h3><code>Transition.Stm.breakpoint(fn)</code></h3>
+<p>Stops the state machine from progressing past the current state.   This is equivalent to using &#8216;Step&#8217; in the interactive Runner.  You can call this from any of your state handlers or transition predicates.</p>
+<p>If a function is passed (fn), it will be called.  This makes <code>breakpoint</code> suitable as a wrapper around other functions.</p>
+<h3><code>Transition.Stm.breakpoint_(fn)</code></h3>
+<p>This is a defered version of <code>breakpoint</code>, that can also be used as a wrapper around other functions:</p>
+<div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Stm</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;viewLogin&#39;</span><span class="p">,</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">breakpoint_</span><span class="p">(</span><span class="nx">Transition</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)),</span> <span class="p">{},</span>
+    <span class="p">{</span><span class="nx">to</span><span class="o">:</span> <span class="s1">&#39;doLogin&#39;</span><span class="p">,</span> <span class="nx">pred</span><span class="o">:</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;input[name=email]&#39;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="p">);</span>
+</code></pre>
+</div>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Transition.js maintained by <a href="https://github.com/kyleburton">kyleburton</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,64 @@
+---
+layout: default2
+title: Transition.js - Detangled in browser Web Testing
+show_downloads: true
+---
+
+h3. Overview
+
+Transition.js is an in-browser testing framework designed to make testing asynchronous web applications easier.
+
+I had the following goals when I created Transition.js:
+
+* To run on mobile devices (iPhone, Android Phones) with minimal manual intervention
+* Make testing asynchronous web applications easier
+* To run "headless":http://phantomjs.org/ execution of the test suite to support "CI":http://en.wikipedia.org/wiki/Continuous_integration
+
+h3. A First Example
+
+Transition.js comes with an example application,  "Engineyard's Todo App in Sinatra":https://github.com/engineyard/todo-sinatra.  There is a small test suite which tests the Todo application.
+
+This test adds a Todo List and asserts that it is visible:
+
+{% highlight javascript %}
+/*jslint browser: true, maxerr: 50, indent: 2, nomen: false, regexp: false, newcap:false */
+/*global window, jQuery, _, Backbone, console, Transition, TodoTestLib */
+"use strict";
+
+(function () {
+  this.addTest({
+    name: 'Add a List',
+
+    states: [
+      this.newState('init', this.navigateTo_('/'))
+        .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
+        .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
+      this.newState('deleteTestList', TodoTestLib.deleteTestList)
+        .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
+        .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
+      this.newState('mainPage', this.navigateTo_('/'))
+        .to('createList',     this.elementExists_('input[name="list[name]"]:visible')),
+      this.newState('createList', TodoTestLib.createTestList)
+        .to('success',        this.elementExists_('li a:contains("Test")'))
+    ],
+
+    deleteTestList: function () {
+      var old = parent.frames.main.confirm;
+      parent.frames.main.confirm = function () {
+        return true;
+      };
+      parent.frames.main.$('a[data-method=delete]').click();
+      parent.frames.main.confirm = old;
+    },
+
+    createTestList: function () {
+      Transition.find('input[name="list[name]"]').val('Test');
+      Transition.find('input[type=submit]:visible').click();
+    }
+  });
+}.call(Transition));
+{% endhighlight %}
+
+h3. Ready to get started?
+
+Start with the "installation instructions":documentation/install then browse the "Documentation":documentation/.
