@@ -1,7 +1,8 @@
 For Events (a real click), recording, etc, look at:
   https://github.com/jupiterjs/syn
 
-Issues
+Issues:
+  Tests that transition to their 'failure' state are not reported as failing by the runner (not showing in the progress bar correctly)
   The example test suite fails to run on the iPad
 
 Test

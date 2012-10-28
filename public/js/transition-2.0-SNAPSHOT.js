@@ -1175,8 +1175,13 @@
       url:      url,
       dataType: "script",
       async:    false,
-      error:    function () {
-        Log.error("Error loading script: %s", url);
+      error:    function (jqXHR, textStatus, errorThrown) {
+        Transition.lastError = errorThrown;
+        Log.error("Error loading script[%s] %s<pre>%s</pre>", url, errorThrown.message, errorThrown.stack);
+        console.log('jqXHR: %o', jqXHR);
+        console.log('textStatus: %o', textStatus);
+        console.log('errorThrown: %o', errorThrown);
+        console.log('errorThrown: %o', errorThrown.stack);
       }
     });
   };
