@@ -18,6 +18,8 @@ h3. Overview
 
 Transition.js tests are implemented as state machines.  This allows you to decouple the logic of waiting for the web site to complete an operation from the logic of what to do next.
 
+<strong>NB: the following needs to be re-written for 2.0...</strong>
+
 <a name="using-the-state-machine"></a>
 
 h3. Using the state machine

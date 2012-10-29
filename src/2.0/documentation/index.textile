@@ -4,9 +4,16 @@ title: Documentation
 navigation: main
 ---
 
+* "Rationale":#rationale
+* "Test Runner":#test-runner
+** "Log":#test-log
+** "Controls":#controls
+** "Settings":#setings
 * "Installation":install/
 * "Getting Started":getting-started/
 * "Transition.js API":api/
+
+<a name="rationale"></a>
 
 h2. Rationale
 
@@ -33,3 +40,35 @@ When a test is run by Transition.js, the framework will call the test's initiali
 * try each of the current state's transitions
 
 If a predicate returns true, then the target state will be transitioned to.  If no predicates return true, the framework will set a timeout (default is 250ms) before trying again.  If the test takes more than a pre-set maximum (default 30s), then the test is considered failed.  If it reaches a success state before the timeout, it is considered passed.
+
+<a name="test-runner"></a>
+
+h1. The Runner UI
+
+h2. Test Suite
+
+The 'Suite' menu allows you to select a test to run, optionally by first filtering the list.  You may also reload your test suite.  Reloading does not effect the state of the Runner UI and is an effective tool when developing and debugging your tests.
+
+<a name="test-log"></a>
+
+h2. The Test Log
+
+Transition.js has a logging system that logs to the Runner UI instead of the browser's debug console.  The browser's debug console is often either not visible on some devices, difficult to enable or not fully featured.  The Transition.js logger is visible, supports searching (filtering) and setting different levels of output.
+
+<a name="controls"></a>
+
+h2. Test Controls
+
+There are several control buttons in the runner UI:
+
+* Run Suite: this starts a full run of the suite from the first test.
+* Start: starts the currently selected test, or the first test in the suite if none is selected.
+* Stop: this will halt the currently running test or full suite.
+* Step: stepping allows you to walk through your test one poll at a time so you can observe what it is doing.
+* Back: if you are single-stepping a test, the Back button will move back a state (executing its trigger function)
+* Continue: if you have single-stepped a test, Continue will start the polling process so the test continues to run automatically.
+
+<a name="settings"></a>
+
+h2. Settings
+

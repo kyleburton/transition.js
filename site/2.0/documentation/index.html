@@ -35,10 +35,18 @@
 
       <section id="main_content" class="inner">
       <ul>
+	<li><a href="#rationale">Rationale</a></li>
+	<li><a href="#test-runner">Test Runner</a>
+	<ul>
+		<li><a href="#test-log">Log</a></li>
+		<li><a href="#controls">Controls</a></li>
+		<li><a href="#setings">Settings</a></li>
+	</ul></li>
 	<li><a href="install/">Installation</a></li>
 	<li><a href="getting-started/">Getting Started</a></li>
 	<li><a href="api/">Transition.js <span class="caps">API</span></a></li>
 </ul>
+<p><a name="rationale"></a></p>
 <h2>Rationale</h2>
 <p>Transition.js was created to address specific issues I was having with trying to test my websites on Mobile and Tablet devices.</p>
 <p>The websites I needed to test were invarily asynchronous.  This lead to writing tests that poll and wait for asynchronous events to complete.  Detecting when events completed was error prone.  The tests were brittle and would fail inconsistently due to timing issues.</p>
@@ -55,6 +63,26 @@
 	<li>try each of the current state&#8217;s transitions</li>
 </ul>
 <p>If a predicate returns true, then the target state will be transitioned to.  If no predicates return true, the framework will set a timeout (default is 250ms) before trying again.  If the test takes more than a pre-set maximum (default 30s), then the test is considered failed.  If it reaches a success state before the timeout, it is considered passed.</p>
+<p><a name="test-runner"></a></p>
+<h1>The Runner UI</h1>
+<h2>Test Suite</h2>
+<p>The &#8216;Suite&#8217; menu allows you to select a test to run, optionally by first filtering the list.  You may also reload your test suite.  Reloading does not effect the state of the Runner UI and is an effective tool when developing and debugging your tests.</p>
+<p><a name="test-log"></a></p>
+<h2>The Test Log</h2>
+<p>Transition.js has a logging system that logs to the Runner UI instead of the browser&#8217;s debug console.  The browser&#8217;s debug console is often either not visible on some devices, difficult to enable or not fully featured.  The Transition.js logger is visible, supports searching (filtering) and setting different levels of output.</p>
+<p><a name="controls"></a></p>
+<h2>Test Controls</h2>
+<p>There are several control buttons in the runner UI:</p>
+<ul>
+	<li>Run Suite: this starts a full run of the suite from the first test.</li>
+	<li>Start: starts the currently selected test, or the first test in the suite if none is selected.</li>
+	<li>Stop: this will halt the currently running test or full suite.</li>
+	<li>Step: stepping allows you to walk through your test one poll at a time so you can observe what it is doing.</li>
+	<li>Back: if you are single-stepping a test, the Back button will move back a state (executing its trigger function)</li>
+	<li>Continue: if you have single-stepped a test, Continue will start the polling process so the test continues to run automatically.</li>
+</ul>
+<p><a name="settings"></a></p>
+<h2>Settings</h2>
       </section>
     </div>
 
