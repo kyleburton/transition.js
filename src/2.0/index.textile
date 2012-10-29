@@ -22,7 +22,7 @@ This test adds a Todo List and asserts that it is visible:
 
 {% highlight javascript %}
 /*jslint browser: true, maxerr: 50, indent: 2, nomen: false, regexp: false, newcap:false */
-/*global window, jQuery, _, Backbone, console, Transition, TodoTestLib */
+/*global window, jQuery, _, Backbone, console, Transition */
 "use strict";
 
 (function () {
@@ -33,12 +33,12 @@ This test adds a Todo List and asserts that it is visible:
       this.newState('init', this.navigateTo_('/'))
         .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
         .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
-      this.newState('deleteTestList', TodoTestLib.deleteTestList)
+      this.newState('deleteTestList', 'deleteTestList')
         .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
         .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
       this.newState('mainPage', this.navigateTo_('/'))
         .to('createList',     this.elementExists_('input[name="list[name]"]:visible')),
-      this.newState('createList', TodoTestLib.createTestList)
+      this.newState('createList', 'createTestList')
         .to('success',        this.elementExists_('li a:contains("Test")'))
     ],
 
