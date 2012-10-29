@@ -335,10 +335,17 @@
     },
 
     percentRemaining: function () {
+      var testsRun, totalTests, pct;
+
       if (!this.get('total')) {
         return 100.0;
       }
-      return 100.0 * (this.get('numPassed') + this.get('numFailed')) / this.get('total');
+
+      totalTests = this.get('total');
+      testsRun   = totalTests - this.get('numPassed') - this.get('numFailed');
+      pct = 100.0 * (testsRun / totalTests);
+
+      return pct;
     },
 
     percentPassed: function () {
