@@ -5,6 +5,8 @@ Issues:
   Tests that transition to their 'failure' state are not reported as failing by the runner (not showing in the progress bar correctly)
   The example test suite fails to run on the iPad
 
+Store currently selected test in a cookie so it will be re-selected if the page is reloaded.
+
 Test
   Each should have a pending flag.
 Suite
