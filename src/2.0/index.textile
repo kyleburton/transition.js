@@ -52,8 +52,8 @@ This test adds a Todo List and asserts that it is visible:
     },
 
     createTestList: function () {
-      Transition.find('input[name="list[name]"]').val('Test');
-      Transition.find('input[type=submit]:visible').click();
+      this.find('input[name="list[name]"]').val('Test');
+      this.find('input[type=submit]:visible').click();
     }
   });
 }.call(Transition));
@@ -61,4 +61,4 @@ This test adds a Todo List and asserts that it is visible:
 
 h3. Ready to get started?
 
-Start with the "installation instructions":documentation/install then browse the "Documentation":documentation/.
+Begin with the "installation instructions":documentation/install then browse the "Documentation":documentation/.

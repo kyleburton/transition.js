@@ -8,4 +8,28 @@ navigation: main
 * "Getting Started":getting-started/
 * "Transition.js API":api/
 
-h5. Testing Asynchronous Web Applications
+h2. Rationale
+
+Transition.js was created to address specific issues I was having with trying to test my websites on Mobile and Tablet devices.
+
+The websites I needed to test were invarily asynchronous.  This lead to writing tests that poll and wait for asynchronous events to complete.  Detecting when events completed was error prone.  The tests were brittle and would fail inconsistently due to timing issues.
+
+I wanted a test suite that drove the user interface of the website as close to how a user would.  Not just a framework that would test the underlying JavaScript code at the unit level.
+
+I wanted a solution that would execute a test suite on mobile devices (phones and tablets).
+
+At the time I started Transition.js there was no tool or framework that I knew of that was a fit.
+
+h3. Inverting the need to Poll
+
+Since waiting for a condition to become true before continuing was a core part of the tests I was writing, I made the idea of waiting core to the testing framework.  The most natural way of expressing this for me was to implement tests as a "State Machine":http://en.wikipedia.org/wiki/Finite-state_machine.
+
+Each test has a name, an optional `initialize` function and a list of states.  Each state has a name, an initializer, and defines the set of transitions to subsequent states.  A transition consists of the name of the target state and a predicate function.
+
+When a test is run by Transition.js, the framework will call the test's initializer, then:
+
+* transition to the first state of the test
+* call the initializer for the first state
+* try each of the current state's transitions
+
+If a predicate returns true, then the target state will be transitioned to.  If no predicates return true, the framework will set a timeout (default is 250ms) before trying again.  If the test takes more than a pre-set maximum (default 30s), then the test is considered failed.  If it reaches a success state before the timeout, it is considered passed.
