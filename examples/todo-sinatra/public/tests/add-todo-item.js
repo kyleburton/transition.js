@@ -19,11 +19,16 @@
       this.newState('mainPage', this.navigateTo_('/'))
         .to('createList', this.elementExists_('input[name="list[name]"]:visible')),
       this.newState('createList', TodoTestLib.createTestList)
-        .to('addItem', this.elementExists_('li a:contains("Test")')),
+        .to('addItem', 'testListExists'),
       this.newState('addItem', 'addItem')
         .to('success', this.elementExists_('li:contains("item")'))
     ],
-  
+
+    testListExists: function () {
+      return this.elementExists('li a:contains("Test")')
+    },
+
+    // NB: test using a named member fn as a predicate
     addItem: function () {
       this.find('input[name="task[name]"]').val('item');
       this.find('form:visible').submit();

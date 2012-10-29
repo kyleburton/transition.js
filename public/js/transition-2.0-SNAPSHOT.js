@@ -256,11 +256,6 @@
         this.get('states').add(failureState);
       }
 
-      this.find             = Transition.find;
-      this.elementExists    = Transition.elementExists;
-      this.elementNotExists = Transition.elementNotExists;
-      this.navigateTo       = Transition.navigateTo;
-
       // NB: validate the graph: that there are no unreachable states
 
       this.set('currentState', this.startState);
@@ -281,7 +276,23 @@
         }
       });
       return res;
-    }
+    },
+
+    find: function () {
+      return Transition.find.apply(Transition, arguments);
+    },
+
+    elementExists:  function () {
+      return Transition.elementExists.apply(Transition, arguments);
+    },
+
+    elementNotExists:  function () {
+      return Transition.elementNotExists.apply(Transition, arguments);
+    },
+
+    navigateTo:  function () {
+      return Transition.navigateTo.apply(Transition, arguments);
+    },
 
   });
 
@@ -471,7 +482,17 @@
       }
 
       _.each(state.get('transitions'), function (tr) {
-        if (tr.pred.call(test, state, tr)) {
+        var pred = tr.pred;
+
+        if (typeof pred !== "function") {
+          pred = test.attributes[pred];
+        }
+
+        if (typeof pred !== "function") {
+          throw sprintf("Error: predicate for test %s/%s not recognized: %s", test.get('name'), state.get('name'), pred);
+        }
+
+        if (pred.call(test, state, tr)) {
           dests.push(tr);
         }
       });
@@ -495,9 +516,11 @@
           state.callOnEnter(test, dests[0]);
         }
         catch (e) {
-          console.error(e);
           this.set('error', e);
-          Log.error(e);
+          Log.error("Error calling on-enter trigger for: %s : %s<pre>%s</pre>", this.get('name'), e.message, e.stack);
+          console.error(e);
+          console.log(e.message);
+          console.log(e.stack);
         }
 
         return true;
@@ -1298,14 +1321,17 @@
    *
    ********************************************************************************/
   Transition.Log.newEntry = function (slevel, level, args) {
-    var entry = new LogEntry({
+    var message, entry;
+    args[0] = args[0] + '';
+    message = sprintf.apply(sprintf, args);
+    entry = new LogEntry({
       slevel:      slevel,
       level:       level,
       testName:    models.suiteRunner.get('currentTest'),
       testState:   models.suiteRunner.get('currentTest').get('currentState'),
       timestamp:   '*test state*',
       repeatCount: 1,
-      message:     sprintf.apply(sprintf, args)
+      message:     message
     });
 
     if (level >= models.settings.get('logLevel')) {
