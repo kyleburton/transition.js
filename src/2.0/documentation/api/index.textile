@@ -6,11 +6,121 @@ navigation: documentation
 
 h1. Defining a Test Suite
 
+After creating the symbolic link to the Transition.js @public@ directory, your next step is to define your test suite.  You do this in the file @test-suite.js@ in the same place you created the symbolic link:
+
+{% highlight bash %}
+public/
+  +-- transition -> ~/projects/transition.js/public
+  +-- test-suite.js
+  +-- tests
+      +-- add-a-list.js
+      +-- add-todo-item.js
+      +-- index-page.js
+      +-- mark-item-as-done.js
+{% endhighlight %}
+
+Tests can be defined within the @test-suite.js@ file directly, or in separate files.  A common pattern is to place utility code for testing your application in the test-suite.js with tests each in their own separate file:
+
+{% highlight javascript %}
+(function () {
+  var root        = this,
+      TodoTestLib = {};
+
+  this.TodoTestLib = TodoTestLib;
+
+  TodoTestLib.deleteTestList = function () {
+    ...
+  };
+
+  TodoTestLib.createTestList = function () {
+    ...
+  };
+
+}.call(this));
+
+Transition.loadScript('/tests/index-page.js');
+Transition.loadScript('/tests/add-a-list.js');
+Transition.loadScript('/tests/add-todo-item.js');
+Transition.loadScript('/tests/mark-item-as-done.js');
+{% endhighlight %}
+
 h1. Defining a Test
+
+Tests can be added by calling the @Transition.addTest@ test DSL, passing an object of test properties.
+
+The test must have 2 properties:
+
+* @name@: the name of the test
+* @states@: the set of states that comprise the test.
+
+
+States can be constructed using @Transition.newState@.  Each state must have:
+* a name
+* @on-enter@ callback, which is called once, when the state is entered.
+* a set of exit transitions, created with the @to@ DSL method.
+
+Here is an example that loads the root page of the example TODO application and asserts that the form for creating lists is present:
+
+{% highlight javascript %}
+(function () {
+
+  this.addTest({
+    name: 'Test Index Page',
+
+    states: [
+      this.newState('init', this.navigateTo_('about:blank'))
+        .to('mainPage', this.constantly_(true)),
+      this.newState('mainPage', this.navigateTo_('/'))
+        .to('success', this.elementExists_('form[action="/lists"]'))
+    ]
+  });
+
+}.call(Transition));
+{% endhighlight %}
 
 h1. Transition's Apis
 
-h2. Logging
+h2. DOM Helpers
+
+The DOM helpers make working with the main frame (where the application runs) simpler.  They will use jQuery within the web application if it is present (by detecting the presence of @$@), or wrap the main frame's document in a jQuery object.
+
+When a function is suffixed with an underscore, it creates a closure over the arguments and returns a function that performs the action.  This is useful for when callbacks are required in your tests, avoiding having to write out an anonymous function.
+
+h3. @Transition.navigateTo@, @Transition.navigateTo_@
+
+These set the main frame's location.
+
+h3. @Transition.find@
+
+This executes jQuery's find, returning the result set.
+
+h3. @Transition.elementExists@, @Transition.elementExists_@
+
+These boolean predicates test if an element exists in the page.
+
+h3. @Transition.elementNotExists@, @Transition.elementNotExists_@
+
+These boolean predicates test if an element does not exist in the page.
 
 h2. Logging
+
+There are 6 logging levels, each indicating a different severity:
+
+* @Transition.Log.trace@
+* @Transition.Log.debug@
+* @Transition.Log.info@
+* @Transition.Log.warn@
+* @Transition.Log.error@
+* @Transition.Log.fatal@
+
+The Log output window's filter setting will determine what is visible based on the level.
+
+The log functions use "@sprintf@":https://github.com/kvz/phpjs/blob/master/functions/strings/sprintf.js for formatting entries.  The first argument will be treated as the format string and additional arguments will supply values for the format string.
+
+The format strings follow the "sprintf":https://github.com/kvz/phpjs/blob/master/functions/strings/sprintf.js library with a single addition: @%a@ for formatting JavaScript objects:
+
+{% highlight javascript %}
+  Transition.Log.info("Object is: %a", {an: 'object', num: 123});
+  // => [23:20:30] Object is: {"an":"object","num":123}
+{% endhighlight %}
 

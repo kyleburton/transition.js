@@ -72,3 +72,10 @@ There are several control buttons in the runner UI:
 
 h2. Settings
 
+h5. Test Timeout
+
+This is the maximum time in miliseconds (1/1000 of a second) that a test may run for before it is considered failed.  Having a timeout on a test prevents tests that are unable to succeed from causing the test runner to execute for an indefinite amount of time.
+
+h5. State Timeout
+
+This is the maximum time in miliseconds (1/1000 of a second) that a test may remain in a single state without transitioning.
