@@ -11,7 +11,7 @@
       this.newState('init', this.navigateTo_('about:blank'))
         .to('mainPage', this.constantly_(true)),
       this.newState('mainPage', this.navigateTo_('/'))
-        .to('success', this.elementExists_('form[action="/lists"]'))
+        .to('failure', this.elementExists_('form[action="/lists"]'))
     ]
   });
 

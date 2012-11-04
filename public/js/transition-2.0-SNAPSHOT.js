@@ -396,6 +396,33 @@
       }
       // ERROR and FATAL
       return 'label-important';
+    },
+
+    levelDescription: function () {
+      var level = this.get('level');
+      if ( Log.Levels.TRACE === level ) {
+        return 'TRACE';
+      }
+
+      if ( Log.Levels.DEBUG === level ) {
+        return 'DEBUG';
+      }
+
+      if ( Log.Levels.INFO === level ) {
+        return 'INFO';
+      }
+
+      if ( Log.Levels.WARN === level ) {
+        return 'WARN';
+      }
+
+      if ( Log.Levels.ERROR === level ) {
+        return 'ERROR';
+      }
+
+      if ( Log.Levels.FATAL === level ) {
+        return 'FATAL';
+      }
     }
 
   });
@@ -1132,11 +1159,11 @@
 
         if (Transition.testRunner.succeeded()) {
           models.suiteRunner.set('numPassed', 1 + models.suiteRunner.get('numPassed'));
-          Log.info('PASSED');
+          Log.info('PASSED: %s', Transition.testRunner.get('test').get('name'));
         }
         else {
           models.suiteRunner.set('numFailed', 1 + models.suiteRunner.get('numFailed'));
-          Log.error('FAILED');
+          Log.error('FAILED: %s', Transition.testRunner.get('test').get('name'));
         }
 
         if (models.suiteRunner.nextTest()) {
@@ -1149,6 +1176,7 @@
         Transition.suiteRunning = false;
         return;
       }
+
       Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
     };
 
