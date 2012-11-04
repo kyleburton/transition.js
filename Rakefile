@@ -11,18 +11,14 @@ def chdir! path
   end 
 end
 
-PHANTOM_URLS = {
+PHANTOM_CONFIG = {
   "Linux" => {
-    :url => "http://phantomjs.googlecode.com/files/phantomjs-1.5.0-linux-x86_64-dynamic.tar.gz",
-    :dir => "phantomjs-1.5.0",
-    :sha1 => "137113dbb25dcd7cf4e19f70c05c11ed8f258b24" 
-  },
-  "Darwin" => {
-    :url => "http://phantomjs.googlecode.com/files/phantomjs-1.5.0-macosx-static.zip",
-    :dir => "phantomjs-1.5.0",
-    :sha1 => "b87152ce691e7ed1937d30f86bc706a408d47f64"
+    :x64 => "http://phantomjs.googlecode.com/files/phantomjs-1.7.0-linux-i686.tar.bz2",
+    :x32 => "http://phantomjs.googlecode.com/files/phantomjs-1.7.0-linux-x86_64.tar.bz2"
   }
 }
+PHANTOM_URL = "http://phantomjs.googlecode.com/files/phantomjs-1.7.0-source.zip"
+PHANTOM_DIR = "phantomjs-1.7.0"
 
 def phantom_url
   sys = `uname`.chomp!
@@ -31,14 +27,19 @@ end
 
 def install_phantom
   chdir!("software") do
-    phantom_pkg = phantom_url
-    unless File.exist? File.basename(phantom_pkg[:url])
-      system "wget", phantom_pkg[:url]
+    phantom_pkg = PHANTOM_URL
+    unless File.exist? File.basename(PHANTOM_URL)
+      system "wget", PHANTOM_URL
     end
 
-    unless File.exist? phantom_pkg[:dir]
-      system "unzip", File.basename(phantom_pkg[:url])
+    unless File.exist? PHANTOM_DIR
+      system "unzip", File.basename(PHANTOM_URL)
     end
+
+    Dir.chdir(PHANTOM_DIR) do |p|
+      system "bash", "build.sh"
+    end
+
   end
 end
 

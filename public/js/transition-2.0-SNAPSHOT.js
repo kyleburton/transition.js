@@ -28,7 +28,8 @@
       models: {},
       KEYS: {
         ESC: 27
-      }
+      },
+      suiteRunning: false
     },
     Views       = Transition.Views,
     Models      = Transition.Models,
@@ -1093,6 +1094,7 @@
   };
 
   Transition.runSuite = function () {
+    Transition.suiteRunning = true;
     models.suiteRunner.set('numPassed', 0);
     models.suiteRunner.set('numFailed', 0);
     models.suiteRunner.set('queue', new TestSuite(models.suite.models));
@@ -1140,13 +1142,17 @@
         if (models.suiteRunner.nextTest()) {
           Transition.runTest();
           Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
+          return;
         }
 
+        Log.info('Suite Completed');
+        Transition.suiteRunning = false;
         return;
       }
       Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
     };
 
+    // schedule the first poll
     Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
   };
 
@@ -1462,7 +1468,7 @@
     addView('logViewer',        Views.LogViewer,        '#transition-runner-log-viewer');
     Log.info('views initialized');
     Backbone.history.start();
-    Log.info('runner initialization completed: %a');
+    Log.info('runner initialization completed');
     if (models.suite.models.length < 1) {
       Log.fatal('No Test Suite Found, please place your tests in <a href="../test-suite.js">../test-suite.js</a>');
     }
