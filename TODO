@@ -1,3 +1,22 @@
+Documentation:
+ * point out that the web server has to follow symlinks if you install transition with a symlink...
+
+Logging:
+ * somehow (stringify the function?) show the contents of the on-enter and the transition predicates in the log?
+   do this automatically when you are stepping through a test?
+ * to the Log menu, add a 'toggle verbose vs non-verbose' to display full LogEntry details
+ * click or over over a log line, to view expanded details: full time/date string, test name & state, the log-level
+ * NB: the 'testName' member of the LogEntry is the test that caused the log, not just the name [string]
+
+Log Filtering:
+ * search for the name of the test too, not just the log entries themselves
+ * multiple words should be treated as an 'AND' between the terms
+ * or use a simple syntax for boolean searches
+ * filter the log output based on the currently selected test? (how do you unselect the current test?)
+
+Settings:
+ * use HTML5 local storage for the settings (thanks Nicholas Canzoneri)
+
 For Events (a real click), recording, etc, look at:
   https://github.com/jupiterjs/syn
 
