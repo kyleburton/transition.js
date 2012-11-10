@@ -1,5 +1,7 @@
 h1. Transition.js
 
+NOTE: This is the 1.0 Branch of Transition.js, for the 2.0 Branch, use master.
+
 Detangled in-browser web application testing.
 
 h1. "Documentation":http://kyleburton.github.com/transition.js
