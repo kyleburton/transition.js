@@ -2,7 +2,7 @@ h1. Transition.js 2.0
 
 Detangled in-browser web application testing.
 
-h1. "Documentation":http://kyleburton.github.com/transition.js
+h1. "Documentation":http://kyleburton.github.com/transition.js/site/2.0
 
 h1. Example
 
