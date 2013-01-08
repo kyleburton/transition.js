@@ -18,7 +18,7 @@
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
-          <a id="forkme_banner" href="https://github.com/kyleburton/transition.js/tree/transition.js-2.0">View on GitHub</a>
+          <a id="forkme_banner" href="https://github.com/kyleburton/transition.js/">View on GitHub</a>
 
           <h1 id="project_title"><a href="/transition.js/2.0">Transition.js 2.0</a></h1>
           <h2 id="project_tagline">Detangled in-Browser Webapp Testing</h2>
@@ -50,7 +50,7 @@
       +-- mark-item-as-done.js
 </code></pre>
 </div>
-<p>Tests can be defined within the <code>test-suite.js</code> file directly, or in separate files.  A common pattern is to place utility code for testing your application in the test-suite.js with tests each in their own separate file:</p>
+<p>Tests can be defined within the <code>test-suite.js</code> file directly, or in separate files.  A common pattern is to place utility code for testing your application in the test-suite.js with tests each in separate files:</p>
 <div class="highlight"><pre><code class="javascript"><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">root</span>        <span class="o">=</span> <span class="k">this</span><span class="p">,</span>
       <span class="nx">TodoTestLib</span> <span class="o">=</span> <span class="p">{};</span>
@@ -73,18 +73,21 @@
 <span class="nx">Transition</span><span class="p">.</span><span class="nx">loadScript</span><span class="p">(</span><span class="s1">&#39;/tests/mark-item-as-done.js&#39;</span><span class="p">);</span>
 </code></pre>
 </div>
+<h1>Optinally Defining a <code>test-suite.html</code> for Static Content</h1>
+<p>If your tests themselves require helper libraries or other static content (like their own UI controls, html, etc.), you can create a <code>test-suite.html</code> file next to <code>test-suite.js</code>.  The content of this file will be fetched and appended to the <code>&lt;body&gt;</code> <strong>before</strong> the <code>test-suite.js</code> file itself is loaded.</p>
 <h1>Defining a Test</h1>
-<p>Tests can be added by calling the <code>Transition.addTest</code> test <span class="caps">DSL</span>, passing an object of test properties.</p>
+<p>Tests are added to the suite by calling the <code>Transition.addTest</code> <span class="caps">DSL</span> function, passing an object defining the test&#8217;s properties.</p>
 <p>The test must have 2 properties:</p>
 <ul>
 	<li><code>name</code>: the name of the test</li>
 	<li><code>states</code>: the set of states that comprise the test.</li>
 </ul>
+<p>Other properties inthe test definition will be ignored by the framework, though they will still be available to your test.  You can use additional properties to define helper functions or other settings for your specific tests.</p>
 <p>States can be constructed using <code>Transition.newState</code>.  Each state must have:</p>
 <ul>
 	<li>a name</li>
-	<li><code>on-enter</code> callback, which is called once, when the state is entered.</li>
-	<li>a set of exit transitions, created with the <code>to</code> <span class="caps">DSL</span> method.</li>
+	<li>an <code>on-enter</code> callback, which is called once, when the state is entered.</li>
+	<li>a set of exit transitions, created with the <code>to</code> <span class="caps">DSL</span> function.</li>
 </ul>
 <p>Here is an example that loads the root page of the example <span class="caps">TODO</span> application and asserts that the form for creating lists is present:</p>
 <div class="highlight"><pre><code class="javascript"><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
@@ -95,6 +98,7 @@
     <span class="nx">states</span><span class="o">:</span> <span class="p">[</span>
       <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;about:blank&#39;</span><span class="p">))</span>
         <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">constantly_</span><span class="p">(</span><span class="kc">true</span><span class="p">)),</span>
+
       <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
         <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/lists&quot;]&#39;</span><span class="p">))</span>
     <span class="p">]</span>

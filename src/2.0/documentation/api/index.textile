@@ -19,7 +19,7 @@ public/
       +-- mark-item-as-done.js
 {% endhighlight %}
 
-Tests can be defined within the @test-suite.js@ file directly, or in separate files.  A common pattern is to place utility code for testing your application in the test-suite.js with tests each in their own separate file:
+Tests can be defined within the @test-suite.js@ file directly, or in separate files.  A common pattern is to place utility code for testing your application in the test-suite.js with tests each in separate files:
 
 {% highlight javascript %}
 (function () {
@@ -44,20 +44,26 @@ Transition.loadScript('/tests/add-todo-item.js');
 Transition.loadScript('/tests/mark-item-as-done.js');
 {% endhighlight %}
 
+h1. Optinally Defining a @test-suite.html@ for Static Content
+
+If your tests themselves require helper libraries or other static content (like their own UI controls, html, etc.), you can create a @test-suite.html@ file next to @test-suite.js@.  The content of this file will be fetched and appended to the @<body>@ *before* the @test-suite.js@ file itself is loaded.
+
 h1. Defining a Test
 
-Tests can be added by calling the @Transition.addTest@ test DSL, passing an object of test properties.
+Tests are added to the suite by calling the @Transition.addTest@ DSL function, passing an object defining the test's properties.
 
 The test must have 2 properties:
 
 * @name@: the name of the test
 * @states@: the set of states that comprise the test.
 
+Other properties inthe test definition will be ignored by the framework, though they will still be available to your test.  You can use additional properties to define helper functions or other settings for your specific tests.
 
 States can be constructed using @Transition.newState@.  Each state must have:
+
 * a name
-* @on-enter@ callback, which is called once, when the state is entered.
-* a set of exit transitions, created with the @to@ DSL method.
+* an @on-enter@ callback, which is called once, when the state is entered.
+* a set of exit transitions, created with the @to@ DSL function.
 
 Here is an example that loads the root page of the example TODO application and asserts that the form for creating lists is present:
 
@@ -70,6 +76,7 @@ Here is an example that loads the root page of the example TODO application and 
     states: [
       this.newState('init', this.navigateTo_('about:blank'))
         .to('mainPage', this.constantly_(true)),
+
       this.newState('mainPage', this.navigateTo_('/'))
         .to('success', this.elementExists_('form[action="/lists"]'))
     ]

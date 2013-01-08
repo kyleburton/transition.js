@@ -22,8 +22,8 @@ $ cd ~/projects/my-project/web-root
 $ ln -s ~/transition.js/public ./transition
 {% endhighlight %}
 
-You should then be able to browse to `/transition/index.html` within your web application and see the test runner.
+You should then be able to browse to @/transition/index.html@ within your web application and see the test runner.
 
-Implement your test suite in the file `test-suite.js` in your Web application's document root.
+Implement your test suite in the file @test-suite.js@ in your Web application's document root.  Optionally create a @test-suite.html@ for any UI elements your _tests_ require and it will be automatically appended to the Test UI's @<body>@ by the framework.
 
 Continue on to the "Documentation":../../documentation
