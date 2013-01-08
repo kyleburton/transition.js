@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>app.rb</title>
+  <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="app.html">app.rb</a>
+          <a class="source" href="models/list.html">list.rb</a>
+          <a class="source" href="models/task.html">task.rb</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>app.rb</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        <p>A Port of the EngineYard Todo App to Sinatra 1.3 by Steven! Ragnarök.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre></pre></div>
+      </td>
+    </tr>
+    <tr id='section-2'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-2">&#182;</a>
+        </div>
+        <p>Require YAML to read the config file.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="nb">require</span> <span class="s2">&quot;yaml&quot;</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-3'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-3">&#182;</a>
+        </div>
+        <p>Use Bundler for dependency management.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="nb">require</span> <span class="s2">&quot;bundler&quot;</span>
+<span class="no">Bundler</span><span class="o">.</span><span class="n">require</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-4'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-4">&#182;</a>
+        </div>
+        <p>Require models.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="n">require_relative</span> <span class="s2">&quot;models/list&quot;</span>
+<span class="n">require_relative</span> <span class="s2">&quot;models/task&quot;</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-5'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-5">&#182;</a>
+        </div>
+        <p>The entire application is nested within the <code>Todo</code> module.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="k">module</span> <span class="nn">Todo</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-6'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-6">&#182;</a>
+        </div>
+        <p>Setup environment and connect to the database.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="no">RACK_ENV</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;RACK_ENV&#39;</span><span class="o">]</span> <span class="o">||</span> <span class="s2">&quot;development&quot;</span>
+  <span class="no">DB_SETTINGS</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s2">&quot;config/database.yml&quot;</span><span class="p">)</span><span class="o">[</span><span class="no">RACK_ENV</span><span class="o">]</span>
+  <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">establish_connection</span><span class="p">(</span><span class="no">DB_SETTINGS</span><span class="p">)</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-7'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-7">&#182;</a>
+        </div>
+        <p>The main Sinatra Application. This is the app that is run in <code>config.ru</code>.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="k">class</span> <span class="nc">App</span> <span class="o">&lt;</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">Base</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-8'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-8">&#182;</a>
+        </div>
+        <p>Use Erubis for template compilation. Essentially a faster ERB.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="no">Tilt</span><span class="o">.</span><span class="n">register</span> <span class="ss">:erb</span><span class="p">,</span> <span class="no">Tilt</span><span class="o">[</span><span class="ss">:erubis</span><span class="o">]</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-GET_/'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-GET_/">&#182;</a>
+        </div>
+        <h1>GET /</h1>
+
+<p>Entry point for the application. Displays the main page. Which is a tabbed
+set of lists with a new list tab. The first list&rsquo;s tasks are displayed as
+well.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">get</span> <span class="s2">&quot;/&quot;</span> <span class="k">do</span>
+      <span class="vi">@lists</span> <span class="o">=</span> <span class="no">List</span><span class="o">.</span><span class="n">all</span>
+      <span class="n">erb</span> <span class="ss">:show_tasks</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-GET_/lists/:list_id'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-GET_/lists/:list_id">&#182;</a>
+        </div>
+        <h1>GET /lists/:list_id</h1>
+
+<p>This renders the same page as root but allows you to specify which list
+is shown first. Doing this is kind of hacky, I&rsquo;d like to have this get
+request, but redirect it to root with an anchor link specifying which tab
+should be shown. However, the tabbing library being used for the project
+doesn&rsquo;t pick up on the anchor link itself, but rather appears to intercept
+them. I would have to find a library which fixes this or fix it myself to
+get the desired behavior. So for now I&rsquo;ll imitate the behavior of the
+Rails 3 app.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">get</span> <span class="s2">&quot;/lists/:list_id&quot;</span> <span class="k">do</span>
+      <span class="vi">@lists</span> <span class="o">=</span> <span class="no">List</span><span class="o">.</span><span class="n">all</span>
+      <span class="vi">@selected_list_index</span> <span class="o">=</span> <span class="vi">@lists</span><span class="o">.</span><span class="n">index</span> <span class="p">{</span> <span class="o">|</span><span class="n">l</span><span class="o">|</span> <span class="n">l</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">].</span><span class="n">to_i</span> <span class="p">}</span>
+      <span class="n">erb</span> <span class="ss">:show_tasks</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-POST_/lists'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-POST_/lists">&#182;</a>
+        </div>
+        <h1>POST /lists</h1>
+
+<p>Create a new list with the given name, then return to <code>/</code>.</p>
+
+<h2>Parameters of <code>list</code>.</h2>
+
+<ul>
+<li><code>name</code>: The name of the list to create.</li>
+</ul>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">post</span> <span class="s2">&quot;/lists&quot;</span> <span class="k">do</span>
+      <span class="no">List</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="n">params</span><span class="o">[</span><span class="ss">:list</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span><span class="p">)</span>
+      <span class="n">redirect</span> <span class="s2">&quot;/&quot;</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-DELETE_/lists/:list_id'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-DELETE_/lists/:list_id">&#182;</a>
+        </div>
+        <h1>DELETE /lists/:list_id</h1>
+
+<p>Delete the list with the given id.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">delete</span> <span class="s2">&quot;/lists/:list_id&quot;</span> <span class="k">do</span>
+      <span class="no">List</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">destroy</span>
+      <span class="n">redirect</span> <span class="s2">&quot;/&quot;</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-POST_/lists/:list_id'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-POST_/lists/:list_id">&#182;</a>
+        </div>
+        <h1>POST /lists/:list_id</h1>
+
+<p>This is primarily a proxy for browser deletion. It does not currently have
+any other function.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">post</span> <span class="s2">&quot;/lists/:list_id&quot;</span> <span class="k">do</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-14'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-14">&#182;</a>
+        </div>
+        
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>      <span class="k">if</span> <span class="n">params</span><span class="o">[</span><span class="ss">:_method</span><span class="o">]</span> <span class="o">==</span> <span class="s2">&quot;delete&quot;</span>
+        <span class="no">List</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">destroy</span>
+        <span class="n">redirect</span> <span class="s2">&quot;/&quot;</span>
+      <span class="k">end</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-POST_/lists/:list_id/tasks'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-POST_/lists/:list_id/tasks">&#182;</a>
+        </div>
+        <h1>POST /lists/:list_id/tasks</h1>
+
+<p>Create a new task with the given name, then return to the correct tab of
+&lsquo;/&rsquo;.</p>
+
+<h2>Parameters of <code>task</code>.</h2>
+
+<ul>
+<li><code>name</code>: The name of the task. For example, &ldquo;Walk the pug&rdquo;.</li>
+<li><code>list_id</code>: The unique identifier of the list to which the task should be
+added.</li>
+<li><code>completed</code>: The truth value of the task&rsquo;s competion status.</li>
+</ul>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">post</span> <span class="s2">&quot;/lists/:list_id/tasks&quot;</span> <span class="k">do</span>
+      <span class="vi">@task</span> <span class="o">=</span> <span class="no">Task</span><span class="o">.</span><span class="n">create</span> <span class="nb">name</span><span class="p">:</span> <span class="n">params</span><span class="o">[</span><span class="ss">:task</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span>
+      <span class="no">List</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">add_task</span> <span class="vi">@task</span>
+      <span class="n">redirect</span> <span class="s2">&quot;/lists/</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-DELETE_/lists/:list_id/tasks/:task_id'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-DELETE_/lists/:list_id/tasks/:task_id">&#182;</a>
+        </div>
+        <h1>DELETE /lists/:list_id/tasks/:task_id</h1>
+
+<p>Delete the specified task from the list and return to root.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">delete</span> <span class="s2">&quot;/lists/:list_id/tasks/:task_id&quot;</span> <span class="k">do</span>
+      <span class="no">List</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">remove_task</span><span class="p">(</span>
+        <span class="no">Task</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:task_id</span><span class="o">]</span><span class="p">))</span><span class="o">.</span><span class="n">destroy</span>
+
+      <span class="n">redirect</span> <span class="s2">&quot;/lists/</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">end</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-POST_/lists/:list_id/tasks/:task_id'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-POST_/lists/:list_id/tasks/:task_id">&#182;</a>
+        </div>
+        <h1>POST /lists/:list_id/tasks/:task_id</h1>
+
+<p>This endpoint serves the dual purpose of acting as a proxy for the DELETE
+verb in browsers, as well as updating individual tasks acting as the PUT
+verb for updating the task&rsquo;s completion status.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="n">post</span> <span class="s2">&quot;/lists/:list_id/tasks/:task_id&quot;</span> <span class="k">do</span>
+      <span class="k">if</span> <span class="n">params</span><span class="o">[</span><span class="ss">:_method</span><span class="o">]</span> <span class="o">==</span> <span class="s2">&quot;delete&quot;</span>
+        <span class="no">List</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">remove_task</span><span class="p">(</span>
+          <span class="no">Task</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:task_id</span><span class="o">]</span><span class="p">))</span><span class="o">.</span><span class="n">destroy</span>
+      <span class="k">else</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="no">Task</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:task_id</span><span class="o">]</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">params</span><span class="o">[</span><span class="ss">:task</span><span class="o">][</span><span class="ss">:done</span><span class="o">]</span>
+          <span class="n">task</span><span class="o">.</span><span class="n">complete!</span>
+        <span class="k">else</span>
+          <span class="n">task</span><span class="o">.</span><span class="n">uncomplete!</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+
+      <span class="n">redirect</span> <span class="s2">&quot;/lists/</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:list_id</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>

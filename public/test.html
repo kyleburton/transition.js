@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=8" />
+    <title>Test Frame</title>
+    <!-- For IE versions that do not define JSON -->
+    <script src="//ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js" type="text/javascript"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/jquery-ui.min.js"></script>
+    <script src="js/underscore-min.js"></script>
+    <script src="js/backbone.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/sprintf.js"></script>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <script id="suite-dropdown-tmpl" type="text/html">
+      <% _.each( testsToShow(), function (test) { %>
+        <li><a class="test" data-item="testSelected" tabindex="-1" href="test/<%= test.get('name') %>"><%= test.get('name') %></a></li>
+        <% }); %>
+    </script>
+
+    <script id="navbar-tmpl" type="text/html">
+      <div class="navbar">
+        <div class="navbar-inner">
+          <a class="brand" target="_top" href="http://kyleburton.github.com/transition.js/site/">Transition.js</a>
+          <ul class="nav">
+            <li class="dropdown">
+            <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html"> Suite <b class="caret"></b> </a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+              <li><a data-item="reload" tabindex="-1" href="#">Reload</a></li>
+              <li class="divider"></li>
+              <li>
+                <form class="navbar-search" action="">
+                  <input type="text" name="suite-filter" class="search-query" placeholder="Search">
+                </form>
+              </li>
+              <li id="suite-dropdown-divider" class="divider"></li>
+            </ul>
+            </li>
+            <!--
+            <li><a href="#">Reports</a></li>
+            -->
+            <li class="dropdown">
+            <a class="dropdown-toggle" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html"> Log <b class="caret"></b> </a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+              <li><a data-item="clearLog" tabindex="-1" href="#">Clear Log</a></li>
+              <li class="divider"></li>
+              <li>
+                <form class="navbar-search" action="">
+                  <input type="text" name="log-filter" class="search-query" placeholder="Search">
+                </form>
+              </li>
+              <li class="divider"></li>
+              <li><a tabindex="-1" data-item="setLogTrace" href="#">Trace<% if (Transition.Log.isTrace()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogDebug" href="#">Debug<% if (Transition.Log.isDebug()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogInfo" href="#">Info<% if (Transition.Log.isInfo()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogWarn" href="#">Warn<% if (Transition.Log.isWarn()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogError" href="#">Error<% if (Transition.Log.isError()) { %> <i class="icon-ok"></i><% } %></a></li>
+              <li><a tabindex="-1" data-item="setLogFatal" href="#">Fatal<% if (Transition.Log.isFatal()) { %> <i class="icon-ok"></i><% } %></a></li>
+            </ul>
+            </li>
+            <li><a href="#" data-item="showSettings" class="settings">Settings</a></li>
+          </ul>
+
+          <!--
+          <form class="navbar-search pull-right"> <input type="text" class="search-query" placeholder="Search..."> </form>
+          -->
+        </div>
+      </div>
+    </script>
+
+    <script id="transition-runner-progress-bar-tmpl" type="text/html">
+      <div class="span1">
+        <span class="badge">
+          <i class="icon-thumbs-up"></i>
+          <%= Transition.models.suiteRunner.get('numPassed') %>
+          /
+          <i class="icon-thumbs-down"></i>
+          <%= Transition.models.suiteRunner.get('numFailed') %>
+          /
+          <i class="icon-hand-right"></i>
+          <%= Transition.models.suite.models.length %>
+        </span>
+      </div>
+      <div class="progress span11">
+        <div class="bar bar-success" style="width: <%= Transition.models.suiteRunner.percentPassed() %>%;"></div>
+        <div class="bar bar-warning" style="width: 0%;"></div>
+        <div class="bar bar-danger"  style="width: <%= Transition.models.suiteRunner.percentFailed() %>%;"></div>
+        <div class="bar bar-info"    style="width: <%= Transition.models.suiteRunner.percentRemaining() %>%;"></div>
+      </div>
+    </script>
+
+    <script id="transition-runner-controls-tmpl" type="text/html">
+      <button name="run"      class="btn">Run Suite</button>
+      <button name="start"    class="btn">Start</button>
+      <button name="stop"     class="btn">Stop</button>
+      <button name="step"     class="btn">Step</button>
+      <button name="back"     class="btn">Back</button>
+      <button name="continue" class="btn">Continue</button>
+    </script>
+
+    <script id="transition-runner-settings-modal-tmpl" type="text/html">
+      <div title="Settings">
+        <form class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="test-timeout">Test Timeout</label>
+            <div class="controls">
+              <input type="text" id="test-timeout" value="<%= get('testTimeout') %>"> </input>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="state-timeout">State Timeout</label>
+            <div class="controls">
+              <input type="text" id="state-timeout" value="<%= get('perStateTimeout') %>"> </input>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn">Close</button>
+          </div>
+        </form>
+      </div>
+    </script>
+
+    <script id="transition-runner-current-test-state-tmpl" type="text/html">
+      <div class="row-fluid">
+        <div class="span6">
+          <span class="label <%= runner.labelClass() %>"><%= test.get('name') %> / <%= runner.get('state').get('name') %></span>
+          <span class="badge">
+            <i class="icon-thumbs-up"></i>
+            <%= runner.get('currStateNumber') %>
+          </span>
+          <span class="badge">
+            <%= runner.elapsedTime()/1000 %>s
+            /
+            <%= Transition.models.settings.get('testTimeout')/1000 %>s
+          </span>
+        </div>
+        <div class="span6">
+          <div class="progress">
+            <div class="bar bar-success" style="width: <%= runner.percentTimeRemaining() %>%;"></div>
+            <div class="bar bar-warning" style="width: 0%;"></div>
+            <div class="bar bar-danger" style="width: 0%;"></div>
+            <div class="bar bar-info" style="width: <%= runner.percentTimeElapsed() %>%;"></div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <script id="transition-runner-log-entry-tmpl" type="text/html">
+      <div>
+        <span class="label <%= classForLevel() %>"><%= moment(get('timestamp')).format('HH:mm:ss') %></span>
+        <% if (get('repeatCount') > 1) { %>
+          <span class="badge">
+            <i class="icon-repeat"></i>
+            <%= get('repeatCount') %>
+          </span>
+        <% } %>
+        <span class="log-message"><%= get('message') %></span>
+      <div>
+    </script>
+
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div id="transition-runner-settings-modal-container" style="display: none;"> </div>
+
+      <div id="transition-runner-menubar"> </div>
+      <div class="container-fluid">
+        <div class="row-fluid">
+          <div id="transition-runner-controls" class="span6"> </div>
+          <div id="transition-runner-current-test-state" class="span6"> </div>
+        </div>
+        <div id="transition-runner-progress-bar"> </div>
+      </div>
+
+      <div id="transition-runner-log-viewer" class="span12 well"> </div>
+    </div>
+
+    <script src="js/transition-2.0-SNAPSHOT.js"></script>
+    <script src="../test-suite.js"></script>
+    <script>
+      Transition.buildRunner();
+    </script>
+  </body>
+</html>
+
+
