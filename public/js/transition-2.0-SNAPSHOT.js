@@ -67,6 +67,21 @@
     throw 'Error: jQuery not found.';
   }
 
+  Transition.loadSuiteContent = function () {
+    $.ajax({
+      async:     false,
+      url:       '../test-suite.html',
+      dataType:  'html',
+      success:   function (data) {
+        $('body').append(data);
+      },
+      error:      function (jqXHR, textStatus, errorThrown) {
+        Transition.lastError = errorThrown;
+        Log.info("No Custom HTML Content for Test Suite (../test-suite.html)");
+      }
+    });
+  };
+
   /********************************************************************************
    * Templaates and caching.
    *
@@ -1501,5 +1516,7 @@
       Log.fatal('No Test Suite Found, please place your tests in <a href="../test-suite.js">../test-suite.js</a>');
     }
   };
+
+  Transition.loadSuiteContent();
 
 }.call(this));
