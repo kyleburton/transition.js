@@ -1372,6 +1372,20 @@
     };
   };
 
+  Transition.click = function (selector) {
+    var nodes = Transition.find(selector).click();
+    nodes.click();
+    return nodes;
+  };
+
+  Transition.click_ = function (selector) {
+    return function () {
+      var nodes = Transition.find(selector).click();
+      nodes.click();
+      return nodes;
+    };
+  };
+
   /********************************************************************************
    * Logging
    *

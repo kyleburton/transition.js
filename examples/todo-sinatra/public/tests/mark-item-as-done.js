@@ -19,14 +19,10 @@
         .to('addItem', this.elementExists_('li a:contains("Test")')),
       this.newState('addItem', 'addItem')
         .to('markItemDone', this.elementExists_('li:contains("item")')),
-      this.newState('markItemDone', 'markItemDone')
+      this.newState('markItemDone', this.click_('input[type=checkbox]'))
         .to('success', this.elementExists_('li.finished:contains("item")')),
     ],
-  
-    markItemDone: function () {
-      this.find('input[type=checkbox]').click();
-    },
-  
+
     addItem: function () {
       this.find('input[name="task[name]"]').val('item');
       this.find('form:visible').submit();
