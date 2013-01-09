@@ -519,7 +519,8 @@
       var dests = [], 
           test  = this.get('test'),
           state = this.get('state'),
-          error;
+          error,
+          self = this;
 
       //this.trigger('change');
 
@@ -532,9 +533,17 @@
       }
 
       _.each(state.get('transitions'), function (tr) {
-        var pred = tr.pred, predName, pfn;
+        var pred = tr.pred, predName = tr.pred, pfn;
 
-        if (typeof pred !== "function") {
+        if (typeof pred === "undefined") {
+          self.fail();
+          error = sprintf("Error: no predicate defined (or was null) for test %s/%s", test.get('name'), state.get('name'));
+          self.set('error', error);
+          Log.error(error);
+          return;
+        }
+
+        if (typeof pred !== "function" && typeof pred !== "undefined") {
           // allow transition predicates to start with a '!' to allow the
           // expression of logical negation, iow 'NOT predicate'.
           if (pred.toString().indexOf("!") === 0) {
@@ -550,7 +559,12 @@
         }
 
         if (typeof pred !== "function") {
-          throw sprintf("Error: predicate for test %s/%s not recognized: %s", test.get('name'), state.get('name'), pred);
+          self.fail();
+          error = sprintf("Error: predicate for test %s/%s not found/recognized: %s", test.get('name'), state.get('name'), predName);
+          self.set('error', error);
+          Log.error(error);
+          throw sprintf(error);
+          return;
         }
 
         if (pred.call(test, state, tr)) {
@@ -563,6 +577,7 @@
         error = "Error: more than 1 transition out of " + this.get('state').get('name') + " :" + JSON.stringify(dests);
         this.set('error', error);
         Log.error(error);
+        return;
       }
 
       if (dests.length === 1) {
@@ -1139,6 +1154,8 @@
       Log.info('Test completed!');
       return;
     }
+    // NB: protect against transition predicates or init functions from
+    // throwing exceptions, it breaks the state machine / framework
     Transition.testRunner.transition();
     Transition.pollTimeoutId = setTimeout(
         Transition.pollFn,
