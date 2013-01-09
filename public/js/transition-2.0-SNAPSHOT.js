@@ -1345,8 +1345,8 @@
   };
 
   Transition.find = function (selector) {
-    var jq = parent.frames.main.document.$ || $(parent.frames.main.document),
-        result = jq.find(selector);
+    var jq = parent.frames.main.jQuery || parent.frames.main.document.jQuery || parent.frames.main.window.jQuery || $(parent.frames.main.document),
+        result = jq(selector);
     return result;
   };
 
@@ -1373,14 +1373,14 @@
   };
 
   Transition.click = function (selector) {
-    var nodes = Transition.find(selector).click();
+    var nodes = Transition.find(selector);
     nodes.click();
     return nodes;
   };
 
   Transition.click_ = function (selector) {
     return function () {
-      var nodes = Transition.find(selector).click();
+      var nodes = Transition.find(selector);
       nodes.click();
       return nodes;
     };
