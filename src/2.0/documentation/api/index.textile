@@ -59,6 +59,8 @@ The test must have 2 properties:
 
 Other properties inthe test definition will be ignored by the framework, though they will still be available to your test.  You can use additional properties to define helper functions or other settings for your specific tests.
 
+h3. Adding States
+
 States can be constructed using @Transition.newState@.  Each state must have:
 
 * a name
@@ -80,6 +82,39 @@ Here is an example that loads the root page of the example TODO application and 
       this.newState('mainPage', this.navigateTo_('/'))
         .to('success', this.elementExists_('form[action="/lists"]'))
     ]
+  });
+
+}.call(Transition));
+{% endhighlight %}
+
+h3. Transitions and Predicates
+
+Transition predicates can be specified as any of the following:
+
+* a function that returns a boolean
+* the name of a property of your test, as a string, referencing a function that returns a boolean
+
+If the name is passed as a string, it may optionally be prefixed with an exclamation point to indicate it should be logically negated.  This is provided as a convienience so that you don't have to write both the positive and negative forms of a predicate.
+
+The above can be written to use a property name for the @mainPageLoaded@ as follows:
+
+{% highlight javascript %}
+(function () {
+
+  this.addTest({
+    name: 'Test Index Page',
+
+    states: [
+      this.newState('init', this.navigateTo_('about:blank'))
+        .to('mainPage', this.constantly_(true)),
+
+      this.newState('mainPage', this.navigateTo_('/'))
+        .to('success', 'mainPageLoaded')
+    ],
+
+    mainPageLoaded: function () {
+      return this.elementExists_('form[action="/lists"]');
+    }
   });
 
 }.call(Transition));

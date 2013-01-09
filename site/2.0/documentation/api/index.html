@@ -83,6 +83,7 @@
 	<li><code>states</code>: the set of states that comprise the test.</li>
 </ul>
 <p>Other properties inthe test definition will be ignored by the framework, though they will still be available to your test.  You can use additional properties to define helper functions or other settings for your specific tests.</p>
+<h3>Adding States</h3>
 <p>States can be constructed using <code>Transition.newState</code>.  Each state must have:</p>
 <ul>
 	<li>a name</li>
@@ -102,6 +103,34 @@
       <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
         <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/lists&quot;]&#39;</span><span class="p">))</span>
     <span class="p">]</span>
+  <span class="p">});</span>
+
+<span class="p">}.</span><span class="nx">call</span><span class="p">(</span><span class="nx">Transition</span><span class="p">));</span>
+</code></pre>
+</div>
+<h3>Transitions and Predicates</h3>
+<p>Transition predicates can be specified as any of the following:</p>
+<ul>
+	<li>a function that returns a boolean</li>
+	<li>the name of a property of your test, as a string, referencing a function that returns a boolean</li>
+</ul>
+<p>If the name is passed as a string, it may optionally be prefixed with an exclamation point to indicate it should be logically negated.  This is provided as a convienience so that you don&#8217;t have to write both the positive and negative forms of a predicate.</p>
+<div class="highlight"><pre><code class="javascript"><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+
+  <span class="k">this</span><span class="p">.</span><span class="nx">addTest</span><span class="p">({</span>
+    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Test Index Page&#39;</span><span class="p">,</span>
+
+    <span class="nx">states</span><span class="o">:</span> <span class="p">[</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;about:blank&#39;</span><span class="p">))</span>
+        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">constantly_</span><span class="p">(</span><span class="kc">true</span><span class="p">)),</span>
+
+      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="s1">&#39;mainPageLoaded&#39;</span><span class="p">)</span>
+    <span class="p">],</span>
+
+    <span class="nx">mainPageLoaded</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/lists&quot;]&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
   <span class="p">});</span>
 
 <span class="p">}.</span><span class="nx">call</span><span class="p">(</span><span class="nx">Transition</span><span class="p">));</span>
