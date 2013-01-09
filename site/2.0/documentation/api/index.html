@@ -115,6 +115,7 @@
 	<li>the name of a property of your test, as a string, referencing a function that returns a boolean</li>
 </ul>
 <p>If the name is passed as a string, it may optionally be prefixed with an exclamation point to indicate it should be logically negated.  This is provided as a convienience so that you don&#8217;t have to write both the positive and negative forms of a predicate.</p>
+<p>The above can be written to use a property name for the <code>mainPageLoaded</code> as follows:</p>
 <div class="highlight"><pre><code class="javascript"><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
 
   <span class="k">this</span><span class="p">.</span><span class="nx">addTest</span><span class="p">({</span>
