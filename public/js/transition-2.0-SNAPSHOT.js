@@ -532,10 +532,21 @@
       }
 
       _.each(state.get('transitions'), function (tr) {
-        var pred = tr.pred;
+        var pred = tr.pred, predName, pfn;
 
         if (typeof pred !== "function") {
-          pred = test.attributes[pred];
+          // allow transition predicates to start with a '!' to allow the
+          // expression of logical negation, iow 'NOT predicate'.
+          if (pred.toString().indexOf("!") === 0) {
+            predName = pred.toString().substring(1);
+            pfn      = test.attributes[predName];
+            pred     = function (state, tr) {
+              return !pfn.call(this, state, tr);
+            };
+          }
+          else {
+            pred = test.attributes[pred];
+          }
         }
 
         if (typeof pred !== "function") {
