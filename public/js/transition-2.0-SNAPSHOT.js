@@ -1336,6 +1336,12 @@
             return t.get('name') === test.get('name');
           });
 
+      _.each(options, function (param, name) {
+        if ( typeof param === "function" ) {
+          test[name] = param;
+        }
+      });
+
       if (existing) {
         Log.info("Replacing test in suite: '%s'", test.get('name'));
         existing.set(test.toJSON());
