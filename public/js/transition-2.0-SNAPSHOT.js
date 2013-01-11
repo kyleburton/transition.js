@@ -7,10 +7,10 @@
  * Version: 2.0-SNAPSHOT
  ********************************************************************************/
 (function () {
-  var root        = this, 
+  var root        = this,
     Transition  = {
       Log:       {
-        Levels: { 
+        Levels: {
           TRACE: 99,
           DEBUG: 80,
           INFO:  60,
@@ -36,7 +36,7 @@
     Templates   = Transition.Templates,
     mainFrame   = {
       document: this.parent.frames.main
-    }, 
+    },
     runnerFrame = {
       document: this.parent.frames.test,
       $:        this.parent.frames.test && this.parent.frames.test.$
@@ -214,7 +214,7 @@
           name:    'start',
           onEnter: Transition.noop,
           attrs:   {
-            start: true, 
+            start: true,
             success: false,
             failure: false
           },
@@ -233,7 +233,7 @@
           name:    'start',
           onEnter: Transition.noop,
           attrs:   {
-            start: true, 
+            start: true,
             success: false,
             failure: false
           },
@@ -247,7 +247,7 @@
           name:    'success',
           onEnter: Transition.noop,
           attrs:   {
-            start:   true, 
+            start:   true,
             success: true,
             failure: false
           },
@@ -263,7 +263,7 @@
           name:    'failure',
           onEnter: Transition.noop,
           attrs:   {
-            start:   false, 
+            start:   false,
             success: false,
             failure: true
           },
@@ -516,7 +516,7 @@
     },
 
     transition: function () {
-      var dests = [], 
+      var dests = [],
           test  = this.get('test'),
           state = this.get('state'),
           error,
@@ -665,7 +665,7 @@
     },
 
     succeeded: function () {
-      return this.get('isDone') && 
+      return this.get('isDone') &&
              this.get('state').get('attrs').success;
     },
 
@@ -1417,6 +1417,16 @@
       var nodes = Transition.find(selector);
       nodes.click();
       return nodes;
+    };
+  };
+
+  Transition.findVisibleText = function (text) {
+    return Transition.find("*contains(" + text + "):visible:last");
+  };
+
+  Transition.findVisibleText_ = function(text) {
+    return function () {
+      return Transition.findVisibleText(text);
     };
   };
 
