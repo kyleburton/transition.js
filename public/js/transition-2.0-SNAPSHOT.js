@@ -154,7 +154,7 @@
       onEnter.call(test, args);
     },
 
-    to: function (targetStateName, predicate ) {
+    to: function (targetStateName, predicate) {
       var info = {
           to:   targetStateName,
           pred: predicate
@@ -308,7 +308,7 @@
 
     navigateTo:  function () {
       return Transition.navigateTo.apply(Transition, arguments);
-    },
+    }
 
   });
 
@@ -415,27 +415,27 @@
 
     levelDescription: function () {
       var level = this.get('level');
-      if ( Log.Levels.TRACE === level ) {
+      if (Log.Levels.TRACE === level) {
         return 'TRACE';
       }
 
-      if ( Log.Levels.DEBUG === level ) {
+      if (Log.Levels.DEBUG === level) {
         return 'DEBUG';
       }
 
-      if ( Log.Levels.INFO === level ) {
+      if (Log.Levels.INFO === level) {
         return 'INFO';
       }
 
-      if ( Log.Levels.WARN === level ) {
+      if (Log.Levels.WARN === level) {
         return 'WARN';
       }
 
-      if ( Log.Levels.ERROR === level ) {
+      if (Log.Levels.ERROR === level) {
         return 'ERROR';
       }
 
-      if ( Log.Levels.FATAL === level ) {
+      if (Log.Levels.FATAL === level) {
         return 'FATAL';
       }
     }
@@ -564,7 +564,6 @@
           self.set('error', error);
           Log.error(error);
           throw sprintf(error);
-          return;
         }
 
         if (pred.call(test, state, tr)) {
@@ -1337,7 +1336,7 @@
           });
 
       _.each(options, function (param, name) {
-        if ( typeof param === "function" ) {
+        if (typeof param === "function") {
           test[name] = param;
         }
       });
@@ -1424,7 +1423,7 @@
     return Transition.find("*contains(" + text + "):visible:last");
   };
 
-  Transition.findVisibleText_ = function(text) {
+  Transition.findVisibleText_ = function (text) {
     return function () {
       return Transition.findVisibleText(text);
     };
