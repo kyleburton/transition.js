@@ -144,6 +144,10 @@ h3. @Transition.elementNotExists@, @Transition.elementNotExists_@
 
 These boolean predicates test if an element does not exist in the page.
 
+h3. @Transition.findVisibleText@, @Transition.findVisibleText_@
+
+@findVisibleText@ performs a jQuery find for the last node that matchs the selector: @*contains(yourtext):visible:last@
+
 h2. Logging
 
 There are 6 logging levels, each indicating a different severity:
