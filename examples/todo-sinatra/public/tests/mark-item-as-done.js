@@ -28,6 +28,7 @@
     },
 
     addItem: function () {
+      this.set("itemAdded", true);
       this.find('input[name="task[name]"]').val('item');
       this.find('form:visible').submit();
     },
