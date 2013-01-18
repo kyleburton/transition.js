@@ -142,8 +142,10 @@
     },
 
     callOnEnter: function (test, args) {
-      var onEnter = this.get('onEnter');
+      var onEnter = this.get('onEnter'), fnName = 'function';
+
       if (typeof onEnter !== "function") {
+        fnName = onEnter;
         onEnter = test.get(onEnter);
       }
 
@@ -151,7 +153,14 @@
         throw 'Error: onEnter[' + this.get('onEnter') + '] is not a valid function';
       }
 
-      onEnter.call(test, args);
+      try {
+        Log.trace("calling onEnter trigger %s.%s", this.get('name'), fnName);
+        onEnter.call(test, args);
+      }
+      catch (e) {
+        console.log("Error calling onEnter trigger %o.%o", this.get('name'), fnName, e);
+        Log.error("Error calling onEnter trigger %s.%s", this.get('name'), fnName, e);
+      }
     },
 
     to: function (targetStateName, predicate) {
@@ -569,11 +578,17 @@
           }
           else {
             predName = pred.toString();
-            pred = test.attributes[predName];
-            if ( typeof pred === "undefined") {
+            pfn = test.attributes[predName];
+            if ( typeof pfn === "undefined") {
               // treat as a jquery selector
               console.log('treating %o as a jquery (POS) selector', predName);
               pred = Transition.elementExists_(predName);
+            }
+            else {
+                // it's a function on the class
+                pred     = function (state, tr) {
+                    return pfn.call(this, state, tr);
+                };
             }
           }
         }
@@ -1362,7 +1377,7 @@
 
       _.each(options, function (param, name) {
         if (typeof param === "function") {
-          test[name] = param;
+          test[name] = _.bind(param, test);
         }
       });
 
