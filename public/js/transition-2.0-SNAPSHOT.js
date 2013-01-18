@@ -522,7 +522,7 @@
           error,
           self = this;
 
-      //this.trigger('change');
+      Transition.Log.trace('checking %a', state.get('name'));
 
       if (state.get('attrs').success || state.get('attrs').failure) {
         this.set('isDone', true);
@@ -566,8 +566,13 @@
           throw sprintf(error);
         }
 
-        if (pred.call(test, state, tr)) {
-          dests.push(tr);
+        try {
+          if (pred.call(test, state, tr)) {
+            dests.push(tr);
+          }
+        }
+        catch (e) {
+          console.log(e);
         }
       });
 
@@ -1367,25 +1372,20 @@
     };
   };
 
-  Transition.navigateTo = function (dest) {
-    parent.frames.main.document.location = dest;
-  };
-
-  Transition.navigateTo_ = function (dest) {
-    return function () {
-      Transition.navigateTo(dest);
-    };
-  };
-
   Transition.find = function (selector) {
-    var jq = parent.frames.main.jQuery || parent.frames.main.document.jQuery || parent.frames.main.window.jQuery || $(parent.frames.main.document),
-        result = jq(selector);
-    return result;
+    try {
+      var jq = parent.frames.main.jQuery || parent.frames.main.document.jQuery || parent.frames.main.window.jQuery || $(parent.frames.main.document),
+          result = jq(selector);
+      return result;
+    }
+    catch(e) {
+      console.log(e);
+    }
   };
 
   Transition.elementExists = function (selector) {
     var result = Transition.find(selector);
-    return result.length > 0;
+    return result && result.length > 0;
   };
 
   Transition.elementExists_ = function (selector) {
@@ -1419,12 +1419,78 @@
     };
   };
 
+  Transition.navigateTo = function (url) {
+    if (url.indexOf("#") === 0) {
+      parent.frames.main.window.location.hash = url;
+      return url;
+    }
+
+    return parent.main.window.location.href = url;
+  };
+
+  Transition.navigateTo_ = function (url) {
+    return function () {
+      return Transition.navigateTo(url);
+    };
+  };
+
+  Transition.isChecked = function (selector) {
+    return Transition.find(selector).is(':checked');
+  };
+
+  Transition.isChecked_ = function (selector) {
+    return function () {
+      return Transition.isChecked(selector);
+    };
+  };
+
+  Transition.isNotChecked = function (selector) {
+    var elt = Transition.find(selector);
+    // false if no element found
+    if (elt.length < 1) {
+      return false;
+    }
+    return !elt.is(':checked');
+  };
+
+  Transition.isNotChecked_ = function (selector) {
+    return function () {
+      return Transition.isNotChecked(selector);
+    };
+  };
+
+  Transition.clickAnchor = function (selector) {
+    var elt = Transition.find(selector);
+    return Transition.navigateTo(elt.first().attr('href'));
+  };
+
+  Transition.clickAnchor_ = function (selector) {
+    return function () {
+      return Transition.clickAnchor(selector);
+    };
+  };
+
+  Transition.fillInWithKeyEvents = function (selector, text) {
+    var ii, e, e2,
+        el = Transition.find(selector);
+
+    for (ii = 0; ii < text.length; ii += 1) {
+      e  = $.Event("keyup");
+      e2 = $.Event("keydown");
+      e.which = text.charCodeAt(ii);
+      el.val(el.val() + text.charAt(ii));
+      el.trigger(e);
+      el.trigger(e2);
+    }
+    el.change();
+  };
+
   Transition.findVisibleText = function (text) {
     return Transition.find("*contains(" + text + "):visible:last");
   };
 
-  Transition.findVisibleText_ = function (text) {
-    return function () {
+  Transition.findVisibleText_ = function(text) {
+    return function() {
       return Transition.findVisibleText(text);
     };
   };
@@ -1447,7 +1513,7 @@
       message:     message
     });
 
-    if (level >= models.settings.get('logLevel')) {
+    if (level > models.settings.get('logLevel')) {
       return;
     }
 
