@@ -855,7 +855,7 @@
     render: function () {
       this.$el.html(tmpl(this.templateId, {suite: models.suite}));
       this.suiteDropdown = new SuiteDropdown();
-      this.suiteDropdown.render().$el.appendTo(this.$el.find('.dropdown-menu'));
+      this.suiteDropdown.render().$el.appendTo(this.$el.find('.test-suite-dropdown'));
       return this;
     }
   });
