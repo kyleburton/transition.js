@@ -7,10 +7,10 @@
  * Version: 2.0-SNAPSHOT
  ********************************************************************************/
 (function () {
-  var root        = this, 
+  var root        = this,
     Transition  = {
       Log:       {
-        Levels: { 
+        Levels: {
           TRACE: 99,
           DEBUG: 80,
           INFO:  60,
@@ -36,7 +36,7 @@
     Templates   = Transition.Templates,
     mainFrame   = {
       document: this.parent.frames.main
-    }, 
+    },
     runnerFrame = {
       document: this.parent.frames.test,
       $:        this.parent.frames.test && this.parent.frames.test.$
@@ -154,7 +154,7 @@
       onEnter.call(test, args);
     },
 
-    to: function (targetStateName, predicate ) {
+    to: function (targetStateName, predicate) {
       var info = {
           to:   targetStateName,
           pred: predicate
@@ -214,7 +214,7 @@
           name:    'start',
           onEnter: Transition.noop,
           attrs:   {
-            start: true, 
+            start: true,
             success: false,
             failure: false
           },
@@ -233,7 +233,7 @@
           name:    'start',
           onEnter: Transition.noop,
           attrs:   {
-            start: true, 
+            start: true,
             success: false,
             failure: false
           },
@@ -247,7 +247,7 @@
           name:    'success',
           onEnter: Transition.noop,
           attrs:   {
-            start:   true, 
+            start:   true,
             success: true,
             failure: false
           },
@@ -263,7 +263,7 @@
           name:    'failure',
           onEnter: Transition.noop,
           attrs:   {
-            start:   false, 
+            start:   false,
             success: false,
             failure: true
           },
@@ -308,7 +308,7 @@
 
     navigateTo:  function () {
       return Transition.navigateTo.apply(Transition, arguments);
-    },
+    }
 
   });
 
@@ -415,27 +415,27 @@
 
     levelDescription: function () {
       var level = this.get('level');
-      if ( Log.Levels.TRACE === level ) {
+      if (Log.Levels.TRACE === level) {
         return 'TRACE';
       }
 
-      if ( Log.Levels.DEBUG === level ) {
+      if (Log.Levels.DEBUG === level) {
         return 'DEBUG';
       }
 
-      if ( Log.Levels.INFO === level ) {
+      if (Log.Levels.INFO === level) {
         return 'INFO';
       }
 
-      if ( Log.Levels.WARN === level ) {
+      if (Log.Levels.WARN === level) {
         return 'WARN';
       }
 
-      if ( Log.Levels.ERROR === level ) {
+      if (Log.Levels.ERROR === level) {
         return 'ERROR';
       }
 
-      if ( Log.Levels.FATAL === level ) {
+      if (Log.Levels.FATAL === level) {
         return 'FATAL';
       }
     }
@@ -516,12 +516,13 @@
     },
 
     transition: function () {
-      var dests = [], 
+      var dests = [],
           test  = this.get('test'),
           state = this.get('state'),
-          error;
+          error,
+          self = this;
 
-      //this.trigger('change');
+      Transition.Log.trace('checking %a', state.get('name'));
 
       if (state.get('attrs').success || state.get('attrs').failure) {
         this.set('isDone', true);
@@ -532,18 +533,46 @@
       }
 
       _.each(state.get('transitions'), function (tr) {
-        var pred = tr.pred;
+        var pred = tr.pred, predName = tr.pred, pfn;
 
-        if (typeof pred !== "function") {
-          pred = test.attributes[pred];
+        if (typeof pred === "undefined") {
+          self.fail();
+          error = sprintf("Error: no predicate defined (or was null) for test %s/%s", test.get('name'), state.get('name'));
+          self.set('error', error);
+          Log.error(error);
+          return;
+        }
+
+        if (typeof pred !== "function" && typeof pred !== "undefined") {
+          // allow transition predicates to start with a '!' to allow the
+          // expression of logical negation, iow 'NOT predicate'.
+          if (pred.toString().indexOf("!") === 0) {
+            predName = pred.toString().substring(1);
+            pfn      = test.attributes[predName];
+            pred     = function (state, tr) {
+              return !pfn.call(this, state, tr);
+            };
+          }
+          else {
+            pred = test.attributes[pred];
+          }
         }
 
         if (typeof pred !== "function") {
-          throw sprintf("Error: predicate for test %s/%s not recognized: %s", test.get('name'), state.get('name'), pred);
+          self.fail();
+          error = sprintf("Error: predicate for test %s/%s not found/recognized: %s", test.get('name'), state.get('name'), predName);
+          self.set('error', error);
+          Log.error(error);
+          throw sprintf(error);
         }
 
-        if (pred.call(test, state, tr)) {
-          dests.push(tr);
+        try {
+          if (pred.call(test, state, tr)) {
+            dests.push(tr);
+          }
+        }
+        catch (e) {
+          console.log(e);
         }
       });
 
@@ -552,6 +581,7 @@
         error = "Error: more than 1 transition out of " + this.get('state').get('name') + " :" + JSON.stringify(dests);
         this.set('error', error);
         Log.error(error);
+        return;
       }
 
       if (dests.length === 1) {
@@ -639,7 +669,7 @@
     },
 
     succeeded: function () {
-      return this.get('isDone') && 
+      return this.get('isDone') &&
              this.get('state').get('attrs').success;
     },
 
@@ -825,7 +855,7 @@
     render: function () {
       this.$el.html(tmpl(this.templateId, {suite: models.suite}));
       this.suiteDropdown = new SuiteDropdown();
-      this.suiteDropdown.render().$el.appendTo(this.$el.find('.dropdown-menu'));
+      this.suiteDropdown.render().$el.appendTo(this.$el.find('.test-suite-dropdown'));
       return this;
     }
   });
@@ -1128,6 +1158,8 @@
       Log.info('Test completed!');
       return;
     }
+    // NB: protect against transition predicates or init functions from
+    // throwing exceptions, it breaks the state machine / framework
     Transition.testRunner.transition();
     Transition.pollTimeoutId = setTimeout(
         Transition.pollFn,
@@ -1308,6 +1340,12 @@
             return t.get('name') === test.get('name');
           });
 
+      _.each(options, function (param, name) {
+        if (typeof param === "function") {
+          test[name] = param;
+        }
+      });
+
       if (existing) {
         Log.info("Replacing test in suite: '%s'", test.get('name'));
         existing.set(test.toJSON());
@@ -1334,25 +1372,20 @@
     };
   };
 
-  Transition.navigateTo = function (dest) {
-    parent.frames.main.document.location = dest;
-  };
-
-  Transition.navigateTo_ = function (dest) {
-    return function () {
-      Transition.navigateTo(dest);
-    };
-  };
-
   Transition.find = function (selector) {
-    var jq = parent.frames.main.document.$ || $(parent.frames.main.document),
-        result = jq.find(selector);
-    return result;
+    try {
+      var jq = parent.frames.main.jQuery || parent.frames.main.document.jQuery || parent.frames.main.window.jQuery || $(parent.frames.main.document),
+          result = jq(selector);
+      return result;
+    }
+    catch(e) {
+      console.log(e);
+    }
   };
 
   Transition.elementExists = function (selector) {
     var result = Transition.find(selector);
-    return result.length > 0;
+    return result && result.length > 0;
   };
 
   Transition.elementExists_ = function (selector) {
@@ -1369,6 +1402,96 @@
   Transition.elementNotExists_ = function (selector) {
     return function () {
       return Transition.elementNotExists(selector);
+    };
+  };
+
+  Transition.click = function (selector) {
+    var nodes = Transition.find(selector);
+    nodes.click();
+    return nodes;
+  };
+
+  Transition.click_ = function (selector) {
+    return function () {
+      var nodes = Transition.find(selector);
+      nodes.click();
+      return nodes;
+    };
+  };
+
+  Transition.navigateTo = function (url) {
+    if (url.indexOf("#") === 0) {
+      parent.frames.main.window.location.hash = url;
+      return url;
+    }
+
+    return parent.main.window.location.href = url;
+  };
+
+  Transition.navigateTo_ = function (url) {
+    return function () {
+      return Transition.navigateTo(url);
+    };
+  };
+
+  Transition.isChecked = function (selector) {
+    return Transition.find(selector).is(':checked');
+  };
+
+  Transition.isChecked_ = function (selector) {
+    return function () {
+      return Transition.isChecked(selector);
+    };
+  };
+
+  Transition.isNotChecked = function (selector) {
+    var elt = Transition.find(selector);
+    // false if no element found
+    if (elt.length < 1) {
+      return false;
+    }
+    return !elt.is(':checked');
+  };
+
+  Transition.isNotChecked_ = function (selector) {
+    return function () {
+      return Transition.isNotChecked(selector);
+    };
+  };
+
+  Transition.clickAnchor = function (selector) {
+    var elt = Transition.find(selector);
+    return Transition.navigateTo(elt.first().attr('href'));
+  };
+
+  Transition.clickAnchor_ = function (selector) {
+    return function () {
+      return Transition.clickAnchor(selector);
+    };
+  };
+
+  Transition.fillInWithKeyEvents = function (selector, text) {
+    var ii, e, e2,
+        el = Transition.find(selector);
+
+    for (ii = 0; ii < text.length; ii += 1) {
+      e  = $.Event("keyup");
+      e2 = $.Event("keydown");
+      e.which = text.charCodeAt(ii);
+      el.val(el.val() + text.charAt(ii));
+      el.trigger(e);
+      el.trigger(e2);
+    }
+    el.change();
+  };
+
+  Transition.findVisibleText = function (text) {
+    return Transition.find("*contains(" + text + "):visible:last");
+  };
+
+  Transition.findVisibleText_ = function(text) {
+    return function() {
+      return Transition.findVisibleText(text);
     };
   };
 
@@ -1390,7 +1513,7 @@
       message:     message
     });
 
-    if (level >= models.settings.get('logLevel')) {
+    if (level > models.settings.get('logLevel')) {
       return;
     }
 
