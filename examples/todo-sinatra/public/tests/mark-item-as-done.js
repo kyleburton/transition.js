@@ -8,20 +8,24 @@
   
     states: [
       this.newState('init', this.navigateTo_('/'))
-        .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
-        .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
+        .to('deleteTestList').when('li a:contains("Test")')
+        .to('mainPage')      .when('!liContainsTestItem'),
       this.newState('deleteTestList', TodoTestLib.deleteTestList)
-        .to('deleteTestList',     this.elementExists_('li a:contains("Test")'))
-        .to('mainPage',           this.elementNotExists_('li a:contains("Test")')),
+        .to('deleteTestList').when('li a:contains("Test")')
+        .to('mainPage')      .when('!li a:contains("Test")'),
       this.newState('mainPage', this.navigateTo_('/'))
-        .to('createList', this.elementExists_('input[name="list[name]"]:visible')),
+        .to('createList')    .when('input[name="list[name]"]:visible'),
       this.newState('createList', TodoTestLib.createTestList)
-        .to('addItem', this.elementExists_('li a:contains("Test")')),
+        .to('addItem')       .when('li a:contains("Test")'),
       this.newState('addItem', 'addItem')
-        .to('markItemDone', this.elementExists_('li:contains("item")')),
+        .to('markItemDone')  .when('li:contains("item")'),
       this.newState('markItemDone', 'checkAllCheckboxes')
-        .to('success', this.elementExists_('li.finished:contains("item")')),
+        .to('success')       .when('li.finished:contains("item")'),
     ],
+
+    liContainsTestItem: function () {
+      return this.elementExists('li a:contains("Test")');
+    },
 
     addItem: function () {
       this.find('input[name="task[name]"]').val('item');

@@ -163,6 +163,12 @@
       transitions.push(info);
       this.set('transitions', transitions);
       return this;
+    },
+
+    when: function (predicate) {
+      var transitions = this.get('transitions');
+      transitions[transitions.length - 1].pred = predicate;
+      return this;
     }
   });
 
@@ -549,12 +555,26 @@
           if (pred.toString().indexOf("!") === 0) {
             predName = pred.toString().substring(1);
             pfn      = test.attributes[predName];
-            pred     = function (state, tr) {
-              return !pfn.call(this, state, tr);
-            };
+            if ( typeof pfn === "undefined") {
+              // treat as a jquery selector
+              console.log('treating %o as a jquery (NEG) selector', predName);
+              pred = Transition.elementNotExists_(predName);
+            }
+            else {
+              // it's a function on the class
+              pred     = function (state, tr) {
+                return !pfn.call(this, state, tr);
+              };
+            }
           }
           else {
-            pred = test.attributes[pred];
+            predName = pred.toString();
+            pred = test.attributes[predName];
+            if ( typeof pred === "undefined") {
+              // treat as a jquery selector
+              console.log('treating %o as a jquery (POS) selector', predName);
+              pred = Transition.elementExists_(predName);
+            }
           }
         }
 
