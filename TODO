@@ -1,7 +1,12 @@
+
 Documentation:
  * point out that the web server has to follow symlinks if you install transition with a symlink...
  * how to control / update settings from your test-suite.js
- * how to change the frame sizes (percentages) from your test-suite.js
+ * how to change settings (and the frame sizes/percentages) from your test-suite.js
+ * Document that 'autoStartSuite=true' in the query string kicks off the suite on load
+
+Reporting:
+ * demonstrate how to bind to events so reporting information can be sent to another service
 
 Logging:
  * somehow (stringify the function?) show the contents of the on-enter and the transition predicates in the log?

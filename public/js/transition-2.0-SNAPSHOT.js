@@ -1713,6 +1713,10 @@
     if (models.suite.models.length < 1) {
       Log.fatal('No Test Suite Found, please place your tests in <a href="../test-suite.js">../test-suite.js</a>');
     }
+
+    if (parent.window.location.search.indexOf('autoStartSuite=true') !== -1) {
+      Transition.runSuite();
+    }
   };
 
   Transition.loadSuiteContent();
