@@ -107,6 +107,7 @@
     defaults: {
       'frame-divider-upper-pct': 50,
       'frame-divider-lower-pct': 50,
+      sortByLastModified:        true,
       perStateTimeout:           10 * 1000,
       testTimeout:               30 * 1000,
       suiteTimeout:              60 * 1000,
@@ -1346,10 +1347,20 @@
    *
    ********************************************************************************/
   Transition.loadScript = function (url) {
+    var testCount = Transition.models.suite.size(), lastModified, test;
     $.ajax({
       url:      url,
       dataType: "script",
       async:    false,
+      complete: function (jqXHR, textStatus) {
+        Transition.x = jqXHR;
+        if (Transition.models.suite.size() > testCount) {
+          lastModified = new Date(jqXHR.getResponseHeader('Last-Modified'));
+          test = _.last(models.suite.models);
+          test.set('lastModified', lastModified);
+          test.set('lastModifiedTime', lastModified.getTime());
+        }
+      },
       error:    function (jqXHR, textStatus, errorThrown) {
         Transition.lastError = errorThrown;
         Log.error("Error loading script[%s] %s<pre>%s</pre>", url, errorThrown.message, errorThrown.stack);
@@ -1718,15 +1729,22 @@
       Log.fatal('No Test Suite Found, please place your tests in <a href="../test-suite.js">../test-suite.js</a>');
     }
 
+
+    if (parent.window.location.search.indexOf('autoStartSuite=true') !== -1) {
+      Transition.toggleControls();
+      Transition.runSuite();
+    }
+
+    if (models.settings.get('sortByLastModified')) {
+      models.suite.comparator = function (m) {
+        // multiplying by -1 will make the latest modified the first in the list
+        return -1 * m.get('lastModifiedTime');
+      };
+      models.suite.sort();
+    }
+
   };
 
   Transition.loadSuiteContent();
-
-  if (parent.window.location.search.indexOf('autoStartSuite=true') !== -1) {
-    setTimeout(function () {
-      Transition.toggleControls();
-      Transition.runSuite();
-    }, 500);
-  }
 
 }.call(this));
