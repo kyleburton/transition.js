@@ -836,16 +836,7 @@
     },
 
     toggleControls: function () {
-      var elt = this.$el.find('a#hideShowControls'),
-          text = elt.text();
-      if ('Hide' === text) {
-        elt.text('Show');
-        Transition.hideControls();
-        return;
-      }
-
-      elt.text('Hide');
-      Transition.showControls();
+      Transition.toggleControls();
     },
 
     showSettings: function () {
@@ -1570,6 +1561,19 @@
     parent.frames.document.getElementsByTagName('frameset')[0].rows = models.settings.get('frame-divider-upper-pct') + "%," + models.settings.get('frame-divider-lower-pct') + "%";
   };
 
+  Transition.toggleControls = function () {
+    var elt = $('a#hideShowControls'),
+        text = elt.text();
+    if ('Hide' === text) {
+      elt.text('Show');
+      Transition.hideControls();
+      return;
+    }
+
+    elt.text('Hide');
+    Transition.showControls();
+  };
+
   /********************************************************************************
    * Logging
    *
@@ -1714,11 +1718,15 @@
       Log.fatal('No Test Suite Found, please place your tests in <a href="../test-suite.js">../test-suite.js</a>');
     }
 
-    if (parent.window.location.search.indexOf('autoStartSuite=true') !== -1) {
-      Transition.runSuite();
-    }
   };
 
   Transition.loadSuiteContent();
+
+  if (parent.window.location.search.indexOf('autoStartSuite=true') !== -1) {
+    setTimeout(function () {
+      Transition.toggleControls();
+      Transition.runSuite();
+    }, 500);
+  }
 
 }.call(this));
