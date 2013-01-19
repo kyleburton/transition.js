@@ -1,5 +1,7 @@
 Documentation:
  * point out that the web server has to follow symlinks if you install transition with a symlink...
+ * how to control / update settings from your test-suite.js
+ * how to change the frame sizes (percentages) from your test-suite.js
 
 Logging:
  * somehow (stringify the function?) show the contents of the on-enter and the transition predicates in the log?

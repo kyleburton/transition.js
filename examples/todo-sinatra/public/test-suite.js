@@ -2,6 +2,12 @@
 /*global window, jQuery, _, Backbone, console, Transition, TodoTestLib */
 "use strict";
 
+
+// If you don't like where the default frame divider is (50%,50%), you can adjust it:
+Transition.setFrameDivider(60);
+Transition.models.settings.set('pollTimeout', 250);
+Transition.models.settings.set('logLevel',    Transition.Log.Levels.DEBUG);
+
 (function () {
   var root        = this,
       TodoTestLib = {};

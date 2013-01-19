@@ -105,17 +105,19 @@
    ********************************************************************************/
   Models.Settings = Settings = Backbone.Model.extend({
     defaults: {
-      perStateTimeout: 10 * 1000,
-      testTimeout:     30 * 1000,
-      suiteTimeout:    60 * 1000,
+      'frame-divider-upper-pct': 50,
+      'frame-divider-lower-pct': 50,
+      perStateTimeout:           10 * 1000,
+      testTimeout:               30 * 1000,
+      suiteTimeout:              60 * 1000,
       // NB: hook this into the UI
-      maxTransitions:       20,
-      maxAttemptsPerState:  50,
+      maxTransitions:            20,
+      maxAttemptsPerState:       50,
       // NB: hook this into the UI
       //pollTimeout:     250,
-      pollTimeout:     500,
+      pollTimeout:               500,
       // NB: hook this into the UI
-      logLevel:        Log.Levels.TRACE
+      logLevel:                  Log.Levels.TRACE
       //logLevel:        Log.Levels.INFO
     }
   });
@@ -819,7 +821,8 @@
         'change input[name=log-filter]':    'filterLog',
         'keyup input[name=log-filter]':     'filterLog',
         'change input[name=suite-filter]':  'filterSuite',
-        'keyup input[name=suite-filter]':   'filterSuite'
+        'keyup input[name=suite-filter]':   'filterSuite',
+        'click #hideShowControls': 'toggleControls'
       });
       _.bindAll(this, 'showSettings');
       models.suite.on('all', this.render, this);
@@ -830,6 +833,19 @@
       models.suite.off('all', this.render);
       models.settings.off('change', this.render, this);
       this.$el.remove();
+    },
+
+    toggleControls: function () {
+      var elt = this.$el.find('a#hideShowControls'),
+          text = elt.text();
+      if ('Hide' === text) {
+        elt.text('Show');
+        Transition.hideControls();
+        return;
+      }
+
+      elt.text('Hide');
+      Transition.showControls();
     },
 
     showSettings: function () {
@@ -1528,6 +1544,30 @@
     return function() {
       return Transition.findVisibleText(text);
     };
+  };
+
+  /**
+   * Sets the location of the frame divider between the main frame and the test
+   * frame.
+   */
+  Transition.setFrameDivider = function (upper, lower) {
+    if (typeof lower === "undefined") {
+      lower = 100 - upper;
+      lower = Math.floor(lower);
+    }
+    
+    models.settings.set('frame-divider-upper-pct', upper);
+    models.settings.set('frame-divider-lower-pct', lower);
+    parent.frames.document.getElementsByTagName('frameset')[0].rows = upper + "%," + lower + "%";
+  };
+
+  Transition.hideControls = function () {
+    parent.frames.document.getElementsByTagName('frameset')[0].rows = "*,50px";
+
+  };
+
+  Transition.showControls = function () {
+    parent.frames.document.getElementsByTagName('frameset')[0].rows = models.settings.get('frame-divider-upper-pct') + "%," + models.settings.get('frame-divider-lower-pct') + "%";
   };
 
   /********************************************************************************
