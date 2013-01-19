@@ -538,9 +538,8 @@
           test  = this.get('test'),
           state = this.get('state'),
           error,
-          self = this;
-
-      Transition.Log.trace('checking %a', state.get('name'));
+          self = this,
+          toStatesTried = [];
 
       if (state.get('attrs').success || state.get('attrs').failure) {
         this.set('isDone', true);
@@ -552,6 +551,7 @@
 
       _.each(state.get('transitions'), function (tr) {
         var pred = tr.pred, predName = tr.pred, pfn;
+        toStatesTried.push(tr.to);
 
         if (typeof pred === "undefined") {
           self.fail();
@@ -644,7 +644,7 @@
         return true;
       }
 
-      Log.trace("No transition from " + state.get('name') + " yet...");
+      Log.trace("No transition out of " + state.get('name') + " yet, could not go to any of: %a", toStatesTried);
 
       return false;
     },
