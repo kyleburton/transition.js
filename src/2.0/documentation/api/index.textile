@@ -4,123 +4,13 @@ title: API Documentation
 navigation: documentation
 ---
 
-h1. Defining a Test Suite
-
-After creating the symbolic link to the Transition.js @public@ directory, your next step is to define your test suite.  You do this in the file @test-suite.js@ in the same place you created the symbolic link:
-
-{% highlight bash %}
-public/
-  +-- transition -> ~/projects/transition.js/public
-  +-- test-suite.js
-  +-- tests
-      +-- add-a-list.js
-      +-- add-todo-item.js
-      +-- index-page.js
-      +-- mark-item-as-done.js
-{% endhighlight %}
-
-Tests can be defined within the @test-suite.js@ file directly, or in separate files.  A common pattern is to place utility code for testing your application in the test-suite.js with tests each in separate files:
-
-{% highlight javascript %}
-(function () {
-  var root        = this,
-      TodoTestLib = {};
-
-  this.TodoTestLib = TodoTestLib;
-
-  TodoTestLib.deleteTestList = function () {
-    ...
-  };
-
-  TodoTestLib.createTestList = function () {
-    ...
-  };
-
-}.call(this));
-
-Transition.loadScript('/tests/index-page.js');
-Transition.loadScript('/tests/add-a-list.js');
-Transition.loadScript('/tests/add-todo-item.js');
-Transition.loadScript('/tests/mark-item-as-done.js');
-{% endhighlight %}
-
-h1. Optinally Defining a @test-suite.html@ for Static Content
-
-If your tests themselves require helper libraries or other static content (like their own UI controls, html, etc.), you can create a @test-suite.html@ file next to @test-suite.js@.  The content of this file will be fetched and appended to the @<body>@ *before* the @test-suite.js@ file itself is loaded.
-
-h1. Defining a Test
-
-Tests are added to the suite by calling the @Transition.addTest@ DSL function, passing an object defining the test's properties.
-
-The test must have 2 properties:
-
-* @name@: the name of the test
-* @states@: the set of states that comprise the test.
-
-Other properties inthe test definition will be ignored by the framework, though they will still be available to your test.  You can use additional properties to define helper functions or other settings for your specific tests.
-
-h3. Adding States
-
-States can be constructed using @Transition.newState@.  Each state must have:
-
-* a name
-* an @on-enter@ callback, which is called once, when the state is entered.
-* a set of exit transitions, created with the @to@ DSL function.
-
-Here is an example that loads the root page of the example TODO application and asserts that the form for creating lists is present:
-
-{% highlight javascript %}
-(function () {
-
-  this.addTest({
-    name: 'Test Index Page',
-
-    states: [
-      this.newState('init', this.navigateTo_('about:blank'))
-        .to('mainPage', this.constantly_(true)),
-
-      this.newState('mainPage', this.navigateTo_('/'))
-        .to('success', this.elementExists_('form[action="/lists"]'))
-    ]
-  });
-
-}.call(Transition));
-{% endhighlight %}
-
-h3. Transitions and Predicates
-
-Transition predicates can be specified as any of the following:
-
-* a function that returns a boolean
-* the name of a property of your test, as a string, referencing a function that returns a boolean
-
-If the name is passed as a string, it may optionally be prefixed with an exclamation point to indicate it should be logically negated.  This is provided as a convienience so that you don't have to write both the positive and negative forms of a predicate.
-
-The above can be written to use a property name for the @mainPageLoaded@ as follows:
-
-{% highlight javascript %}
-(function () {
-
-  this.addTest({
-    name: 'Test Index Page',
-
-    states: [
-      this.newState('init', this.navigateTo_('about:blank'))
-        .to('mainPage', this.constantly_(true)),
-
-      this.newState('mainPage', this.navigateTo_('/'))
-        .to('success', 'mainPageLoaded')
-    ],
-
-    mainPageLoaded: function () {
-      return this.elementExists_('form[action="/lists"]');
-    }
-  });
-
-}.call(Transition));
-{% endhighlight %}
+* "Dom Helpers":#dom-helpers
+* "Logging API":#logging-api
+* "Test Declaration":#declaring-tests
 
 h1. Transition's Apis
+
+<a name="dom-helpers"></a>
 
 h2. DOM Helpers
 
@@ -128,21 +18,58 @@ The DOM helpers make working with the main frame (where the application runs) si
 
 When a function is suffixed with an underscore, it creates a closure over the arguments and returns a function that performs the action.  This is useful for when callbacks are required in your tests, avoiding having to write out an anonymous function.
 
-h3. @Transition.navigateTo@, @Transition.navigateTo_@
+h3. @Transition.navigateTo(url)@, @Transition.navigateTo_(url)@
 
 These set the main frame's location.
 
-h3. @Transition.find@
+h3. @Transition.find(selctor)@
 
 This executes jQuery's find, returning the result set.
 
-h3. @Transition.elementExists@, @Transition.elementExists_@
+h3. @Transition.elementExist(selctor)s@, @Transition.elementExists(selctor)_@
 
 These boolean predicates test if an element exists in the page.
 
-h3. @Transition.elementNotExists@, @Transition.elementNotExists_@
+h3. @Transition.elementNotExist(selctor)s@, @Transition.elementNotExists(selctor)_@
 
 These boolean predicates test if an element does not exist in the page.
+
+h3. @Transition.noop()@
+
+This is a dummy function, it can be used for states where you do not want or need an on-enter trigger.
+
+h3. @Transition.constantly_(value)@
+
+Returns a function that when called always returns the value passed to @constantly_@.
+
+{% highlight javascript %}
+  var fn = Transition.constantly_(3);
+  fn(); // => 3
+  fn(); // => 3
+  fn(); // => 3
+{% endhighlight %}
+
+h3. @Transition.click(selector)@, @Transition.click_(selector)@
+
+These take a selector, find the matching dom elements and call @click()@ on them.
+
+h3. @Transition.isChecked(selector)@, @Transition.isChecked_(selector)@, @Transition.isNotChecked(selector)@, @Transition.isNotChecked_(selector)@
+
+These take a selector and test if the node has or does not have the attribute @checked@.
+
+h3. @Transition.clickAnchor(selector)@, @Transition.clickAnchor_(selector)@
+
+These functions take a selector and simulate clicking an anchor tag.  They set the main frame's location to the href of the anchor tag.  If href starts with a has, then only the location.hash is set.
+
+h3. @Transition.fillInWithKeyEvents(selector, text)@
+
+This sends keyup/keydown events to the elements identified by selector, simulating a user typing.
+
+h3. @Transition.findVisibleText(text)@, @Transition.findVisibleText_(text)@
+
+These search the entire dom of the main frame for any element that contains the provided text.
+
+<a name="logging-api"></a>
 
 h3. @Transition.findVisibleText@, @Transition.findVisibleText_@
 
@@ -170,3 +97,60 @@ The format strings follow the "sprintf":https://github.com/kvz/phpjs/blob/master
   // => [23:20:30] Object is: {"an":"object","num":123}
 {% endhighlight %}
 
+<a name="declaring-tests"></a>
+
+h2. Test Declaration
+
+h3. @Transition.addTest({name: 'test-name', states: [...]})@
+
+h3. Adding States
+
+h4. @Transition.to(name, [predicate])@
+
+This adds a transition to the current state.  It can be passed a name and optionally a predicate.
+
+h4. @Transition.when(predicate)@
+
+@when@ attaches a predicate to a transition.  The predicate may be any of the following:
+
+h5. string: method
+
+If the string names a method on the test, this method will become the predicate used to determine if the transition is followed.
+
+{% highlight javascript %}
+  ...
+    this.newState('mainPage', this.navigateTo_('/'))
+      .to('success').when('listsFormExists')
+  ...
+
+  listsFormExists: function () {
+    return Transition.elementExists('form[action="/lists"]');
+  }
+{% endhighlight %}
+
+h5. string: jQuery selector
+
+If the string does not identify a method on the test, then it is treated as a jQuery selector.  The selector may be prefixed with an exclamation mark.  jQuery selectors are treated as if you had written: @Transition.elementExists_(selector)@
+
+If the selector starts an exclamation mark, it is treated as if @Transition.elementNotExists_(selector)@ were written.
+
+{% highlight javascript %}
+  ...
+    this.newState('mainPage', this.navigateTo_('/'))
+      .to('success').when('form[action="/lists"]')
+      .to('failure').when('!form[action="/lists"]')
+  ...
+{% endhighlight %}
+
+h5. function
+
+A function may be passed as the predicate.
+
+{% highlight javascript %}
+  ...
+    this.newState('mainPage', this.navigateTo_('/'))
+      .to('success').when(function () {
+        return Transition.elementExists('form[action="/lists"]')
+      })
+  ...
+{% endhighlight %}

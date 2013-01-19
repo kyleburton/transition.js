@@ -38,117 +38,47 @@
       
 
       <section id="main_content" class="inner">
-      <h1>Defining a Test Suite</h1>
-<p>After creating the symbolic link to the Transition.js <code>public</code> directory, your next step is to define your test suite.  You do this in the file <code>test-suite.js</code> in the same place you created the symbolic link:</p>
-<div class="highlight"><pre><code class="bash">public/
-  +-- transition -&gt; ~/projects/transition.js/public
-  +-- <span class="nb">test</span>-suite.js
-  +-- tests
-      +-- add-a-list.js
-      +-- add-todo-item.js
-      +-- index-page.js
-      +-- mark-item-as-done.js
-</code></pre>
-</div>
-<p>Tests can be defined within the <code>test-suite.js</code> file directly, or in separate files.  A common pattern is to place utility code for testing your application in the test-suite.js with tests each in separate files:</p>
-<div class="highlight"><pre><code class="javascript"><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">root</span>        <span class="o">=</span> <span class="k">this</span><span class="p">,</span>
-      <span class="nx">TodoTestLib</span> <span class="o">=</span> <span class="p">{};</span>
-
-  <span class="k">this</span><span class="p">.</span><span class="nx">TodoTestLib</span> <span class="o">=</span> <span class="nx">TodoTestLib</span><span class="p">;</span>
-
-  <span class="nx">TodoTestLib</span><span class="p">.</span><span class="nx">deleteTestList</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="p">...</span>
-  <span class="p">};</span>
-
-  <span class="nx">TodoTestLib</span><span class="p">.</span><span class="nx">createTestList</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="p">...</span>
-  <span class="p">};</span>
-
-<span class="p">}.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">));</span>
-
-<span class="nx">Transition</span><span class="p">.</span><span class="nx">loadScript</span><span class="p">(</span><span class="s1">&#39;/tests/index-page.js&#39;</span><span class="p">);</span>
-<span class="nx">Transition</span><span class="p">.</span><span class="nx">loadScript</span><span class="p">(</span><span class="s1">&#39;/tests/add-a-list.js&#39;</span><span class="p">);</span>
-<span class="nx">Transition</span><span class="p">.</span><span class="nx">loadScript</span><span class="p">(</span><span class="s1">&#39;/tests/add-todo-item.js&#39;</span><span class="p">);</span>
-<span class="nx">Transition</span><span class="p">.</span><span class="nx">loadScript</span><span class="p">(</span><span class="s1">&#39;/tests/mark-item-as-done.js&#39;</span><span class="p">);</span>
-</code></pre>
-</div>
-<h1>Optinally Defining a <code>test-suite.html</code> for Static Content</h1>
-<p>If your tests themselves require helper libraries or other static content (like their own UI controls, html, etc.), you can create a <code>test-suite.html</code> file next to <code>test-suite.js</code>.  The content of this file will be fetched and appended to the <code>&lt;body&gt;</code> <strong>before</strong> the <code>test-suite.js</code> file itself is loaded.</p>
-<h1>Defining a Test</h1>
-<p>Tests are added to the suite by calling the <code>Transition.addTest</code> <span class="caps">DSL</span> function, passing an object defining the test&#8217;s properties.</p>
-<p>The test must have 2 properties:</p>
-<ul>
-	<li><code>name</code>: the name of the test</li>
-	<li><code>states</code>: the set of states that comprise the test.</li>
+      <ul>
+	<li><a href="#dom-helpers">Dom Helpers</a></li>
+	<li><a href="#logging-api">Logging <span class="caps">API</span></a></li>
+	<li><a href="#declaring-tests">Test Declaration</a></li>
 </ul>
-<p>Other properties inthe test definition will be ignored by the framework, though they will still be available to your test.  You can use additional properties to define helper functions or other settings for your specific tests.</p>
-<h3>Adding States</h3>
-<p>States can be constructed using <code>Transition.newState</code>.  Each state must have:</p>
-<ul>
-	<li>a name</li>
-	<li>an <code>on-enter</code> callback, which is called once, when the state is entered.</li>
-	<li>a set of exit transitions, created with the <code>to</code> <span class="caps">DSL</span> function.</li>
-</ul>
-<p>Here is an example that loads the root page of the example <span class="caps">TODO</span> application and asserts that the form for creating lists is present:</p>
-<div class="highlight"><pre><code class="javascript"><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-
-  <span class="k">this</span><span class="p">.</span><span class="nx">addTest</span><span class="p">({</span>
-    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Test Index Page&#39;</span><span class="p">,</span>
-
-    <span class="nx">states</span><span class="o">:</span> <span class="p">[</span>
-      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;about:blank&#39;</span><span class="p">))</span>
-        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">constantly_</span><span class="p">(</span><span class="kc">true</span><span class="p">)),</span>
-
-      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
-        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/lists&quot;]&#39;</span><span class="p">))</span>
-    <span class="p">]</span>
-  <span class="p">});</span>
-
-<span class="p">}.</span><span class="nx">call</span><span class="p">(</span><span class="nx">Transition</span><span class="p">));</span>
-</code></pre>
-</div>
-<h3>Transitions and Predicates</h3>
-<p>Transition predicates can be specified as any of the following:</p>
-<ul>
-	<li>a function that returns a boolean</li>
-	<li>the name of a property of your test, as a string, referencing a function that returns a boolean</li>
-</ul>
-<p>If the name is passed as a string, it may optionally be prefixed with an exclamation point to indicate it should be logically negated.  This is provided as a convienience so that you don&#8217;t have to write both the positive and negative forms of a predicate.</p>
-<p>The above can be written to use a property name for the <code>mainPageLoaded</code> as follows:</p>
-<div class="highlight"><pre><code class="javascript"><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-
-  <span class="k">this</span><span class="p">.</span><span class="nx">addTest</span><span class="p">({</span>
-    <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;Test Index Page&#39;</span><span class="p">,</span>
-
-    <span class="nx">states</span><span class="o">:</span> <span class="p">[</span>
-      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;about:blank&#39;</span><span class="p">))</span>
-        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">constantly_</span><span class="p">(</span><span class="kc">true</span><span class="p">)),</span>
-
-      <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
-        <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="s1">&#39;mainPageLoaded&#39;</span><span class="p">)</span>
-    <span class="p">],</span>
-
-    <span class="nx">mainPageLoaded</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">elementExists_</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/lists&quot;]&#39;</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">});</span>
-
-<span class="p">}.</span><span class="nx">call</span><span class="p">(</span><span class="nx">Transition</span><span class="p">));</span>
-</code></pre>
-</div>
 <h1>Transition&#8217;s Apis</h1>
+<p><a name="dom-helpers"></a></p>
 <h2><span class="caps">DOM</span> Helpers</h2>
 <p>The <span class="caps">DOM</span> helpers make working with the main frame (where the application runs) simpler.  They will use jQuery within the web application if it is present (by detecting the presence of <code>$</code>), or wrap the main frame&#8217;s document in a jQuery object.</p>
 <p>When a function is suffixed with an underscore, it creates a closure over the arguments and returns a function that performs the action.  This is useful for when callbacks are required in your tests, avoiding having to write out an anonymous function.</p>
-<h3><code>Transition.navigateTo</code>, <code>Transition.navigateTo_</code></h3>
+<h3><code>Transition.navigateTo(url)</code>, <code>Transition.navigateTo_(url)</code></h3>
 <p>These set the main frame&#8217;s location.</p>
-<h3><code>Transition.find</code></h3>
+<h3><code>Transition.find(selctor)</code></h3>
 <p>This executes jQuery&#8217;s find, returning the result set.</p>
-<h3><code>Transition.elementExists</code>, <code>Transition.elementExists_</code></h3>
+<h3><code>Transition.elementExist(selctor)s</code>, <code>Transition.elementExists(selctor)_</code></h3>
 <p>These boolean predicates test if an element exists in the page.</p>
-<h3><code>Transition.elementNotExists</code>, <code>Transition.elementNotExists_</code></h3>
+<h3><code>Transition.elementNotExist(selctor)s</code>, <code>Transition.elementNotExists(selctor)_</code></h3>
 <p>These boolean predicates test if an element does not exist in the page.</p>
+<h3><code>Transition.noop()</code></h3>
+<p>This is a dummy function, it can be used for states where you do not want or need an on-enter trigger.</p>
+<h3><code>Transition.constantly_(value)</code></h3>
+<p>Returns a function that when called always returns the value passed to <code>constantly_</code>.</p>
+<div class="highlight"><pre><code class="javascript">  <span class="kd">var</span> <span class="nx">fn</span> <span class="o">=</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">constantly_</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+  <span class="nx">fn</span><span class="p">();</span> <span class="c1">// =&gt; 3</span>
+  <span class="nx">fn</span><span class="p">();</span> <span class="c1">// =&gt; 3</span>
+  <span class="nx">fn</span><span class="p">();</span> <span class="c1">// =&gt; 3</span>
+</code></pre>
+</div>
+<h3><code>Transition.click(selector)</code>, <code>Transition.click_(selector)</code></h3>
+<p>These take a selector, find the matching dom elements and call <code>click()</code> on them.</p>
+<h3><code>Transition.isChecked(selector)</code>, <code>Transition.isChecked_(selector)</code>, <code>Transition.isNotChecked(selector)</code>, <code>Transition.isNotChecked_(selector)</code></h3>
+<p>These take a selector and test if the node has or does not have the attribute <code>checked</code>.</p>
+<h3><code>Transition.clickAnchor(selector)</code>, <code>Transition.clickAnchor_(selector)</code></h3>
+<p>These functions take a selector and simulate clicking an anchor tag.  They set the main frame&#8217;s location to the href of the anchor tag.  If href starts with a has, then only the location.hash is set.</p>
+<h3><code>Transition.fillInWithKeyEvents(selector, text)</code></h3>
+<p>This sends keyup/keydown events to the elements identified by selector, simulating a user typing.</p>
+<h3><code>Transition.findVisibleText(text)</code>, <code>Transition.findVisibleText_(text)</code></h3>
+<p>These search the entire dom of the main frame for any element that contains the provided text.</p>
+<p><a name="logging-api"></a></p>
+<h3><code>Transition.findVisibleText</code>, <code>Transition.findVisibleText_</code></h3>
+<p><code>findVisibleText</code> performs a jQuery find for the last node that matchs the selector: <code>*contains(yourtext):visible:last</code></p>
 <h2>Logging</h2>
 <p>There are 6 logging levels, each indicating a different severity:</p>
 <ul>
@@ -164,6 +94,46 @@
 <p>The format strings follow the <a href="https://github.com/kvz/phpjs/blob/master/functions/strings/sprintf.js">sprintf</a> library with a single addition: <code>%a</code> for formatting JavaScript objects:</p>
 <div class="highlight"><pre><code class="javascript">  <span class="nx">Transition</span><span class="p">.</span><span class="nx">Log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s2">&quot;Object is: %a&quot;</span><span class="p">,</span> <span class="p">{</span><span class="nx">an</span><span class="o">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="nx">num</span><span class="o">:</span> <span class="mi">123</span><span class="p">});</span>
   <span class="c1">// =&gt; [23:20:30] Object is: {&quot;an&quot;:&quot;object&quot;,&quot;num&quot;:123}</span>
+</code></pre>
+</div>
+<p><a name="declaring-tests"></a></p>
+<h2>Test Declaration</h2>
+<h3><code>Transition.addTest({name: 'test-name', states: [...]})</code></h3>
+<h3>Adding States</h3>
+<h4><code>Transition.to(name, [predicate])</code></h4>
+<p>This adds a transition to the current state.  It can be passed a name and optionally a predicate.</p>
+<h4><code>Transition.when(predicate)</code></h4>
+<p><code>when</code> attaches a predicate to a transition.  The predicate may be any of the following:</p>
+<h5>string: method</h5>
+<p>If the string names a method on the test, this method will become the predicate used to determine if the transition is followed.</p>
+<div class="highlight"><pre><code class="javascript">  <span class="p">...</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+      <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">).</span><span class="nx">when</span><span class="p">(</span><span class="s1">&#39;listsFormExists&#39;</span><span class="p">)</span>
+  <span class="p">...</span>
+
+  <span class="nx">listsFormExists</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/lists&quot;]&#39;</span><span class="p">);</span>
+  <span class="p">}</span>
+</code></pre>
+</div>
+<h5>string: jQuery selector</h5>
+<p>If the string does not identify a method on the test, then it is treated as a jQuery selector.  The selector may be prefixed with an exclamation mark.  jQuery selectors are treated as if you had written: <code>Transition.elementExists_(selector)</code></p>
+<p>If the selector starts an exclamation mark, it is treated as if <code>Transition.elementNotExists_(selector)</code> were written.</p>
+<div class="highlight"><pre><code class="javascript">  <span class="p">...</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+      <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">).</span><span class="nx">when</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/lists&quot;]&#39;</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;failure&#39;</span><span class="p">).</span><span class="nx">when</span><span class="p">(</span><span class="s1">&#39;!form[action=&quot;/lists&quot;]&#39;</span><span class="p">)</span>
+  <span class="p">...</span>
+</code></pre>
+</div>
+<h5>function</h5>
+<p>A function may be passed as the predicate.</p>
+<div class="highlight"><pre><code class="javascript">  <span class="p">...</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">newState</span><span class="p">(</span><span class="s1">&#39;mainPage&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">navigateTo_</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+      <span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">&#39;success&#39;</span><span class="p">).</span><span class="nx">when</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">Transition</span><span class="p">.</span><span class="nx">elementExists</span><span class="p">(</span><span class="s1">&#39;form[action=&quot;/lists&quot;]&#39;</span><span class="p">)</span>
+      <span class="p">})</span>
+  <span class="p">...</span>
 </code></pre>
 </div>
       </section>
