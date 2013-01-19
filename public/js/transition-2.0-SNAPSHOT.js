@@ -1741,6 +1741,8 @@
         return -1 * m.get('lastModifiedTime');
       };
       models.suite.sort();
+
+      models.suiteRunner.trackCurrentTest(_.first(models.suite.models));
     }
 
   };
