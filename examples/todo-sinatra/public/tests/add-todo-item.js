@@ -11,24 +11,24 @@
   
     states: [
       this.newState('init', this.navigateTo_('/'))
-        .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
-        .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
+        .to('deleteTestList', 'li a:contains("Test")')
+        .to('mainPage',       '!li a:contains("Test")'),
       this.newState('deleteTestList', TodoTestLib.deleteTestList)
-        .to('deleteTestList',     this.elementExists_('li a:contains("Test")'))
-        .to('mainPage',           this.elementNotExists_('li a:contains("Test")')),
+        .to('deleteTestList',     'li a:contains("Test")')
+        .to('mainPage',           '!li a:contains("Test")'),
       this.newState('mainPage', this.navigateTo_('/'))
-        .to('createList', this.elementExists_('input[name="list[name]"]:visible')),
+        .to('createList', 'input[name="list[name]"]:visible'),
       this.newState('createList', TodoTestLib.createTestList)
         .to('addItem', 'testListExists'),
       this.newState('addItem', 'addItem')
-        .to('success', this.elementExists_('li:contains("item")'))
+        .to('success', 'li:contains("item")')
     ],
 
+    // example of using a model function for a predicate
     testListExists: function () {
       return this.elementExists('li a:contains("Test")')
     },
 
-    // NB: test using a named member fn as a predicate
     addItem: function () {
       this.find('input[name="task[name]"]').val('item');
       this.find('form:visible').submit();

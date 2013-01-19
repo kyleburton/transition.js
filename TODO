@@ -1,5 +1,3 @@
-Update exmaple tests to use new DSL.
-
 Documentation:
  * point out that the web server has to follow symlinks if you install transition with a symlink...
  * how to control / update settings from your test-suite.js
