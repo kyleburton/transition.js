@@ -182,6 +182,7 @@
       transitions[transitions.length - 1].pred = predicate;
       return this;
     }
+
   });
 
   Models.TestStates = TestStates = Backbone.Collection.extend({
@@ -211,6 +212,11 @@
       this.get('states').reset(attributes.states || []);
 
       _.each(this.get('states').models, function (state) {
+        if (state.get('name') === 'start') {
+          Log.error("Error: you may not declare a state named 'start'");
+          throw("Error: you may not declare a state named 'start'");
+        }
+
         if (state.get('attrs').start) {
           if (this.startState) {
             throw "Error: multiple start states in: " + this.get('name');
