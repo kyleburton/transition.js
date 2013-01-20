@@ -31,8 +31,6 @@ describe("Transition ", function () {
       expect(Transition.models.logEntries.last().get('message')).toMatch('Error');
     });
 
-    it("", function () {
-    });
   });
 
 
