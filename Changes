@@ -1,3 +1,6 @@
+Sat Jan 19 22:05:03 EST 2013
+  Create 2.0-rc1 for 2.0 release.
+
 Thu Aug  9 11:57:37 EDT 2012
   stats.rb: also supports remote logging
   test suite runner: test log output is now in a fixed size scrollable div.
