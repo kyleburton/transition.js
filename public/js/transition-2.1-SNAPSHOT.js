@@ -569,7 +569,6 @@
             pfn      = test.attributes[predName];
             if ( typeof pfn === "undefined") {
               // treat as a jquery selector
-              console.log('treating %o as a jquery (NEG) selector', predName);
               pred = Transition.elementNotExists_(predName);
             }
             else {
@@ -584,7 +583,6 @@
             pfn = test.attributes[predName];
             if ( typeof pfn === "undefined") {
               // treat as a jquery selector
-              console.log('treating %o as a jquery (POS) selector', predName);
               pred = Transition.elementExists_(predName);
             }
             else {
@@ -1714,6 +1712,8 @@
    *
    ********************************************************************************/
   Transition.buildRunner = function () {
+    Transition.LocalStorage.initialize();
+
     Transition.router  = new Transition.Router();
     Log.info('router initialized');
     addView('navBar',           Views.Navbar,           '#transition-runner-menubar');
@@ -1736,6 +1736,7 @@
     }
 
     if (models.settings.get('sortByLastModified')) {
+      Log.trace('sortByLastModified');
       models.suite.comparator = function (m) {
         // multiplying by -1 will make the latest modified the first in the list
         return -1 * m.get('lastModifiedTime');
@@ -1744,6 +1745,8 @@
 
       models.suiteRunner.trackCurrentTest(_.first(models.suite.models));
     }
+
+    Log.info('Ready: there are %s tests in the suite.', models.suite.models.length);
 
   };
 
