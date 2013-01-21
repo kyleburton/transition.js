@@ -20,9 +20,6 @@ Log Filtering:
  * or use a simple syntax for boolean searches
  * filter the log output based on the currently selected test? (how do you unselect the current test?)
 
-Settings:
- * use HTML5 local storage for the settings (thanks Nicholas Canzoneri)
-
 For Events (a real click), recording, etc, look at:
   https://github.com/jupiterjs/syn
 
