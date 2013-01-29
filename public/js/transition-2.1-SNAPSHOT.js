@@ -105,17 +105,20 @@
    ********************************************************************************/
   Models.Settings = Settings = Backbone.Model.extend({
     defaults: {
-      perStateTimeout: 10 * 1000,
-      testTimeout:     30 * 1000,
-      suiteTimeout:    60 * 1000,
+      'frame-divider-upper-pct': 50,
+      'frame-divider-lower-pct': 50,
+      sortByLastModified:        true,
+      perStateTimeout:           10 * 1000,
+      testTimeout:               30 * 1000,
+      suiteTimeout:              60 * 1000,
       // NB: hook this into the UI
-      maxTransitions:       20,
-      maxAttemptsPerState:  50,
+      maxTransitions:            20,
+      maxAttemptsPerState:       50,
       // NB: hook this into the UI
       //pollTimeout:     250,
-      pollTimeout:     500,
+      pollTimeout:               500,
       // NB: hook this into the UI
-      logLevel:        Log.Levels.TRACE
+      logLevel:                  Log.Levels.TRACE
       //logLevel:        Log.Levels.INFO
     }
   });
@@ -142,8 +145,10 @@
     },
 
     callOnEnter: function (test, args) {
-      var onEnter = this.get('onEnter');
+      var onEnter = this.get('onEnter'), fnName = 'function';
+
       if (typeof onEnter !== "function") {
+        fnName = onEnter;
         onEnter = test.get(onEnter);
       }
 
@@ -151,7 +156,14 @@
         throw 'Error: onEnter[' + this.get('onEnter') + '] is not a valid function';
       }
 
-      onEnter.call(test, args);
+      try {
+        Log.trace("calling onEnter trigger %s.%s", this.get('name'), fnName);
+        onEnter.call(test, args);
+      }
+      catch (e) {
+        console.log("Error calling onEnter trigger %o.%o", this.get('name'), fnName, e);
+        Log.error("Error calling onEnter trigger %s.%s", this.get('name'), fnName, e);
+      }
     },
 
     to: function (targetStateName, predicate) {
@@ -526,9 +538,8 @@
           test  = this.get('test'),
           state = this.get('state'),
           error,
-          self = this;
-
-      Transition.Log.trace('checking %a', state.get('name'));
+          self = this,
+          toStatesTried = [];
 
       if (state.get('attrs').success || state.get('attrs').failure) {
         this.set('isDone', true);
@@ -540,6 +551,7 @@
 
       _.each(state.get('transitions'), function (tr) {
         var pred = tr.pred, predName = tr.pred, pfn;
+        toStatesTried.push(tr.to);
 
         if (typeof pred === "undefined") {
           self.fail();
@@ -557,7 +569,6 @@
             pfn      = test.attributes[predName];
             if ( typeof pfn === "undefined") {
               // treat as a jquery selector
-              console.log('treating %o as a jquery (NEG) selector', predName);
               pred = Transition.elementNotExists_(predName);
             }
             else {
@@ -569,11 +580,16 @@
           }
           else {
             predName = pred.toString();
-            pred = test.attributes[predName];
-            if ( typeof pred === "undefined") {
+            pfn = test.attributes[predName];
+            if ( typeof pfn === "undefined") {
               // treat as a jquery selector
-              console.log('treating %o as a jquery (POS) selector', predName);
               pred = Transition.elementExists_(predName);
+            }
+            else {
+                // it's a function on the class
+                pred     = function (state, tr) {
+                    return pfn.call(this, state, tr);
+                };
             }
           }
         }
@@ -626,7 +642,7 @@
         return true;
       }
 
-      Log.trace("No transition from " + state.get('name') + " yet...");
+      Log.trace("No transition out of " + state.get('name') + " yet, could not go to any of: %a", toStatesTried);
 
       return false;
     },
@@ -804,7 +820,8 @@
         'change input[name=log-filter]':    'filterLog',
         'keyup input[name=log-filter]':     'filterLog',
         'change input[name=suite-filter]':  'filterSuite',
-        'keyup input[name=suite-filter]':   'filterSuite'
+        'keyup input[name=suite-filter]':   'filterSuite',
+        'click #hideShowControls': 'toggleControls'
       });
       _.bindAll(this, 'showSettings');
       models.suite.on('all', this.render, this);
@@ -815,6 +832,10 @@
       models.suite.off('all', this.render);
       models.settings.off('change', this.render, this);
       this.$el.remove();
+    },
+
+    toggleControls: function () {
+      Transition.toggleControls();
     },
 
     showSettings: function () {
@@ -1324,10 +1345,20 @@
    *
    ********************************************************************************/
   Transition.loadScript = function (url) {
+    var testCount = Transition.models.suite.size(), lastModified, test;
     $.ajax({
       url:      url,
       dataType: "script",
       async:    false,
+      complete: function (jqXHR, textStatus) {
+        Transition.x = jqXHR;
+        if (Transition.models.suite.size() > testCount) {
+          lastModified = new Date(jqXHR.getResponseHeader('Last-Modified'));
+          test = _.last(models.suite.models);
+          test.set('lastModified', lastModified);
+          test.set('lastModifiedTime', lastModified.getTime());
+        }
+      },
       error:    function (jqXHR, textStatus, errorThrown) {
         Transition.lastError = errorThrown;
         Log.error("Error loading script[%s] %s<pre>%s</pre>", url, errorThrown.message, errorThrown.stack);
@@ -1362,7 +1393,7 @@
 
       _.each(options, function (param, name) {
         if (typeof param === "function") {
-          test[name] = param;
+          test[name] = _.bind(param, test);
         }
       });
 
@@ -1515,6 +1546,43 @@
     };
   };
 
+  /**
+   * Sets the location of the frame divider between the main frame and the test
+   * frame.
+   */
+  Transition.setFrameDivider = function (upper, lower) {
+    if (typeof lower === "undefined") {
+      lower = 100 - upper;
+      lower = Math.floor(lower);
+    }
+    
+    models.settings.set('frame-divider-upper-pct', upper);
+    models.settings.set('frame-divider-lower-pct', lower);
+    parent.frames.document.getElementsByTagName('frameset')[0].rows = upper + "%," + lower + "%";
+  };
+
+  Transition.hideControls = function () {
+    parent.frames.document.getElementsByTagName('frameset')[0].rows = "*,50px";
+
+  };
+
+  Transition.showControls = function () {
+    parent.frames.document.getElementsByTagName('frameset')[0].rows = models.settings.get('frame-divider-upper-pct') + "%," + models.settings.get('frame-divider-lower-pct') + "%";
+  };
+
+  Transition.toggleControls = function () {
+    var elt = $('a#hideShowControls'),
+        text = elt.text();
+    if ('Hide' === text) {
+      elt.text('Show');
+      Transition.hideControls();
+      return;
+    }
+
+    elt.text('Hide');
+    Transition.showControls();
+  };
+
   /********************************************************************************
    * Logging
    *
@@ -1644,6 +1712,8 @@
    *
    ********************************************************************************/
   Transition.buildRunner = function () {
+    Transition.LocalStorage.initialize();
+
     Transition.router  = new Transition.Router();
     Log.info('router initialized');
     addView('navBar',           Views.Navbar,           '#transition-runner-menubar');
@@ -1658,6 +1728,26 @@
     if (models.suite.models.length < 1) {
       Log.fatal('No Test Suite Found, please place your tests in <a href="../test-suite.js">../test-suite.js</a>');
     }
+
+
+    if (parent.window.location.search.indexOf('autoStartSuite=true') !== -1) {
+      Transition.toggleControls();
+      Transition.runSuite();
+    }
+
+    if (models.settings.get('sortByLastModified')) {
+      Log.trace('sortByLastModified');
+      models.suite.comparator = function (m) {
+        // multiplying by -1 will make the latest modified the first in the list
+        return -1 * m.get('lastModifiedTime');
+      };
+      models.suite.sort();
+
+      models.suiteRunner.trackCurrentTest(_.first(models.suite.models));
+    }
+
+    Log.info('Ready: there are %s tests in the suite.', models.suite.models.length);
+
   };
 
   Transition.loadSuiteContent();

@@ -1,5 +1,11 @@
 Documentation:
  * point out that the web server has to follow symlinks if you install transition with a symlink...
+ * how to control / update settings from your test-suite.js
+ * how to change settings (and the frame sizes/percentages) from your test-suite.js
+ * Document that 'autoStartSuite=true' in the query string kicks off the suite on load
+
+Reporting:
+ * demonstrate how to bind to events so reporting information can be sent to another service
 
 Logging:
  * somehow (stringify the function?) show the contents of the on-enter and the transition predicates in the log?
@@ -13,9 +19,6 @@ Log Filtering:
  * multiple words should be treated as an 'AND' between the terms
  * or use a simple syntax for boolean searches
  * filter the log output based on the currently selected test? (how do you unselect the current test?)
-
-Settings:
- * use HTML5 local storage for the settings (thanks Nicholas Canzoneri)
 
 For Events (a real click), recording, etc, look at:
   https://github.com/jupiterjs/syn

@@ -8,15 +8,15 @@
 
     states: [
       this.newState('init', this.navigateTo_('/'))
-        .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
-        .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
+        .to('deleteTestList').when('li a:contains("Test")')
+        .to('mainPage')      .when('!li a:contains("Test")'),
       this.newState('deleteTestList', TodoTestLib.deleteTestList)
-        .to('deleteTestList', this.elementExists_('li a:contains("Test")'))
-        .to('mainPage',       this.elementNotExists_('li a:contains("Test")')),
+        .to('deleteTestList').when('li a:contains("Test")')
+        .to('mainPage')      .when('!li a:contains("Test")'),
       this.newState('mainPage', this.navigateTo_('/'))
-        .to('createList',     this.elementExists_('input[name="list[name]"]:visible')),
+        .to('createList')    .when('input[name="list[name]"]:visible'),
       this.newState('createList', TodoTestLib.createTestList)
-        .to('success',        this.elementExists_('li a:contains("Test")'))
+        .to('success')       .when('li a:contains("Test")')
     ]
   });
 }.call(Transition));
