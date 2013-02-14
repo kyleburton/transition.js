@@ -22,11 +22,12 @@
   LocalStorage.initialize = function () {
     // load settings from local storage
     //console.log('LocalStorage.initialize');
-    var attrs;
+    var attrs, newAttrs;
     try {
       attrs = JSON.parse(localStorage.getItem('transition.settings'));
+      newAttrs = _.extend({}, Transition.models.settings.attributes, attrs);
       Transition.models.settings.clear({silent: true});
-      Transition.models.settings.set(attrs);
+      Transition.models.settings.set(newAttrs);
     }
     catch(e) {
       // ignore, just won't be any local storage

@@ -4,7 +4,7 @@
 
 /********************************************************************************
  * Transition.js
- * Version: 2.0-SNAPSHOT
+ * Version: 2.1-SNAPSHOT
  ********************************************************************************/
 (function () {
   var root        = this,
@@ -108,9 +108,9 @@
       'frame-divider-upper-pct': 50,
       'frame-divider-lower-pct': 50,
       sortByLastModified:        true,
-      perStateTimeout:           10 * 1000,
-      testTimeout:               30 * 1000,
-      suiteTimeout:              60 * 1000,
+      perStateTimeout:           20 * 1000,
+      testTimeout:               60 * 1000,
+      suiteTimeout:              200 * 1000,
       // NB: hook this into the UI
       maxTransitions:            20,
       maxAttemptsPerState:       50,
@@ -1236,9 +1236,17 @@
 
       if (Transition.testRunner.elapsedTime() >= models.settings.get('testTimeout')) {
         Log.fatal('Test timed out at ' + (models.settings.get('testTimeout') / 1000) + ' seconds');
-        Transition.stop();
-        Transition.testRunner.fail();
+        //NB: Mark current test as failed
         models.suiteRunner.set('numFailed', 1 + models.suiteRunner.get('numFailed'));
+
+        if (models.suiteRunner.nextTest()) {
+          Transition.runTest();
+          Transition.suitePollTimeoutId = setTimeout(Transition.suitePollFn, models.settings.get('pollTimeout'));
+          return;
+        }
+
+        Log.info('Suite Completed');
+        Transition.suiteRunning = false;
         return;
       }
 
@@ -1466,6 +1474,20 @@
     return function () {
       var nodes = Transition.find(selector);
       nodes.click();
+      return nodes;
+    };
+  };
+
+  Transition.clickAfter = function (selector, ms) {
+    var nodes = Transition.find(selector);
+    setTimeout(nodes.click(), ms);
+    return nodes;
+  };
+
+  Transition.clickAfter_ = function (selector) {
+    return function () {
+      var nodes = Transition.find(selector);
+      setTimeout(nodes.click(), ms);
       return nodes;
     };
   };
