@@ -1480,14 +1480,14 @@
 
   Transition.clickAfter = function (selector, ms) {
     var nodes = Transition.find(selector);
-    setTimeout(nodes.click(), ms);
+    setTimeout(nodes.click, ms);
     return nodes;
   };
 
   Transition.clickAfter_ = function (selector) {
     return function () {
       var nodes = Transition.find(selector);
-      setTimeout(nodes.click(), ms);
+      setTimeout(nodes.click, ms);
       return nodes;
     };
   };
