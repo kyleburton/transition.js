@@ -109,7 +109,7 @@
       'frame-divider-lower-pct': 50,
       sortByLastModified:        true,
       perStateTimeout:           20 * 1000,
-      testTimeout:               60 * 1000,
+      testTimeout:               30 * 1000,
       suiteTimeout:              200 * 1000,
       // NB: hook this into the UI
       maxTransitions:            20,
@@ -702,6 +702,7 @@
       this.set('elapsedTime', this.elapsedTime());
       this.set('isRunning', false);
       this.set('succeeded', this.succeeded());
+      this.set('testFinished', true);
     },
 
     succeeded: function () {
@@ -1197,8 +1198,16 @@
     // or if we've extend the maxAttemptsPerState
     if (Transition.testRunner.get('isDone')) {
       Log.info('Test completed!');
+      Transition.testRunner.set('testFinished', true);
       return;
     }
+
+    if (Transition.testRunner.elapsedTime() >= models.settings.get('testTimeout')) {
+      Log.fatal('Test timed out at ' + (models.settings.get('testTimeout') / 1000) + ' seconds');
+      Transition.testRunner.fail();
+      return;
+    }
+
     // NB: protect against transition predicates or init functions from
     // throwing exceptions, it breaks the state machine / framework
     Transition.testRunner.transition();
@@ -1210,6 +1219,7 @@
 
   Transition.runSuite = function () {
     Transition.suiteRunning = true;
+    models.suiteRunner.set('suiteStarted', true);
     models.suiteRunner.set('numPassed', 0);
     models.suiteRunner.set('numFailed', 0);
     models.suiteRunner.set('queue', new TestSuite(models.suite.models));
@@ -1223,6 +1233,8 @@
       var currTest;
       if (models.suiteRunner.get('stopSuite')) {
         Log.error('Suite halted.');
+        Transition.suiteRunning = false;
+        models.suiteRunner.set('suiteFinished', true);
         return;
       }
 
@@ -1231,6 +1243,8 @@
         Transition.stop();
         Transition.testRunner.fail();
         models.suiteRunner.set('numFailed', 1 + models.suiteRunner.get('numFailed'));
+        Transition.suiteRunning = false;
+        models.suiteRunner.set('suiteFinished', true);
         return;
       }
 
@@ -1247,6 +1261,7 @@
 
         Log.info('Suite Completed');
         Transition.suiteRunning = false;
+        models.suiteRunner.set('suiteFinished', true);
         return;
       }
 
@@ -1270,6 +1285,7 @@
 
         Log.info('Suite Completed');
         Transition.suiteRunning = false;
+        models.suiteRunner.set('suiteFinished', true);
         return;
       }
 
@@ -1298,6 +1314,8 @@
 
   Transition.runTest = function () {
     Transition.initTestRunner();
+    Transition.testRunner.set('testFinished', false);
+    Transition.testRunner.set('testStarted', true);
     Transition.pollTimeoutId = setTimeout(
         Transition.pollFn,
         models.settings.get('pollTimeout')
@@ -1480,13 +1498,15 @@
 
   Transition.clickAfter = function (selector, ms) {
     var nodes = Transition.find(selector);
-    setTimeout(nodes.click(), ms);
+    setTimeout(nodes.click, ms);
     return nodes;
   };
 
-  Transition.clickAfter_ = function (selector, ms) {
+  Transition.clickAfter_ = function (selector) {
     return function () {
-      return Transition.clickAfter(selector, ms);
+      var nodes = Transition.find(selector);
+      setTimeout(nodes.click, ms);
+      return nodes;
     };
   };
 
