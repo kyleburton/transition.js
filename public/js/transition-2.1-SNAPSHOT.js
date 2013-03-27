@@ -109,7 +109,7 @@
       'frame-divider-lower-pct': 50,
       sortByLastModified:        true,
       perStateTimeout:           20 * 1000,
-      testTimeout:               30 * 1000,
+      testTimeout:               45 * 1000,
       suiteTimeout:              200 * 1000,
       // NB: hook this into the UI
       maxTransitions:            20,
