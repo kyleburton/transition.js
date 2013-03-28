@@ -1207,8 +1207,8 @@
       return;
     }
 
-    if (Transition.testRunner.elapsedTime() >= models.settings.get('testTimeout')) {
-      Log.fatal('Test timed out at ' + (models.settings.get('testTimeout') / 1000) + ' seconds');
+    if (Transition.testRunner.elapsedTime() >= (Transition.testRunner.get('test').get('testTimeout') || models.settings.get('testTimeout'))) {
+      Log.fatal('Test timed out at ' + ((Transition.testRunner.get('test').get('testTimeout') || models.settings.get('testTimeout')) / 1000) + ' seconds');
       Transition.testRunner.fail();
       return;
     }
