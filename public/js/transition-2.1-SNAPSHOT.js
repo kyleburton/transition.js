@@ -697,7 +697,7 @@
 
     fail: function () {
       if (typeof models.suiteRunner.get('failedTests') !== "undefined") {
-        models.suiteRunner.set(models.suiteRunner.get('failedTests'), models.suiteRunner.get('failedTests').push(this.get('test')));
+        models.suiteRunner.get('failedTests').push(this.get('test'));
         console.log('added a failed test to log');
       }
       this.trigger('change');
