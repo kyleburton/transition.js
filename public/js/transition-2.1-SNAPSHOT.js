@@ -339,7 +339,8 @@
       currentTest: new Test({}),
       total:       0,
       numPassed:   0,
-      numFailed:   0
+      numFailed:   0,
+      failedTests: []
     },
 
     initialize: function (ourModels, options) {
@@ -504,7 +505,7 @@
       this.set('currStateNumber', 0);
       this.set('state',           attributes.test.getState('start'));
       this.set('visited',         []);
-      this.set('failedTests',     []);
+      //this.set('failedTests',     []);
     },
 
     visited: function (name) {
@@ -696,10 +697,8 @@
     },
 
     fail: function () {
-      if (typeof models.suiteRunner.get('failedTests') !== "undefined") {
-        models.suiteRunner.get('failedTests').push(this.get('test'));
-        console.log('added a failed test to log');
-      }
+      console.log('*** ADDED A FAILED TEST TO THE LOG ***'); 
+      models.suiteRunner.get('failedTests').push(this.get('test'));
       this.trigger('change');
       var state = this.get('test').getState('failure');
       this.set('state', state);
@@ -1274,9 +1273,9 @@
         if (models.suiteRunner.get('failedTests').length > 0) {
           var failedTests = models.suiteRunner.get('failedTests');
           for (var i = 0; i < failedTests.length; i++) {
-            Log.info(' --> ' + failedTests[i].attributes.name);
+            Log.error(' --> ' + failedTests[i].attributes.name);
           }
-          Log.info('\n\nThe following tests failed:');
+          Log.error('\n\nThe following tests failed:');
         }
 
         return;
