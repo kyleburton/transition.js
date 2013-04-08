@@ -109,7 +109,7 @@
       'frame-divider-lower-pct': 50,
       sortByLastModified:        true,
       perStateTimeout:           20 * 1000,
-      testTimeout:               60 * 1000,
+      testTimeout:               45 * 1000,
       suiteTimeout:              200 * 1000,
       // NB: hook this into the UI
       maxTransitions:            20,
@@ -339,7 +339,8 @@
       currentTest: new Test({}),
       total:       0,
       numPassed:   0,
-      numFailed:   0
+      numFailed:   0,
+      failedTests: []
     },
 
     initialize: function (ourModels, options) {
@@ -504,6 +505,7 @@
       this.set('currStateNumber', 0);
       this.set('state',           attributes.test.getState('start'));
       this.set('visited',         []);
+      //this.set('failedTests',     []);
     },
 
     visited: function (name) {
@@ -695,6 +697,11 @@
     },
 
     fail: function () {
+      var failedTests = models.suiteRunner.get('failedTests');
+      console.log('*** ADDED A FAILED TEST TO THE LOG ***'); 
+      if (failedTests[failedTests.length-1] != this.get('test')) {
+        models.suiteRunner.get('failedTests').push(this.get('test'));
+      }
       this.trigger('change');
       var state = this.get('test').getState('failure');
       this.set('state', state);
@@ -702,6 +709,7 @@
       this.set('elapsedTime', this.elapsedTime());
       this.set('isRunning', false);
       this.set('succeeded', this.succeeded());
+      this.set('testFinished', true);
     },
 
     succeeded: function () {
@@ -1197,8 +1205,16 @@
     // or if we've extend the maxAttemptsPerState
     if (Transition.testRunner.get('isDone')) {
       Log.info('Test completed!');
+      Transition.testRunner.set('testFinished', true);
       return;
     }
+
+    if (Transition.testRunner.elapsedTime() >= (Transition.testRunner.get('test').get('testTimeout') || models.settings.get('testTimeout'))) {
+      Log.fatal('Test timed out at ' + ((Transition.testRunner.get('test').get('testTimeout') || models.settings.get('testTimeout')) / 1000) + ' seconds');
+      Transition.testRunner.fail();
+      return;
+    }
+
     // NB: protect against transition predicates or init functions from
     // throwing exceptions, it breaks the state machine / framework
     Transition.testRunner.transition();
@@ -1210,6 +1226,8 @@
 
   Transition.runSuite = function () {
     Transition.suiteRunning = true;
+    models.suiteRunner.set('failedTests', []);
+    models.suiteRunner.set('suiteStarted', true);
     models.suiteRunner.set('numPassed', 0);
     models.suiteRunner.set('numFailed', 0);
     models.suiteRunner.set('queue', new TestSuite(models.suite.models));
@@ -1223,6 +1241,8 @@
       var currTest;
       if (models.suiteRunner.get('stopSuite')) {
         Log.error('Suite halted.');
+        Transition.suiteRunning = false;
+        models.suiteRunner.set('suiteFinished', true);
         return;
       }
 
@@ -1231,13 +1251,19 @@
         Transition.stop();
         Transition.testRunner.fail();
         models.suiteRunner.set('numFailed', 1 + models.suiteRunner.get('numFailed'));
+        Transition.suiteRunning = false;
+        models.suiteRunner.set('suiteFinished', true);
         return;
+      }
+      else {
+        console.log('Suite has not yet timed out after ' + models.suiteRunner.elapsedTime() + ' < ' + (models.settings.get('suiteTimeout')));
       }
 
       if (Transition.testRunner.elapsedTime() >= models.settings.get('testTimeout')) {
         Log.fatal('Test timed out at ' + (models.settings.get('testTimeout') / 1000) + ' seconds');
         //NB: Mark current test as failed
         models.suiteRunner.set('numFailed', 1 + models.suiteRunner.get('numFailed'));
+        Transition.testRunner.fail();
 
         if (models.suiteRunner.nextTest()) {
           Transition.runTest();
@@ -1247,6 +1273,17 @@
 
         Log.info('Suite Completed');
         Transition.suiteRunning = false;
+        models.suiteRunner.set('suiteFinished', true);
+
+        // Log out which tests failed (if any):
+        if (models.suiteRunner.get('failedTests').length > 0) {
+          var failedTests = models.suiteRunner.get('failedTests');
+          for (var i = 0; i < failedTests.length; i++) {
+            Log.error(' --> ' + failedTests[i].attributes.name);
+          }
+          Log.error('\n\nThe following tests failed:');
+        }
+
         return;
       }
 
@@ -1270,6 +1307,8 @@
 
         Log.info('Suite Completed');
         Transition.suiteRunning = false;
+        models.suiteRunner.set('suiteFinished', true);
+
         return;
       }
 
@@ -1298,6 +1337,8 @@
 
   Transition.runTest = function () {
     Transition.initTestRunner();
+    Transition.testRunner.set('testFinished', false);
+    Transition.testRunner.set('testStarted', true);
     Transition.pollTimeoutId = setTimeout(
         Transition.pollFn,
         models.settings.get('pollTimeout')
@@ -1352,6 +1393,44 @@
    * Test Suite Management and Helpers
    *
    ********************************************************************************/
+  Transition.loadScript = function () {
+    var url, option;
+    url = arguments[0];
+    if (arguments.length > 1) {
+      option = arguments[1];
+    }
+    if ( ((option === "no-ci") && (Transition.models.suiteRunner.get('runningPhantom'))) || (option === "pending") ) {
+      console.log('Note: the following test was marked as pending: ' + url);
+    } else {
+      var testCount = Transition.models.suite.size(), lastModified, test;
+      $.ajax({
+        url:      url,
+        dataType: "script",
+        async:    false,
+        complete: function (jqXHR, textStatus) {
+          Transition.x = jqXHR;
+          if (Transition.models.suite.size() > testCount) {
+            lastModified = new Date(jqXHR.getResponseHeader('Last-Modified'));
+            test = _.last(models.suite.models);
+            test.set('url', url);
+            test.set('ciCompatible', true);
+            test.set('lastModified', lastModified);
+            test.set('lastModifiedTime', lastModified.getTime());
+          }
+        },
+        error:    function (jqXHR, textStatus, errorThrown) {
+          Transition.lastError = errorThrown;
+          Log.error("Error loading script[%s] %s<pre>%s</pre>", url, errorThrown.message, errorThrown.stack);
+          console.log('jqXHR: %o', jqXHR);
+          console.log('textStatus: %o', textStatus);
+          console.log('errorThrown: %o', errorThrown);
+          console.log('errorThrown: %o', errorThrown.stack);
+        }
+      });
+    }
+  };
+
+  /*
   Transition.loadScript = function (url) {
     var testCount = Transition.models.suite.size(), lastModified, test;
     $.ajax({
@@ -1377,6 +1456,7 @@
       }
     });
   };
+  */
 
   Transition.newState = function () {
     var args = [].slice.call(arguments),
@@ -1734,7 +1814,7 @@
    *
    ********************************************************************************/
   Transition.buildRunner = function () {
-    Transition.LocalStorage.initialize();
+    //Transition.LocalStorage.initialize();
 
     Transition.router  = new Transition.Router();
     Log.info('router initialized');
