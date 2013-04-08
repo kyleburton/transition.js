@@ -1478,6 +1478,18 @@
     };
   };
 
+  Transition.clickAfter = function (selector, ms) {
+    var nodes = Transition.find(selector);
+    setTimeout(nodes.click(), ms);
+    return nodes;
+  };
+
+  Transition.clickAfter_ = function (selector, ms) {
+    return function () {
+      return Transition.clickAfter(selector, ms);
+    };
+  };
+
   Transition.navigateTo = function (url) {
     if (url.indexOf("#") === 0) {
       parent.frames.main.window.location.hash = url;
