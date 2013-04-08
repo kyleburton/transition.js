@@ -697,8 +697,11 @@
     },
 
     fail: function () {
+      var failedTests = models.suiteRunner.get('failedTests');
       console.log('*** ADDED A FAILED TEST TO THE LOG ***'); 
-      models.suiteRunner.get('failedTests').push(this.get('test'));
+      if (failedTests[failedTests.length-1] != this.get('test')) {
+        models.suiteRunner.get('failedTests').push(this.get('test'));
+      }
       this.trigger('change');
       var state = this.get('test').getState('failure');
       this.set('state', state);
@@ -1251,6 +1254,9 @@
         Transition.suiteRunning = false;
         models.suiteRunner.set('suiteFinished', true);
         return;
+      }
+      else {
+        console.log('Suite has not yet timed out after ' + models.suiteRunner.elapsedTime() + ' < ' + (models.settings.get('suiteTimeout')));
       }
 
       if (Transition.testRunner.elapsedTime() >= models.settings.get('testTimeout')) {
