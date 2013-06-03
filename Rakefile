@@ -11,12 +11,11 @@ def chdir! path
   end 
 end
 
-PHANTOM_URL = "http://phantomjs.googlecode.com/files/phantomjs-1.8.1-source.zip"
-PHANTOM_DIR = "phantomjs-1.8.1"
+PHANTOM_URL = "https://phantomjs.googlecode.com/files/phantomjs-1.9.0-source.zip"
+PHANTOM_DIR = "phantomjs-1.9.0"
 PHANTOM_URLS = {
-  "Darwin" => "http://phantomjs.googlecode.com/files/phantomjs-1.8.1-macosx.zip",
-  "Linux"  => "http://phantomjs.googlecode.com/files/phantomjs-1.8.1-linux-x86_64.tar.bz2"
-
+  "Darwin" => "https://phantomjs.googlecode.com/files/phantomjs-1.9.0-macosx.zip",
+  "Linux"  => "https://phantomjs.googlecode.com/files/phantomjs-1.9.0-linux-x86_64.tar.bz2"
 }
 
 def phantom_url
